@@ -50,7 +50,7 @@ import com.example.musicdraft.ui.theme.GreenJC
 import com.example.musicdraft.ui.theme.MusicDraftTheme
 import kotlinx.coroutines.launch
 
-// test commit
+// test committo
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
