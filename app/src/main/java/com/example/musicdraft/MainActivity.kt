@@ -46,7 +46,8 @@ import com.example.musicdraft.sections.Marketplace
 import com.example.musicdraft.sections.Matchmaking
 import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.sections.Screens
-import com.example.musicdraft.ui.theme.GreenJC
+import com.example.musicdraft.ui.theme.BlueApp
+import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
 import kotlinx.coroutines.launch
 
@@ -88,7 +89,7 @@ fun MusicDraftUI(){
         drawerContent = {
             ModalDrawerSheet {
                 Box(modifier = Modifier
-                    .background(GreenJC) // Imposta come colore di sfondo il GreenJC
+                    .background(BlueApp) // Imposta come colore di sfondo il BlueApp
                     .fillMaxWidth()
                     .height(150.dp)){
                     Text(text = "")
@@ -96,9 +97,9 @@ fun MusicDraftUI(){
                 Divider() // inserisco una linea sotto l'header del ModalNavigationDrawer
 
                 // Definisco la sezione "Home":
-                NavigationDrawerItem(label = { Text(text = "Home", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Home", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "home", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "home", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Home")
                     onClick = {
@@ -116,9 +117,9 @@ fun MusicDraftUI(){
                     })
 
                 // Definisco la sezione "Friends":
-                NavigationDrawerItem(label = { Text(text = "Friends", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Friends", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "friends", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "friends", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Friends")
                     onClick = {
@@ -136,9 +137,9 @@ fun MusicDraftUI(){
                     })
 
                 // Definisco la sezione "Cards":
-                NavigationDrawerItem(label = { Text(text = "Cards", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Cards", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "cards", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "cards", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Cards")
                     onClick = {
@@ -156,9 +157,9 @@ fun MusicDraftUI(){
                     })
 
                 // Definisco la sezione "Decks":
-                NavigationDrawerItem(label = { Text(text = "Decks", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Decks", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "decks", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "decks", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Decks")
                     onClick = {
@@ -177,9 +178,9 @@ fun MusicDraftUI(){
 
 
                 // Definisco la sezione "Marketplace":
-                NavigationDrawerItem(label = { Text(text = "Marketplace", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Marketplace", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "marketplace", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "marketplace", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Marketplace")
                     onClick = {
@@ -198,9 +199,9 @@ fun MusicDraftUI(){
 
 
                 // Definisco la sezione "Matchmaking":
-                NavigationDrawerItem(label = { Text(text = "Matchmaking", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Matchmaking", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "matchmaking", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "matchmaking", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Matchmaking")
                     onClick = {
@@ -219,9 +220,9 @@ fun MusicDraftUI(){
 
 
                 // Definisco la sezione "Settings":
-                NavigationDrawerItem(label = { Text(text = "Settings", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Settings", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = "settings", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = "settings", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Settings")
                     onClick = {
@@ -256,7 +257,7 @@ fun MusicDraftUI(){
                     title = { Text(text = "MusicDraft") }, // titolo della TopAppBar
                     colors = TopAppBarDefaults.topAppBarColors(
                               // parametri di colors:
-                              containerColor = GreenJC, // colore della TopAppBar:
+                              containerColor = BlueApp, // colore della TopAppBar:
                               titleContentColor = Color.White, // colore del titolo della TopAppBar
                               navigationIconContentColor = Color.White // colore dell'icona della TopAppBar
                     ),
@@ -278,7 +279,7 @@ fun MusicDraftUI(){
         ){
             // Qui definisco il NavHost che specificherà quali schermate dovranno aprirsi
             // in base alle sezioni sulle quali cliccherà l'utente.
-            // - Schermata iniziale sarà "Home"
+            // - La Schermata iniziale sarà "Home"
             NavHost(navController = navigationController, startDestination = Screens.Home.screen){
                 composable(Screens.Home.screen){
                     Home() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
@@ -287,16 +288,16 @@ fun MusicDraftUI(){
                     Friends() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
                 }
                 composable(Screens.Cards.screen){
-                    Cards() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Cards() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
                 }
                 composable(Screens.Decks.screen){
-                    Decks() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Decks() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"
                 }
                 composable(Screens.Marketplace.screen){
-                    Marketplace() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Marketplace() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Marketplace"
                 }
                 composable(Screens.Matchmaking.screen){
-                    Matchmaking() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Matchmaking() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Matchmaking"
                 }
                 composable(Screens.Settings.screen){
                     Settings() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Settings"
@@ -306,3 +307,6 @@ fun MusicDraftUI(){
         }
     }
 }
+
+// - DOMANI CAMBIA I COLORI E FAI IL LOGIN
+
