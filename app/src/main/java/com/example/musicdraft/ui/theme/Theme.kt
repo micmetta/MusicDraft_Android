@@ -57,7 +57,7 @@ fun MusicDraftTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = GreenJC.toArgb() // impongo il colore (GreenJC inserito in "Color.kt") della barra
+            window.statusBarColor = BlueApp.toArgb() // impongo il colore (BlueApp inserito in "Color.kt") della barra
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
