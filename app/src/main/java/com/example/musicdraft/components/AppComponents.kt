@@ -2,16 +2,22 @@ package com.example.musicdraft.components
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -23,6 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
@@ -41,7 +49,9 @@ import androidx.compose.ui.unit.sp
 import com.example.musicdraft.ui.theme.TextColor
 import com.example.musicdraft.R
 import com.example.musicdraft.ui.theme.BgColor
+import com.example.musicdraft.ui.theme.GrayColor
 import com.example.musicdraft.ui.theme.Primary
+import com.example.musicdraft.ui.theme.Secondary
 
 
 @Composable
@@ -244,8 +254,114 @@ fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
                     // e con l'esecuzione di questa funzione verrà mostrata la schermata
                     // che ha come nome "termsAndConditionsScreen".
                 }
-
             }
     })
 }
 
+
+@Composable
+fun ButtonComponent(value: String){
+    Button(onClick = { /*TODO*/ },
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(48.dp),
+        contentPadding = PaddingValues(),
+        colors = ButtonDefaults.buttonColors(Color.Transparent)
+        ) {
+
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(48.dp)
+                .background(
+                    brush = Brush.horizontalGradient(listOf(Secondary, Primary)),
+                    shape = RoundedCornerShape(50.dp)
+                ),
+                    contentAlignment = Alignment.Center
+            ){
+                Text(text = value,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+    }
+}
+
+
+@Composable
+fun DividerTextComponent(){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+
+        Divider(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),
+            color = GrayColor,
+            thickness = 1.dp
+        )
+
+        Text(
+            modifier = Modifier.padding(8.dp),
+            text = stringResource(id = R.string.or),
+            fontSize = 18.sp,
+            color = TextColor)
+
+        Divider(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),
+            color = GrayColor,
+            thickness = 1.dp
+        )
+
+    }
+}
+
+
+@Composable
+fun ClickableLoginTextComponent(onTextSelected: (String) -> Unit){
+
+    val initialPartText = "Already have an account? "
+    val loginText = "Login"
+
+    val annotatedString = buildAnnotatedString {
+        append(initialPartText) // l'aggiungo come una stringa normale
+        withStyle(style = SpanStyle(color = Primary)){
+            pushStringAnnotation(tag = loginText, annotation = loginText) // specifico che questa stringa sarà diversa perchè l'utente potrà cliccarci sopra
+            // e per questo ho definito per essa un 'tag' e 'un'annotation'.
+            append(loginText)
+        }
+    }
+
+    ClickableText(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 40.dp), // altezza minima 80.dp
+        style = TextStyle(
+            fontSize = 21.sp,
+            fontWeight = FontWeight.Normal,
+            fontStyle = FontStyle.Normal,
+            textAlign = TextAlign.Center
+        ),
+
+        text = annotatedString, onClick = {offset ->
+
+        // grazie all'offset sapremo su quale parte di 'annotatedString' ha cliccato l'utente:
+        annotatedString.getStringAnnotations(offset, offset)
+            .firstOrNull()?.also { span ->
+                // stampo nel Logcat il messaggio per sapere se l'utente ha cliccato su 'item=Login'
+                // o su 'item=Term of Use'
+                Log.d("ClickableTextComponent", "{$span}")
+
+                // Quando Login sarà cliccato allora andrò ad una
+                // nuova schermata:
+                if(span.item == loginText){
+                    onTextSelected(span.item) // cambiando il valore del parametro "onTextSelected" automaticamente
+                    // verrà eseguita la lambda function legata al "onTextSelected" presente
+                    // nel "ClickableLoginTextComponent" all'interno del file chiamato "SignUpScreen.kt"
+                    // e con l'esecuzione di questa funzione verrà mostrata la schermata
+                    // che ha come nome "Login".
+                }
+            }
+    })
+}
