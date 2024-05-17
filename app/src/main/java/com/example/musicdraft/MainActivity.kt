@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Divider
@@ -35,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -47,9 +46,11 @@ import com.example.musicdraft.sections.Matchmaking
 import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.sections.Screens
 import com.example.musicdraft.ui.theme.BlueApp
-import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
 import kotlinx.coroutines.launch
+import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
+import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
+
 
 // test committo
 class MainActivity : ComponentActivity() {
@@ -60,12 +61,33 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    MusicDraftUI()
+                    //MusicDraftUI() // c'era prima
+                    //SignUp_SignIn()
+                    Navigation()
                 }
             }
         }
     }
 }
+
+
+@Composable
+fun Navigation(){
+    val navigationController = rememberNavController()
+    // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
+    NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){
+        composable(Screens.SignUp.screen){
+            SignUpScreen(navigationController) // composable che verrà aperto per mostrare la creazione dell'account
+        }
+        composable(Screens.TermsAndConditionsScreen.screen){
+            TermsAndConditionsScreen() // composable che verrà aperto per mostrare la creazione dell'account
+        }
+        composable(Screens.MusicDraftUI.screen){
+            MusicDraftUI() // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+        }
+    }
+}
+
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -307,6 +329,4 @@ fun MusicDraftUI(){
         }
     }
 }
-
-// - DOMANI CAMBIA I COLORI E FAI IL LOGIN
 

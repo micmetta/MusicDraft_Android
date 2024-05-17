@@ -9,4 +9,5 @@
     <string name="hide_password">Hide password</string>
     <string name="show_password">show_password</string>
     <string name="terms_and_conditions">By continuing you accept our Privacy Policy and Term of Use</string>
+    <string name="terms_and_conditions_header">Term of Use</string>
 </resources>
