@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.example.musicdraft.ui.theme.BlueApp
-import com.example.musicdraft.ui.theme.GreenJC
 import com.example.musicdraft.ui.theme.MusicDraftTheme
 
 @Composable

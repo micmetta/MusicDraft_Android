@@ -20,7 +20,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.musicdraft.R
+import com.example.musicdraft.components.ButtonComponent
 import com.example.musicdraft.components.CheckboxComponent
+import com.example.musicdraft.components.ClickableLoginTextComponent
+import com.example.musicdraft.components.DividerTextComponent
 import com.example.musicdraft.components.HeadingTextComponent
 import com.example.musicdraft.components.MyTextFieldComponent
 import com.example.musicdraft.components.NormalTextComponent
@@ -39,8 +42,11 @@ fun SignUpScreen(navController: NavController) {
             modifier = Modifier.fillMaxSize()
         ) {
             NormalTextComponent(value = stringResource(id = R.string.hello)) // componente creato in "components"
+
             HeadingTextComponent(value = stringResource(id = R.string.create_account)) // componente creato in "components"
-            Spacer(modifier = Modifier.height(20.dp))
+
+            Spacer(modifier = Modifier.height(20.dp)) // inserisco dello spazio
+
             MyTextFieldComponent(
                 labelValue = stringResource(id = R.string.nickname),
                 Icons.Default.Person
@@ -59,12 +65,24 @@ fun SignUpScreen(navController: NavController) {
                     navController.navigate("termsAndConditionsScreen")
                 })
 
-            // Adesso qui da qualche parte prima o poi quando l'utente cliccherà su un bottone (ad esempio per confermare i dati) e l'account sarà
-            // validato, allora la schermata che dovrà aprirsi sarà quella creata dal Composable "MusicDraftUI()" in questo modo l'utente entrerà veramente
-            // all'interno dell'app.
-            Button(onClick = { navController.navigate("musicDraftUI"){
-                popUpTo(0) // in questo modo nello stack non mantengo memorizzato la shermata di login o crea_account precedente.
-            } }) {}
+            Spacer(modifier = Modifier.height(40.dp))
+
+            ButtonComponent(value = stringResource(id = R.string.register))
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            DividerTextComponent()
+
+            ClickableLoginTextComponent(onTextSelected = {
+
+            })
+
+//            // Adesso qui da qualche parte prima o poi quando l'utente cliccherà su un bottone (ad esempio per confermare i dati) e l'account sarà
+//            // validato, allora la schermata che dovrà aprirsi sarà quella creata dal Composable "MusicDraftUI()" in questo modo l'utente entrerà veramente
+//            // all'interno dell'app.
+//            Button(onClick = { navController.navigate("musicDraftUI"){
+//                popUpTo(0) // in questo modo nello stack non mantengo memorizzato la shermata di login o crea_account precedente.
+//            } }) {}
 
         }
     }
