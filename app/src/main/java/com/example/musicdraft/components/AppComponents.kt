@@ -175,11 +175,10 @@ fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector) {
 
 
 @Composable
-fun CheckboxComponent(value: String){
+fun CheckboxComponent(value: String, onTextSelected: (String) -> Unit){
     Row(modifier = Modifier
         .fillMaxWidth()
-        .heightIn(56.dp)
-        .padding(16.dp),
+        .heightIn(56.dp),
         verticalAlignment = Alignment.CenterVertically,
     ){
 
@@ -196,7 +195,7 @@ fun CheckboxComponent(value: String){
         // istanzio il composable 'ClickableTextComponent' (definito sotto)
         // passandogli come stringa di testo la variabile 'value'
         // ricevuta in input dal 'CheckboxComponent'
-        ClickableTextComponent(value = value)
+        ClickableTextComponent(value = value, onTextSelected)
     }
 }
 
@@ -205,23 +204,25 @@ fun CheckboxComponent(value: String){
 // inserire la stringa di accettazione dei termini d'uso
 // rendendo cliccabile anche due parti di questa stringa
 @Composable
-fun ClickableTextComponent(value: String){
+fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
 
-    val initialPartText = "By continuing you accept our"
-    val privacyPolicyPartText = "Privacy Policy"
-    val finalPartText = "and"
-    val termsAndConditions = "Term of Use"
+    val initialPartText = "By continuing you accept our "
+    val privacyPolicyPartText = "Privacy Policy "
+    val finalPartText = " and "
+    val termsAndConditionsText = "Term of Use"
 
     val annotatedString = buildAnnotatedString {
-        append(initialPartText)
+        append(initialPartText) // l'aggiungo come una stringa normale
         withStyle(style = SpanStyle(color = Primary)){
-            pushStringAnnotation(tag = privacyPolicyPartText, annotation = privacyPolicyPartText)
+            pushStringAnnotation(tag = privacyPolicyPartText, annotation = privacyPolicyPartText) // specifico che questa stringa sarà diversa perchè l'utente potrà cliccarci sopra
+            // e per questo ho definito per essa un 'tag' e 'un'annotation'.
             append(privacyPolicyPartText)
         }
-        append(finalPartText)
+        append(finalPartText) // l'aggiungo come una stringa normale
         withStyle(style = SpanStyle(color = Primary)){
-            pushStringAnnotation(tag = termsAndConditions, annotation = termsAndConditions)
-            append(privacyPolicyPartText)
+            pushStringAnnotation(tag = termsAndConditionsText, annotation = termsAndConditionsText) // specifico che questa stringa sarà diversa perchè l'utente potrà cliccarci sopra
+            // e per questo ho definito per essa un 'tag' e 'un'annotation'.
+            append(termsAndConditionsText)
         }
     }
 
@@ -230,7 +231,21 @@ fun ClickableTextComponent(value: String){
         // grazie all'offset sapremo su quale parte di 'annotatedString' ha cliccato l'utente:
         annotatedString.getStringAnnotations(offset, offset)
             .firstOrNull()?.also { span ->
+                // stampo nel Logcat il messaggio per sapere se l'utente ha cliccato su 'item=Privacy Policy'
+                // o su 'item=Term of Use'
                 Log.d("ClickableTextComponent", "{$span}")
+
+                // Quando uno dei due item sarà cliccato allora andrò ad una
+                // nuova schermata:
+                if((span.item == termsAndConditionsText) || (span.item == privacyPolicyPartText)){
+                    onTextSelected(span.item) // cambiando il valore del parametro "onTextSelected" automaticamente
+                    // verrà eseguita la lambda function legata al "onTextSelected" presente
+                    // nel "CheckboxComponent" all'interno del file chiamato "SignUpScreen.kt"
+                    // e con l'esecuzione di questa funzione verrà mostrata la schermata
+                    // che ha come nome "termsAndConditionsScreen".
+                }
+
             }
     })
 }
+
