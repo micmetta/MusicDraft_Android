@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.musicdraft.screens_to_signUp_signIn.LoginScreen
 import com.example.musicdraft.sections.Home
 import com.example.musicdraft.sections.Friends
 import com.example.musicdraft.sections.Cards
@@ -79,8 +80,11 @@ fun Navigation(){
         composable(Screens.SignUp.screen){
             SignUpScreen(navigationController) // composable che verrà aperto per mostrare la creazione dell'account
         }
+        composable(Screens.Login.screen){
+            LoginScreen(navigationController) // composable che verrà aperto per mostrare il login
+        }
         composable(Screens.TermsAndConditionsScreen.screen){
-            TermsAndConditionsScreen() // composable che verrà aperto per mostrare la creazione dell'account
+            TermsAndConditionsScreen() // composable che verrà aperto per mostrare i termini e condizioni dell'app
         }
         composable(Screens.MusicDraftUI.screen){
             MusicDraftUI() // composable che verrà aperto una volta che l'utente sarà loggato nell'app
