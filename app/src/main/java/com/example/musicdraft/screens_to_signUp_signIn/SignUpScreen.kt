@@ -28,6 +28,7 @@ import com.example.musicdraft.components.HeadingTextComponent
 import com.example.musicdraft.components.MyTextFieldComponent
 import com.example.musicdraft.components.NormalTextComponent
 import com.example.musicdraft.components.PasswordTextFieldComponent
+import com.example.musicdraft.sections.Screens
 
 @Composable
 fun SignUpScreen(navController: NavController) {
@@ -73,8 +74,8 @@ fun SignUpScreen(navController: NavController) {
 
             DividerTextComponent()
 
-            ClickableLoginTextComponent(onTextSelected = {
-
+            ClickableLoginTextComponent(tryingToLogin = true, onTextSelected = {
+                navController.navigate("login")
             })
 
 //            // Adesso qui da qualche parte prima o poi quando l'utente cliccherà su un bottone (ad esempio per confermare i dati) e l'account sarà

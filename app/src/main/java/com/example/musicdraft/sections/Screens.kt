@@ -13,6 +13,7 @@ sealed class Screens (val screen: String) {
     //   ciascuno di essi è inizializzato con il corrispondente identificatore
     //   di tipo stringa passato come parametro a Screens:
     data object SignUp: Screens("signUp")
+    data object Login: Screens("login")
     data object TermsAndConditionsScreen: Screens("termsAndConditionsScreen")
     data object MusicDraftUI: Screens("musicDraftUI")
     data object Home: Screens("home")

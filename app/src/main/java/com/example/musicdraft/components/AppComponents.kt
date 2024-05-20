@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -40,10 +42,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import com.example.musicdraft.ui.theme.TextColor
@@ -90,6 +94,10 @@ fun HeadingTextComponent(value:String){
     )
 }
 
+
+// - Questo composable di sotto è utilizzato per tutti i campi
+//   nei quali l'utente inserisce i dati ECCETTO IL CAMPO "password"
+//   per il quale ho creato un composable specifico chiamato "PasswordTextFieldComponent".
 @Composable
 fun MyTextFieldComponent(labelValue:String, icon: ImageVector){
 
@@ -110,7 +118,15 @@ fun MyTextFieldComponent(labelValue:String, icon: ImageVector){
             focusedLabelColor = colorResource(id = R.color.colorPrimary),
             cursorColor = colorResource(id = R.color.colorPrimary)
         ),
-        keyboardOptions = KeyboardOptions.Default,
+
+        //keyboardOptions = KeyboardOptions.Default, // senza il pulsante di next sulla tastiera
+        // - Queste 3 righe di codice qui sotto invece, fanno compararire il pulsante
+        // di "next" all'interno della tastiera nel momento in cui l'utente
+        // clicca su un campo di testo:
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        singleLine = true,
+        maxLines = 1,
+
         // In 'value' ci saranno i caratteri inseriti dall'utente nell'OutlinedTextField:
         value = textValue.value, // la proprietà 'value' prende accetta solo una stringa e non un 'MutableState<String>' per questo ho inserito .value
         onValueChange = {
@@ -119,13 +135,16 @@ fun MyTextFieldComponent(labelValue:String, icon: ImageVector){
         // inserisco l'icona all'interno dell'OutlinedTextField:
         leadingIcon = {
             Icon(imageVector = icon, contentDescription = "")
-        }
+        },
     )
 
 }
 
+// - Questo composable è specifico per il campo password.
 @Composable
 fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector) {
+
+    val localFocusManager = LocalFocusManager.current
 
     // grazie alla funzione 'remember' mi ricordo dell'ultimo valore inserito dall'utente nell'OutlinedTextField di sotto
     val password = remember {
@@ -148,7 +167,20 @@ fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector) {
             focusedLabelColor = colorResource(id = R.color.colorPrimary),
             cursorColor = colorResource(id = R.color.colorPrimary)
         ),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+
+        //keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), // nel momento in cui arrivo al campo password il pulsante next si toglie automaticamente e al suo posto viene messo quello di cancellazione
+
+        // - Grazie a queste 3 istruzioni qui sotto invece, una volta arrivato al campo "password"
+        //   (che è l'ultimo campo), l'utente vedrà invece del tasto "next" il tasto con la spunta "v"
+        //   e una volta cliccato grazie a "keyboardActions" la tastiera scomparirà (clearFocus()) in modo tale da permettere all'utente di avere la visione completa
+        //   dei campi e degli altri elementi dell'interfaccia.
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+        singleLine = true,
+        keyboardActions = KeyboardActions{
+            localFocusManager.clearFocus()
+        },
+        maxLines = 1,
+
         // In 'value' ci saranno i caratteri inseriti dall'utente nell'OutlinedTextField:
         value = password.value, // la proprietà 'value' prende accetta solo una stringa e non un 'MutableState<String>' per questo ho inserito .value
         onValueChange = {
@@ -210,9 +242,9 @@ fun CheckboxComponent(value: String, onTextSelected: (String) -> Unit){
 }
 
 
-// Il composable di sotto mi permette di
-// inserire la stringa di accettazione dei termini d'uso
-// rendendo cliccabile anche due parti di questa stringa
+// - Il composable di sotto mi permette di
+//   inserire la stringa di accettazione dei termini d'uso
+//   rendendo cliccabile anche due parti di questa stringa
 @Composable
 fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
 
@@ -259,6 +291,7 @@ fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
 }
 
 
+// - Utilizzato come botton per avviare la registrazione.
 @Composable
 fun ButtonComponent(value: String){
     Button(onClick = { /*TODO*/ },
@@ -287,6 +320,8 @@ fun ButtonComponent(value: String){
 }
 
 
+// - Utilizzato per avere le due linee a sinistra e destra di 'or' per permettere
+//   all'utente di creare l'account o fare il login con Google o con un altro social:
 @Composable
 fun DividerTextComponent(){
     Row(
@@ -318,11 +353,21 @@ fun DividerTextComponent(){
 }
 
 
+// - Se tryingToLogin == true (comportamento di default), allora
+//   Mi permette di creare due stringhe,
+//   la prima con la scritta "Already have an account? "
+//   e di avere la seconda stringa "Login" cliccabile,
+//   ALTRIMENTI,
+//   Mi permette di creare due stringhe,
+//   la prima con la scritta "Don't have an account yet? "
+//   e di avere la seconda stringa "Register" cliccabile.
 @Composable
-fun ClickableLoginTextComponent(onTextSelected: (String) -> Unit){
+fun ClickableLoginTextComponent(tryingToLogin:Boolean = true, onTextSelected: (String) -> Unit){
 
-    val initialPartText = "Already have an account? "
-    val loginText = "Login"
+    // in base a dove questo composable verrà utilizzato, ovvero in "SignUpScreen.kt" piuttosto che in "LoginScreen",
+    // le due stringhe che verranno composte saranno differenti:
+    val initialPartText = if(tryingToLogin) "Already have an account? " else "Don't have an account yet? "
+    val loginText = if(tryingToLogin) "Login" else "Register"
 
     val annotatedString = buildAnnotatedString {
         append(initialPartText) // l'aggiungo come una stringa normale
@@ -365,3 +410,24 @@ fun ClickableLoginTextComponent(onTextSelected: (String) -> Unit){
             }
     })
 }
+
+
+// - Composable utilizzato per la scritta "Forgot your password":
+@Composable
+fun UnderLinedNormalTextComponent(value:String){
+    Text(
+        text = value,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 40.dp), // altezza minima 40.dp
+        style = TextStyle(
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Normal,
+            fontStyle = FontStyle.Normal
+        ),
+        color = colorResource(id = R.color.colorGray),
+        textAlign = TextAlign.Center,
+        textDecoration = TextDecoration.Underline
+    )
+}
+
