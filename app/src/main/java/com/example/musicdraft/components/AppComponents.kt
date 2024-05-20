@@ -98,8 +98,10 @@ fun HeadingTextComponent(value:String){
 // - Questo composable di sotto è utilizzato per tutti i campi
 //   nei quali l'utente inserisce i dati ECCETTO IL CAMPO "password"
 //   per il quale ho creato un composable specifico chiamato "PasswordTextFieldComponent".
+// - onTextSelected: (String) -> Unit è una funzione di callback che mi permette di poter catturare la stringa di testo inserita
+//   nel MyTextFieldComponent da parte dell'utente.
 @Composable
-fun MyTextFieldComponent(labelValue:String, icon: ImageVector){
+fun MyTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelected: (String) -> Unit){
 
     // grazie alla funzione 'remember' mi ricordo dell'ultimo valore inserito dall'utente nell'OutlinedTextField di sotto
     val textValue = remember {
@@ -131,7 +133,9 @@ fun MyTextFieldComponent(labelValue:String, icon: ImageVector){
         value = textValue.value, // la proprietà 'value' prende accetta solo una stringa e non un 'MutableState<String>' per questo ho inserito .value
         onValueChange = {
             textValue.value = it // aggiorno il valore del campo di testo dell'OutlinedTextField
-        },
+            onTextSelected(it) // mi permette di poter catturare la stringa di testo inserita
+                              //  nel MyTextFieldComponent
+                        },
         // inserisco l'icona all'interno dell'OutlinedTextField:
         leadingIcon = {
             Icon(imageVector = icon, contentDescription = "")
@@ -141,8 +145,10 @@ fun MyTextFieldComponent(labelValue:String, icon: ImageVector){
 }
 
 // - Questo composable è specifico per il campo password.
+// - onTextSelected: (String) -> Unit è una funzione di callback che mi permette di poter catturare la stringa di testo inserita
+//   nel PasswordTextFieldComponent da parte dell'utente.
 @Composable
-fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector) {
+fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelected: (String) -> Unit) {
 
     val localFocusManager = LocalFocusManager.current
 
@@ -185,6 +191,8 @@ fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector) {
         value = password.value, // la proprietà 'value' prende accetta solo una stringa e non un 'MutableState<String>' per questo ho inserito .value
         onValueChange = {
             password.value = it // aggiorno il valore del campo di testo dell'OutlinedTextField
+            onTextSelected(it) // mi permette di poter catturare la stringa di testo inserita
+            //  nel PasswordTextFieldComponent
         },
         // inserisco l'icona all'interno dell'OutlinedTextField:
         leadingIcon = {
@@ -292,9 +300,16 @@ fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
 
 
 // - Utilizzato come botton per avviare la registrazione.
+// - La funzione di callback onButtonClick: () -> Unit che mi permette
+//   di poter catturare il click del button e lanciare ad esempio in 'SignUpScreen.kt'
+//   l'eventi 'loginViewModel.onEvent(UIEvent.RegisterButtonClick)'
 @Composable
-fun ButtonComponent(value: String){
-    Button(onClick = { /*TODO*/ },
+fun ButtonComponent(value: String, onButtonClick: () -> Unit){
+    Button(onClick = {
+        // ogni volta che il button verrà cliccato, verrà eseguita la funzione
+        // onButtonClick
+        onButtonClick.invoke()
+    },
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(48.dp),
