@@ -55,6 +55,7 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
 
             Spacer(modifier = Modifier.height(20.dp)) // inserisco dello spazio
 
+            // TextField "nickname"
             MyTextFieldComponent(
                 labelValue = stringResource(id = R.string.nickname),
                 Icons.Default.Person,
@@ -65,11 +66,18 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
                     // Chiamo la funzione 'onEvent' del loginViewModel e gli passo in input
                     // il tipo di evento che è stato generato (in questo caso il 'UIEvent.NicknameChanged'
                     // in modo tale che il loginViewModel possa modificare lo stato presente al suo interno chiamato
-                    // registrationUIState (in questo caso in realtà verrà modificato solo il campo 'registrationUIState.NicknameChanged'
-                    // mentre gli altri due rimarranno invariati):
+                    // 'registrationUIState' (in questo caso in realtà verrà modificato solo il campo 'registrationUIState.NicknameChanged'
+                    // mentre gli altri due (email e password) rimarranno invariati):
                     loginViewModel.onEvent(UIEvent.NicknameChanged(it))
-                }
+                },
+                // passo come 4° parametro al mio 'MyTextFieldComponent' il risultato (booleano) della validazione del campo "nickname"
+                // in questo modo qualora questo valore fosse "true" o "false" allora il componente cambierà automaticamente
+                // colore in base a quale dei due valori valori è presente in 'nicknameError':
+                errorStatus = loginViewModel.registrationUIState.value.nicknameError,
+                registration = true // mi trovo sulla schermata di registrazione
             )
+
+            // TextField "email"
             MyTextFieldComponent(
                 labelValue = stringResource(id = R.string.email),
                 Icons.Default.Email,
@@ -80,8 +88,12 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
                     // registrationUIState (in questo caso in realtà verrà modificato solo il campo 'registrationUIState.EmailChanged'
                     // mentre gli altri due rimarranno invariati):
                     loginViewModel.onEvent(UIEvent.EmailChanged(it))
-                }
+                },
+                errorStatus = loginViewModel.registrationUIState.value.emailError, // aggiornamento colore composable da loginViewModel a interfaccia
+                registration = true // mi trovo sulla schermata di registrazione
             )
+
+            // TextField "password"
             PasswordTextFieldComponent(
                 labelValue = stringResource(id = R.string.password),
                 Icons.Default.Lock,
@@ -95,8 +107,12 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
                     // registrationUIState (in questo caso in realtà verrà modificato solo il campo 'registrationUIState.PasswordChanged'
                     // mentre gli altri due rimarranno invariati):
                     loginViewModel.onEvent(UIEvent.PasswordChanged(it))
-                }
+                },
+                errorStatus = loginViewModel.registrationUIState.value.passwordError, // aggiornamento colore composable da loginViewModel a interfaccia
+                registration = true // mi trovo sulla schermata di registrazione
             )
+
+
             CheckboxComponent(
                 value = stringResource(id = R.string.terms_and_conditions),
                 onTextSelected = {
@@ -105,6 +121,7 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
 
             Spacer(modifier = Modifier.height(40.dp))
 
+            // Button di conferma registrazione
             ButtonComponent(value = stringResource(id = R.string.register),
                 onButtonClick = {
                     loginViewModel.onEvent(UIEvent.RegisterButtonClick)
