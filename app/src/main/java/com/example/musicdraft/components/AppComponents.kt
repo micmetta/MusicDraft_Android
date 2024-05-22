@@ -100,8 +100,13 @@ fun HeadingTextComponent(value:String){
 //   per il quale ho creato un composable specifico chiamato "PasswordTextFieldComponent".
 // - onTextSelected: (String) -> Unit è una funzione di callback che mi permette di poter catturare la stringa di testo inserita
 //   nel MyTextFieldComponent da parte dell'utente.
+// - errorStatus: permette al composable di potersi auto-aggiornare (in termini di cambiamento di colore) nel momento in cui l'utente inserire dei dati
+//   al suo interno e quindi se i dati inseriti saranno corretti allora il composable assumerà un certo colore altrimenti ne assumerà un altro.
+//   (Il valore di questo parametro verrà modificato direttamente dal 'LoginViewModel' e ricevuto dal composable).
+//   Il valore di default è 'false'.
+// - registration: mi permette di sapere se il 'MyTextFieldComponent' si trova nella schermata di registrazione (true) o no (false) (default = false).
 @Composable
-fun MyTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelected: (String) -> Unit){
+fun MyTextFieldComponent(labelValue:String, icon:ImageVector, onTextSelected:(String) -> Unit, errorStatus:Boolean = false, registration:Boolean = false){
 
     // grazie alla funzione 'remember' mi ricordo dell'ultimo valore inserito dall'utente nell'OutlinedTextField di sotto
     val textValue = remember {
@@ -131,15 +136,22 @@ fun MyTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelected: (
 
         // In 'value' ci saranno i caratteri inseriti dall'utente nell'OutlinedTextField:
         value = textValue.value, // la proprietà 'value' prende accetta solo una stringa e non un 'MutableState<String>' per questo ho inserito .value
+        // Dentro 'onValueChange' inserisco cosa deve accadere nel momento in cui l'utente aggiorna il l'OutlinedTextField:
         onValueChange = {
             textValue.value = it // aggiorno il valore del campo di testo dell'OutlinedTextField
-            onTextSelected(it) // mi permette di poter catturare la stringa di testo inserita
-                              //  nel MyTextFieldComponent
-                        },
+            onTextSelected(it) // eseguo questa funzione di callback che mi permette di poter catturare la stringa di testo inserita
+                              //  nel MyTextFieldComponent dall'utente e di passarla al LoginViewModel per fargli capire che è stato generato un evento.
+        },
         // inserisco l'icona all'interno dell'OutlinedTextField:
         leadingIcon = {
             Icon(imageVector = icon, contentDescription = "")
         },
+
+        // - l'attributo 'isError' dell'OutlinedTextField sarà sempre uguale al valore opposto rispetto
+        //   al parametro 'errorStatus' in modo tale che:
+        //   SE errorStatus==true allora vuol dire che i dati inseriti sono corretti e QUINDI isError=false
+        //   ALTRIMENTI, SE errorStatus==false allora vuol dire che i dati inseriti sono sbagliati e QUINDI isError=true
+        isError = if(registration) !errorStatus else false
     )
 
 }
@@ -147,17 +159,22 @@ fun MyTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelected: (
 // - Questo composable è specifico per il campo password.
 // - onTextSelected: (String) -> Unit è una funzione di callback che mi permette di poter catturare la stringa di testo inserita
 //   nel PasswordTextFieldComponent da parte dell'utente.
+// - errorStatus: permette al composable di potersi auto-aggiornare (in termini di cambiamento di colore) nel momento in cui l'utente inserire dei dati
+//   al suo interno e quindi se i dati inseriti saranno corretti allora il composable assumerà un certo colore altrimenti ne assumerà un altro.
+//   (Il valore di questo parametro verrà modificato direttamente dal 'LoginViewModel' e ricevuto dal composable).
+//   Il valore di default è 'false'.
+// - registration: mi permette di sapere se il 'MyTextFieldComponent' si trova nella schermata di registrazione (true) o no (false) (default = false).
 @Composable
-fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelected: (String) -> Unit) {
+fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelected: (String) -> Unit, errorStatus:Boolean = false, registration:Boolean = false) {
 
     val localFocusManager = LocalFocusManager.current
 
-    // grazie alla funzione 'remember' mi ricordo dell'ultimo valore inserito dall'utente nell'OutlinedTextField di sotto
+    // grazie alla funzione 'remembea visibilità r' mi ricordo dell'ultimo valore inserito dall'utente nell'OutlinedTextField di sotto
     val password = remember {
         mutableStateOf("")
     }
 
-    // variabile che mi permetterà di poter gestire la visibilità o meno dei caratteri della password
+    // variabile che mi permetterà di poter gestire lo meno dei caratteri della password
     val passwordVisible = remember {
         mutableStateOf(false) // all'inizio è settata a false
     }
@@ -191,8 +208,8 @@ fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelec
         value = password.value, // la proprietà 'value' prende accetta solo una stringa e non un 'MutableState<String>' per questo ho inserito .value
         onValueChange = {
             password.value = it // aggiorno il valore del campo di testo dell'OutlinedTextField
-            onTextSelected(it) // mi permette di poter catturare la stringa di testo inserita
-            //  nel PasswordTextFieldComponent
+            onTextSelected(it) // eseguo questa funzione di callback che mi permette di poter catturare la stringa di testo inserita
+            //  nel PasswordTextFieldComponent dall'utente e di passarla al LoginViewModel per fargli capire che è stato generato un evento.
         },
         // inserisco l'icona all'interno dell'OutlinedTextField:
         leadingIcon = {
@@ -219,7 +236,13 @@ fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelec
                 Icon(imageVector = iconImage, contentDescription = description)
             }
         },
-        visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
+        visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
+
+        // - l'attributo 'isError' dell'OutlinedTextField sarà sempre uguale al valore opposto rispetto
+        //   al parametro 'errorStatus' in modo tale che:
+        //   SE errorStatus==true allora vuol dire che i dati inseriti sono corretti e QUINDI isError=false
+        //   ALTRIMENTI, SE errorStatus==false allora vuol dire che i dati inseriti sono sbagliati e QUINDI isError=true
+        isError = if(registration) !errorStatus else false
     )
 }
 

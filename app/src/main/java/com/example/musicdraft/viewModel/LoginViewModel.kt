@@ -5,7 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.musicdraft.data.RegistrationUIState
 import com.example.musicdraft.data.UIEvent
+import com.example.musicdraft.data.rules.ValidatorFields
 
+
+// - Nel momento in cui un 'UIEvent' verrà innescato, questo sarà catturato dal "LoginViewModel" che si
+//   preoccuperà di gestirlo andando a modificare lo stato dell'interfaccia chiamato 'registrationUIState'.
 class LoginViewModel : ViewModel() {
 
     // - La variabile qui sotto sarà uno STATE di tipo "RegistrationUIState()" in modo tale che
@@ -19,6 +23,15 @@ class LoginViewModel : ViewModel() {
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
     //   per questo motivo prende in input un evento di tipo "UIEvent".
     fun onEvent(event:UIEvent){
+
+        // Ogni volta che viene generato uno qualsiasi degli eventi qui sotto
+        // verrà eseguita subito la funzione 'validateData()' in modo tale che
+        // ogni volta che l'utente inserisce/cancella un qualche carattere in una qualsiasi delle caselle di testo
+        // (nickname, email e password), questa casella aggiornerà il probprio colore immediatamente in modo tale
+        // da fargli capire se i dati che sta inserendo sono accettabili o meno dal sistema.
+        validateData()
+
+
         // gestione dei diversi eventi possibili:
         when(event){
             // Aggiorno il "registrationUIState" prendendo il 'event.nickname' inserito dall'utente:
@@ -61,14 +74,37 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun signUp() {
-        Log.d(TAG, "Registrazione eseguita con successo!")
+        Log.d(TAG, "Hai cliccato sul button 'Register'!")
         printState()
+
+        // - Con la funzione di sotto eseguo la validazione dei dati inseriti usando il 'ValidatorFields'  presente nel package 'rules':
+        validateData()
+    }
+
+    // - Funzione di validazione dei dati inseriti dall'utente e aggiornamento dello stato dell'interfaccia.
+    private fun validateData() {
+        val nicknameResult = ValidatorFields.validateNickname(nickname = registrationUIState.value.nickName)
+        val emailResult = ValidatorFields.validateEmail(email = registrationUIState.value.email)
+        val passwordResult = ValidatorFields.validatePassword(password = registrationUIState.value.password)
+
+        Log.d(TAG, "Sono dentro validateData() e i risultati delle validazioni sono i seguenti:")
+        Log.d(TAG, "nicknameResult= $nicknameResult")
+        Log.d(TAG, "emailResult= $emailResult")
+        Log.d(TAG, "passwordResult= $passwordResult")
+
+        // aggiornamenti dello stato 'registrationUIState' in base ai risultati di validazione per ogni campo:
+        registrationUIState.value = registrationUIState.value.copy(
+            nicknameError = nicknameResult.status,
+            emailError = emailResult.status,
+            passwordError = passwordResult.status
+        )
+
     }
 
     // mi serve solo per verificare che il registrationUIState venga aggiornato
     // correttamente ogni volta che si verifica un 'UIEvent' usando il Logcat:
     private fun printState(){
-        Log.d(TAG, "Sono dentro printState")
+        Log.d(TAG, "Sono dentro printState()")
         Log.d(TAG, registrationUIState.value.toString())
     }
 }

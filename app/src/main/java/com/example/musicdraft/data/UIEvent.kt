@@ -3,6 +3,10 @@ package com.example.musicdraft.data
 
 // - Questa è la sealed class che conterrà l'insieme finito di eventi che l'utente
 //   potrà generare sulla schermata di creazione dell'account ("SignUpScreen.kt")
+// - Nel momento in cui un UIEvent verrà innescato, questo sarà catturato dal "LoginViewModel" che si
+//   preoccuperà di gestirlo andando a modificare uno stato tenendo conto di quale azione ha eseguito l'utente
+//   (ad es. inserito caratteri nella casella nickname oppure email oppure password oppure aver cliccato sul button
+//   di registrazione).
 sealed class UIEvent {
 
     // - Nel momento in cui l'utente inserisce un qualche carattere all'interno del
