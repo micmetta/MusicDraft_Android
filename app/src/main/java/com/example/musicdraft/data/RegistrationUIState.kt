@@ -10,10 +10,12 @@ data class RegistrationUIState (
     var nickName :String = "",
     var email :String = "",
     var password :String = "",
+    var privacyPolicyAccepted :Boolean = false,
 
-    // mi permettono di capire se qualcuno di questi 3 campi non è valido (l'utente ha inserito dei dati errati)
+    // mi permettono di capire se qualcuno di questi 4 campi non è valido (l'utente ha inserito dei dati errati)
     var nicknameError :Boolean = false,
     var emailError :Boolean = false,
-    var passwordError :Boolean = false
+    var passwordError :Boolean = false,
+    var privacyPolicyError :Boolean = false
 
 )

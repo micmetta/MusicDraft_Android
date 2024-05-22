@@ -19,5 +19,9 @@ sealed class UIEvent {
     data class EmailChanged(val email :String) : UIEvent()
     data class PasswordChanged(val password :String) : UIEvent()
 
+    // se l'utente avrà fatto il check sulla CheckBox che fa riferimento alla privacy allora
+    // il valore del parametro status  sarà true:
+    data class PrivacyPolicyCheckBoxClicked(val status:Boolean) : UIEvent()
+
     object RegisterButtonClick : UIEvent()
 }

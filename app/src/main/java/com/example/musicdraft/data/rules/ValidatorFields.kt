@@ -22,6 +22,15 @@ object ValidatorFields {
             (!password.isNullOrEmpty() && password.length>=4) // restituisce true solamente se le due condizioni sono rispettate
         )
     }
+
+    fun validatePrivacyAndPolicy(statusValue: Boolean): ValidationResult{
+        return ValidationResult(
+            statusValue // restituisce statusValue (che sarà 'true' se l'utente ha validato la checkbox dei termini d'uso altrimenti sarà false)
+        )
+    }
+
+
+
 }
 
 data class ValidationResult(
