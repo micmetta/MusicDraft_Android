@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -51,10 +52,13 @@ import com.example.musicdraft.ui.theme.MusicDraftTheme
 import kotlinx.coroutines.launch
 import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
 import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
+import com.example.musicdraft.viewModel.LoginViewModel
 
 
-// test committo
 class MainActivity : ComponentActivity() {
+
+    private val loginViewModel: LoginViewModel by viewModels() // aggiunto
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -64,7 +68,8 @@ class MainActivity : ComponentActivity() {
                 ){
                     //MusicDraftUI() // c'era prima
                     //SignUp_SignIn()
-                    Navigation()
+                    //Navigation() // c'era prima..
+                    Navigation(loginViewModel)
                 }
             }
         }
@@ -73,15 +78,18 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun Navigation(){
+//fun Navigation(){ c'era prima..
+fun Navigation(loginViewModel: LoginViewModel){
     val navigationController = rememberNavController()
     // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
     NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){
         composable(Screens.SignUp.screen){
-            SignUpScreen(navigationController) // composable che verrà aperto per mostrare la creazione dell'account
+//            SignUpScreen(navigationController) // composable che verrà aperto per mostrare la creazione dell'account (c'era prima..)
+            SignUpScreen(navigationController, loginViewModel)
         }
         composable(Screens.Login.screen){
-            LoginScreen(navigationController) // composable che verrà aperto per mostrare il login
+            //LoginScreen(navigationController) // composable che verrà aperto per mostrare il login (c'era prima..)
+            LoginScreen(navigationController, loginViewModel)
         }
         composable(Screens.TermsAndConditionsScreen.screen){
             TermsAndConditionsScreen() // composable che verrà aperto per mostrare i termini e condizioni dell'app

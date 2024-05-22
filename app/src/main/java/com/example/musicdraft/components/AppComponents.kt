@@ -248,7 +248,7 @@ fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelec
 
 
 @Composable
-fun CheckboxComponent(value: String, onTextSelected: (String) -> Unit){
+fun CheckboxComponent(value: String, onTextSelected: (String) -> Unit, CheckedChange :(Boolean)-> Unit){
     Row(modifier = Modifier
         .fillMaxWidth()
         .heightIn(56.dp),
@@ -263,6 +263,7 @@ fun CheckboxComponent(value: String, onTextSelected: (String) -> Unit){
             checked = checkedState.value,
             onCheckedChange = {
                 checkedState.value = !checkedState.value
+                CheckedChange.invoke(it) // mi permette di far sapere all'esterno se è stato fatto il check sulla checkbox o meno
             })
 
         // istanzio il composable 'ClickableTextComponent' (definito sotto)
@@ -327,7 +328,7 @@ fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
 //   di poter catturare il click del button e lanciare ad esempio in 'SignUpScreen.kt'
 //   l'eventi 'loginViewModel.onEvent(UIEvent.RegisterButtonClick)'
 @Composable
-fun ButtonComponent(value: String, onButtonClick: () -> Unit){
+fun ButtonComponent(value: String, onButtonClick: () -> Unit, isEnabled : Boolean = false){
     Button(onClick = {
         // ogni volta che il button verrà cliccato, verrà eseguita la funzione
         // onButtonClick
@@ -337,7 +338,9 @@ fun ButtonComponent(value: String, onButtonClick: () -> Unit){
             .fillMaxWidth()
             .heightIn(48.dp),
         contentPadding = PaddingValues(),
-        colors = ButtonDefaults.buttonColors(Color.Transparent)
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        shape = RoundedCornerShape(50.dp),
+        enabled = isEnabled
         ) {
 
             Box(modifier = Modifier

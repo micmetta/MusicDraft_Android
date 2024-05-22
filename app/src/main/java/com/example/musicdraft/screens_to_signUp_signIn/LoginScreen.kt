@@ -33,8 +33,8 @@ import com.example.musicdraft.data.UIEvent
 import com.example.musicdraft.viewModel.LoginViewModel
 
 @Composable
-fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = viewModel()){
-
+//fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = viewModel()){ // c'era prima..
+fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
     Surface(
         color = Color.White,
         modifier = Modifier
@@ -62,7 +62,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = v
                     // in modo tale che il loginViewModel possa modificare lo stato presente al suo interno chiamato
                     // registrationUIState (in questo caso in realtà verrà modificato solo il campo 'registrationUIState.NicknameChanged'
                     // mentre gli altri due rimarranno invariati):
-                    loginViewModel.onEvent(UIEvent.NicknameChanged(it))
+                    loginViewModel.onEvent(UIEvent.NicknameChanged(it), navController)
                 })
             PasswordTextFieldComponent(
                 stringResource(id = R.string.password),
@@ -73,7 +73,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = v
                     // in modo tale che il loginViewModel possa modificare lo stato presente al suo interno chiamato
                     // registrationUIState (in questo caso in realtà verrà modificato solo il campo 'registrationUIState.PasswordChanged'
                     // mentre gli altri due rimarranno invariati):
-                    loginViewModel.onEvent(UIEvent.PasswordChanged(it))
+                    loginViewModel.onEvent(UIEvent.PasswordChanged(it), navController)
                 })
 
             Spacer(modifier = Modifier.height(40.dp)) // spazio
@@ -82,7 +82,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = v
             Spacer(modifier = Modifier.height(40.dp)) // spazio
             ButtonComponent(value = stringResource(id = R.string.login),
                 onButtonClick = {
-                    loginViewModel.onEvent(UIEvent.RegisterButtonClick)
+                    loginViewModel.onEvent(UIEvent.RegisterButtonClick, navController)
                 })
 
             Spacer(modifier = Modifier.height(20.dp)) // spazio

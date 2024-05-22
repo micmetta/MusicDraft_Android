@@ -38,7 +38,8 @@ import com.example.musicdraft.viewModel.LoginViewModel
 // Con il parametro loginViewModel: LoginViewModel = viewModel() istanzio e passo al 'SignUpScreen'
 // il LoginViewModel.
 @Composable
-fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = viewModel()) {
+//fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = viewModel()) { // c'era prima..
+fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel) {
     Surface(
         color = Color.White,
         modifier = Modifier
@@ -68,7 +69,7 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
                     // in modo tale che il loginViewModel possa modificare lo stato presente al suo interno chiamato
                     // 'registrationUIState' (in questo caso in realtà verrà modificato solo il campo 'registrationUIState.NicknameChanged'
                     // mentre gli altri due (email e password) rimarranno invariati):
-                    loginViewModel.onEvent(UIEvent.NicknameChanged(it))
+                    loginViewModel.onEvent(UIEvent.NicknameChanged(it), navController)
                 },
                 // passo come 4° parametro al mio 'MyTextFieldComponent' il risultato (booleano) della validazione del campo "nickname"
                 // in questo modo qualora questo valore fosse "true" o "false" allora il componente cambierà automaticamente
@@ -87,7 +88,7 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
                     // in modo tale che il loginViewModel possa modificare lo stato presente al suo interno chiamato
                     // registrationUIState (in questo caso in realtà verrà modificato solo il campo 'registrationUIState.EmailChanged'
                     // mentre gli altri due rimarranno invariati):
-                    loginViewModel.onEvent(UIEvent.EmailChanged(it))
+                    loginViewModel.onEvent(UIEvent.EmailChanged(it), navController)
                 },
                 errorStatus = loginViewModel.registrationUIState.value.emailError, // aggiornamento colore composable da loginViewModel a interfaccia
                 registration = true // mi trovo sulla schermata di registrazione
@@ -106,7 +107,7 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
                     // in modo tale che il loginViewModel possa modificare lo stato presente al suo interno chiamato
                     // registrationUIState (in questo caso in realtà verrà modificato solo il campo 'registrationUIState.PasswordChanged'
                     // mentre gli altri due rimarranno invariati):
-                    loginViewModel.onEvent(UIEvent.PasswordChanged(it))
+                    loginViewModel.onEvent(UIEvent.PasswordChanged(it), navController)
                 },
                 errorStatus = loginViewModel.registrationUIState.value.passwordError, // aggiornamento colore composable da loginViewModel a interfaccia
                 registration = true // mi trovo sulla schermata di registrazione
@@ -114,18 +115,40 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
 
 
             CheckboxComponent(
+                // parametri del CheckboxComponent:
+
                 value = stringResource(id = R.string.terms_and_conditions),
+
+                // 'onTextSelected' (passato come parametro) definisce una lambda che viene eseguita quando il testo
+                // vicino alla checkbox viene selezionato/cliccato, in questo caso
+                // si navigherà ad una nuova schermata chiamata "termsAndConditionsScreen":
                 onTextSelected = {
                     navController.navigate("termsAndConditionsScreen")
-                })
+                },
+
+                // 'CheckedChange' (passato come parametro) definisce sempre una lambda che verrà eseguita
+                //  quando l'utente selezionerà o deselezionerà la CheckboxComponent. Quando si verificherà
+                //  uno di questi due casi verrà generato l'evento 'UIEvent.PrivacyPolicyCheckBoxClicked(it)'
+                //  che verrà gestito dal 'loginViewModel' e 'it' rappresenterà il valore dello stato in cui
+                //  si trova la CheckboxComponent (true(spuntata) o false(non spuntata):
+                CheckedChange = {
+                    loginViewModel.onEvent(UIEvent.PrivacyPolicyCheckBoxClicked(it), navController)
+                }
+
+            )
 
             Spacer(modifier = Modifier.height(40.dp))
 
             // Button di conferma registrazione
             ButtonComponent(value = stringResource(id = R.string.register),
                 onButtonClick = {
-                    loginViewModel.onEvent(UIEvent.RegisterButtonClick)
-                })
+                    loginViewModel.onEvent(UIEvent.RegisterButtonClick, navController) // quando il button viene cliccato verrà generato l'evento 'UIEvent.RegisterButtonClick' che verrà gestito dal "LoginViewModel"
+                },
+                // il button di registrazione sarà attivo solamente se tutti i campi della registrazione
+                // saranno validi:
+                isEnabled = loginViewModel.allValidationCompleted.value
+
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
