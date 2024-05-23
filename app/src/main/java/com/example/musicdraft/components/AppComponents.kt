@@ -361,6 +361,44 @@ fun ButtonComponent(value: String, onButtonClick: () -> Unit, isEnabled : Boolea
 }
 
 
+// - Utilizzato come botton per effettuare il login.
+// - La funzione di callback onButtonClick: () -> Unit che mi permette
+//   di poter catturare il click del button e lanciare ad esempio in 'SignUpScreen.kt'
+//   l'eventi 'loginViewModel.onEvent(UIEvent.RegisterButtonClick)'
+@Composable
+fun ButtonComponentLogin(value: String, onButtonClick: () -> Unit, isEnabled : Boolean = false){
+    Button(onClick = {
+        // ogni volta che il button verrà cliccato, verrà eseguita la funzione
+        // onButtonClick
+        onButtonClick.invoke()
+    },
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(48.dp),
+        contentPadding = PaddingValues(),
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        shape = RoundedCornerShape(50.dp),
+        enabled = isEnabled
+    ) {
+
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(48.dp)
+            .background(
+                brush = Brush.horizontalGradient(listOf(Secondary, Primary)),
+                shape = RoundedCornerShape(50.dp)
+            ),
+            contentAlignment = Alignment.Center
+        ){
+            Text(text = value,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+
 // - Utilizzato per avere le due linee a sinistra e destra di 'or' per permettere
 //   all'utente di creare l'account o fare il login con Google o con un altro social:
 @Composable
