@@ -119,7 +119,7 @@ fun MusicDraftUI(){
 
         drawerState = drawerState, // mi permette di gestire la chiusura e l'apertura del menù in verticale sulla sinistra che mostrerà tutte
         // le sezioni sulle quali l'utente potrà cliccare.
-        gesturesEnabled = true, // permette di aprire automaticamente lo swap il navigation draw
+        gesturesEnabled = true, // abilita lo swap del 'ModalNavigationDrawer'
         drawerContent = {
             ModalDrawerSheet {
                 Box(modifier = Modifier
