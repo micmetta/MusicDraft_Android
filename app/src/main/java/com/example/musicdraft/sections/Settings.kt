@@ -10,12 +10,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.musicdraft.components.ButtonComponent
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
+import com.example.musicdraft.viewModel.LoginViewModel
 
 
 @Composable
-fun Settings() {
+fun Settings(navController: NavController, loginViewModel: LoginViewModel) {
 
     // definisco una box
     Box(modifier = Modifier.fillMaxSize()){
@@ -26,6 +29,14 @@ fun Settings() {
             verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             // inserisco un text all'interno della colonna
             Text(text = "Settings", fontSize = 30.sp, color = BlueApp) // GreenJC colore definito in "Color.kt"
+        
+            ButtonComponent(
+                value = "Logout",
+                onButtonClick = {
+                    loginViewModel.logoutFromFirebase(navController)
+                },
+                isEnabled = true
+            )
         }
     }
 }

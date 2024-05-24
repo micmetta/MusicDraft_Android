@@ -149,7 +149,7 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel) {
                     },
                     // il button di registrazione sarà attivo solamente se tutti i campi della registrazione
                     // saranno validi:
-                    isEnabled = loginViewModel.allValidationCompleted.value,
+                    isEnabled = loginViewModel.allValidationCompleted.value
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -157,6 +157,9 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel) {
                 DividerTextComponent()
 
                 ClickableLoginTextComponent(tryingToLogin = true, onTextSelected = {
+                    loginViewModel.onEvent(UIEventSignUp.InvalidateDataSignUp, navController) // invalido i dati della schermata di login subito dopo che l'utente
+                    // ha cliccato su questa schermata sul button 'Login' in modo tale che se dovesse tornare di nuovo sulla schermata di Registrazione
+                    // non vedrà il button 'Register' abilitato.
                     navController.navigate("login")
                 })
 

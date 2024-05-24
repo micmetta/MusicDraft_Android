@@ -53,6 +53,7 @@ import kotlinx.coroutines.launch
 import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
 import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
 import com.example.musicdraft.viewModel.LoginViewModel
+import com.google.firebase.FirebaseApp
 
 
 class MainActivity : ComponentActivity() {
@@ -69,6 +70,7 @@ class MainActivity : ComponentActivity() {
                     //MusicDraftUI() // c'era prima
                     //SignUp_SignIn()
                     //Navigation() // c'era prima..
+                    //FirebaseApp.initializeApp(this) // passaggio dell'application context
                     Navigation(loginViewModel)
                 }
             }
@@ -95,7 +97,7 @@ fun Navigation(loginViewModel: LoginViewModel){
             TermsAndConditionsScreen() // composable che verrà aperto per mostrare i termini e condizioni dell'app
         }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI() // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -105,7 +107,7 @@ fun Navigation(loginViewModel: LoginViewModel){
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MusicDraftUI(){
+fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: LoginViewModel){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -334,7 +336,7 @@ fun MusicDraftUI(){
                     Matchmaking() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Matchmaking"
                 }
                 composable(Screens.Settings.screen){
-                    Settings() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Settings"
+                    Settings(navControllerInitialScreens, loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Settings"
                 }
 
             }
