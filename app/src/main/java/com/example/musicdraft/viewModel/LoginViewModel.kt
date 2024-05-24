@@ -10,6 +10,9 @@ import com.example.musicdraft.data.UIEventSignIn
 import com.example.musicdraft.data.UIEventSignUp
 import com.example.musicdraft.data.rules.ValidatorFields
 import com.example.musicdraft.sections.Screens
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 
 
 // - Nel momento in cui un 'UIEvent' verrà innescato, questo sarà catturato dal "LoginViewModel" che si
@@ -31,6 +34,8 @@ class LoginViewModel() : ViewModel() {
     var signInInProgress = mutableStateOf(false) // stessa cosa di 'signUpInProgress' ma dopo aver cliccato su 'Login'
 
     private val TAG = LoginViewModel::class.simpleName
+
+
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -83,6 +88,10 @@ class LoginViewModel() : ViewModel() {
                 )
             }
 
+            is UIEventSignUp.InvalidateDataSignUp -> {
+                invalidateDataSigUp()
+            }
+
         }
 
         // Ogni volta che uno qualsiasi degli eventi sopra è stato gestito,
@@ -120,6 +129,10 @@ class LoginViewModel() : ViewModel() {
             is UIEventSignIn.LoginButtonClick -> {
                 signIn(navController)
             }
+
+            is UIEventSignIn.InvalidateDataSignIn -> {
+                invalidateDataSigIn()
+            }
         }
 
         // Ogni volta che uno qualsiasi degli eventi sopra è stato gestito,
@@ -130,78 +143,85 @@ class LoginViewModel() : ViewModel() {
         validateDataLogin() // da inserire in un thread
     }
 
+    // Questa funzione serve per invalidare i dati della schermata di registrazione subito dopo che l'utente
+    // ha cliccato su questa schermata sul button 'Login'.
+    private fun invalidateDataSigUp() {
+        // resetto tutti i campi di "registrationUIState":
+        registrationUIState.value = registrationUIState.value.copy(
+            nickName = "",
+            email = "",
+            password = "",
+            privacyPolicyAccepted = false
+        )
+        allValidationCompleted.value = false
+    }
+
+    // Questa funzione serve per invalidare i dati della schermata di login subito dopo che l'utente
+    // ha cliccato su questa schermata sul button 'Register'.
+    private fun invalidateDataSigIn() {
+        // resetto tutti i campi di "loginUIState":
+        loginUIState.value = loginUIState.value.copy(
+            email = "",
+            password = ""
+        )
+        allValidationCompletedLogin.value = false
+    }
+
 
     // - Questa è la funzione che verrà eseguita una volta che l'utente avrà premuto sul button "Register".
     private fun signUp(navController: NavController) {
-
-        // attivo l'indicatore di caricamento:
-        signUpInProgress.value = true
 
         Log.d(TAG, "Hai cliccato sul button 'Register'!")
         printStateSignUp()
 
         // - Con la funzione di sotto eseguo la validazione dei dati inseriti usando il 'ValidatorFields'  presente nel package 'rules':
-        validateData()
-
+        //validateData()
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // controlli da fare nel DB per vedere se i dati inseriti dall'utente sono corretti rispetto a quelli presenti nel DB in questo momento
-        // ...... TO DO...
+        // - Controllerà se la registrazione potrà andare a buon fine o meno:
+        createUserInFirebase(
+            email = registrationUIState.value.email,
+            password = registrationUIState.value.password,
+            navController
+        )
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-        // disattivo l'indicatore di caricamento:
-        signUpInProgress.value = false
-
-        // Qui passo alla schermata: navigationController.navigate(Screens.home.screen)
-        if (allValidationCompleted.value) {
-
-            // resetto tutti i campi di "registrationUIState":
-            registrationUIState.value = registrationUIState.value.copy(
-                nickName = "",
-                email = "",
-                password = "",
-                privacyPolicyAccepted = false
-            )
-            navController.navigate(Screens.MusicDraftUI.screen)
-        }
+//        // Qui passo alla schermata: navigationController.navigate(Screens.home.screen)
+//        if (allValidationCompleted.value) {
+//            // resetto tutti i campi di "registrationUIState":
+//            registrationUIState.value = registrationUIState.value.copy(
+//                nickName = "",
+//                email = "",
+//                password = "",
+//                privacyPolicyAccepted = false
+//            )
+//            navController.navigate(Screens.MusicDraftUI.screen)
+//        }
 
     }
 
     // - Questa è la funzione che verrà eseguita una volta che l'utente avrà premuto sul button "Login".
     private fun signIn(navController: NavController) {
-
-        // attivo l'indicatore di caricamento:
-        signInInProgress.value = true
-
         Log.d(TAG, "Hai cliccato sul button 'Login'!")
         printStateSignIn()
 
         // - Con la funzione di sotto eseguo la validazione dei dati inseriti usando il 'ValidatorFields'  presente nel package 'rules':
         validateDataLogin()
 
-
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // controlli da fare nel DB per vedere se i dati inseriti dall'utente sono corretti rispetto a quelli presenti nel DB in questo momento
-        // ...... TO DO...
+        // - Controllerà nel DB se il login potrà andare a buon fine o meno:
+        login(navController)
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-        // disattivo l'indicatore di caricamento:
-        signInInProgress.value = false
-
-        // Qui passo alla schermata: navigationController.navigate(Screens.home.screen)
-        if (allValidationCompletedLogin.value) {
-
-            // resetto tutti i campi di "loginUIState":
-            loginUIState.value = loginUIState.value.copy(
-                email = "",
-                password = "",
-            )
-
-            navController.navigate(Screens.MusicDraftUI.screen)
-        }
-
+//        // Qui passo alla schermata: navigationController.navigate(Screens.home.screen)
+//        if (allValidationCompletedLogin.value) {
+//            // resetto tutti i campi di "loginUIState":
+//            loginUIState.value = loginUIState.value.copy(
+//                email = "",
+//                password = ""
+//            )
+//            navController.navigate(Screens.MusicDraftUI.screen)
+//        }
     }
 
 
@@ -267,7 +287,7 @@ class LoginViewModel() : ViewModel() {
     // correttamente ogni volta che si verifica un 'UIEvent' usando il Logcat:
     private fun printStateSignUp(){
         Log.d(TAG, "Sono dentro printState() della registrazione")
-        Log.d(TAG, registrationUIState.value.toString())
+        Log.d(TAG, "registrationUIState corrente: " + registrationUIState.value.toString())
     }
 
     // mi serve solo per verificare che il loginUIState venga aggiornato
@@ -275,5 +295,104 @@ class LoginViewModel() : ViewModel() {
     private fun printStateSignIn(){
         Log.d(TAG, "Sono dentro printState() del login")
         Log.d(TAG, loginUIState.value.toString())
+    }
+
+    /*
+     - Questa funzione verrà invocata dalla funzione di SignUp per creare e memorizzare nel DB di firebase
+       il nuovo utente con tutte le sue info.
+    */
+    private fun createUserInFirebase(email:String, password:String, navController: NavController){
+
+        // attivo l'indicatore di caricamento:
+        signUpInProgress.value = true
+
+        FirebaseAuth
+            .getInstance() // ottengo l'istanza di Firebase
+            .createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener{
+
+                // disattivo l'indicatore di caricamento:
+                signUpInProgress.value = false
+
+                // qui dentro c'è quello che verrà eseguito nel momento in cui il processo di creazione viene completato.
+                Log.d(TAG, "Sono dentro addOnCompleteListener di CREATE USER IN FIREBASE!")
+                Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
+                Log.d(TAG, "Il nuovo utente è stato REGISTRATO NEL DB DI FIREBASE!")
+
+                if(it.isSuccessful){
+                    // resetto tutti i campi di "registrationUIState":
+                    registrationUIState.value = registrationUIState.value.copy(
+                        nickName = "",
+                        email = "",
+                        password = "",
+                        privacyPolicyAccepted = false
+                    )
+                    navController.navigate(Screens.MusicDraftUI.screen)
+                }
+            }
+            .addOnFailureListener {
+                // qui dentro c'è quello che verrà eseguito nel momento in cui si verifica un qualche errore durante il processo di creazione.
+                Log.d(TAG, "Sono dentro addOnFailureListener ")
+                Log.d(TAG, "Si è verificato un errore durante la creazione dell'utente su FIREBASE.")
+                Log.d(TAG, " Exception = ${it.message}") // messaggio d'errore
+                Log.d(TAG, " Exception = ${it.localizedMessage}")
+            }
+    }
+
+    /*
+     - Questa funzione permette all'utente di eseguire il login (supponendo che si sia già registrato).
+    */
+    private fun login(navController: NavController){
+
+        // attivo l'indicatore di caricamento:
+        signInInProgress.value = true
+
+        val email = loginUIState.value.email
+        val password = loginUIState.value.password
+        FirebaseAuth
+            .getInstance()
+            .signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener{
+                // lamda function che verrà eseguita qualora il login avesse successo
+
+                // disattivo l'indicatore di caricamento:
+                signInInProgress.value = false
+
+                Log.d(TAG, "Sono dentro addOnCompleteListener di LOGIN!")
+                Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
+                Log.d(TAG, "Login completato con successo!")
+                if(it.isSuccessful){
+                    // resetto tutti i campi di "loginUIState":
+                    loginUIState.value = loginUIState.value.copy(
+                        email = "",
+                        password = ""
+                    )
+                    navController.navigate(Screens.MusicDraftUI.screen)
+                }
+            }
+            .addOnFailureListener{
+                // lamda function che verrà eseguita qualora il login fallisse
+                Log.d(TAG, "Sono dentro addOnFailureListener di LOGIN!")
+                Log.d(TAG, " message = ${it.message}")
+                Log.d(TAG, "Login FALLITO..")
+            }
+    }
+
+    /*
+     - Questa funzione permette all'utente di eseguire il logout.
+    */
+    fun logoutFromFirebase(navController: NavController){
+        val firebaseAuth = FirebaseAuth.getInstance()
+        firebaseAuth.signOut()
+        val authStateListener = AuthStateListener {
+            if(it.currentUser == null){
+                // se entro qui vuol dire che il logout è andato a buon fine.
+                Log.d(TAG, "Logout eseguito con successo!")
+                navController.navigate(Screens.Login.screen)
+            }else{
+                Log.d(TAG, "Logout fallito.")
+            }
+        }
+        firebaseAuth.addAuthStateListener(authStateListener)
     }
 }

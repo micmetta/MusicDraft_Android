@@ -23,5 +23,6 @@ sealed class UIEventSignUp {
     // il valore del parametro status  sarà true:
     data class PrivacyPolicyCheckBoxClicked(val status:Boolean) : UIEventSignUp()
     object RegisterButtonClick : UIEventSignUp()
+    object InvalidateDataSignUp : UIEventSignUp()
 
 }

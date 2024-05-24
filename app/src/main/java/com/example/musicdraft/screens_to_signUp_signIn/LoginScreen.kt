@@ -98,6 +98,9 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                 DividerTextComponent()
 
                 ClickableLoginTextComponent(tryingToLogin = false, onTextSelected = {
+                    loginViewModel.onEvent(UIEventSignIn.InvalidateDataSignIn, navController) // invalido i dati della schermata di login subito dopo che l'utente
+                    // ha cliccato su questa schermata sul button 'Register' in modo tale che se dovesse tornare di nuovo sulla schermata di Login
+                    // non vedrà il button 'Login' abilitato.
                     navController.navigate("signUp")
                 })
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "278616448276",
+    "project_id": "musicdraft-d3f9b",
+    "storage_bucket": "musicdraft-d3f9b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278616448276:android:09d459dbc9f97f6e52f601",
+        "android_client_info": {
+          "package_name": "com.example.musicdraft"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsznnz4sQXxxgVMeKDzToYzIyhmjhNIMw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
