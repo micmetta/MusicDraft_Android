@@ -12,7 +12,20 @@
           "package_name": "com.example.musicdraft"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "278616448276-rm5d833p4t6hpourf7g7906h7avho65o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.musicdraft",
+            "certificate_hash": "cd6402d2778a0667301975ac17c507c8f835ca22"
+          }
+        },
+        {
+          "client_id": "278616448276-4on14ih7uqgiamnmt10a8qvdrb3ga2k8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDsznnz4sQXxxgVMeKDzToYzIyhmjhNIMw"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "278616448276-4on14ih7uqgiamnmt10a8qvdrb3ga2k8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -53,12 +53,15 @@ import kotlinx.coroutines.launch
 import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
 import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
 import com.example.musicdraft.viewModel.LoginViewModel
-import com.google.firebase.FirebaseApp
-
 
 class MainActivity : ComponentActivity() {
 
-    private val loginViewModel: LoginViewModel by viewModels() // aggiunto
+//    private val googleAuthUiClient by lazy {
+//        GoogleAuthUiClient(
+//            context = applicationContext,
+//            oneTapClient = Identity.getSignInClient(applicationContext)
+//        )
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,10 +70,25 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    //MusicDraftUI() // c'era prima
-                    //SignUp_SignIn()
-                    //Navigation() // c'era prima..
-                    //FirebaseApp.initializeApp(this) // passaggio dell'application context
+                    val loginViewModel: LoginViewModel by viewModels()
+                    //val state by loginViewModel.state.collectAsStateWithLifecycle()
+
+//                    val launcher = rememberLauncherForActivityResult(
+//                        contract = ActivityResultContracts.StartIntentSenderForResult(),
+//                        onResult = { result ->
+//                            if(result.resultCode == RESULT_OK) {
+//                                lifecycleScope.launch{
+//                                    val signInResult = googleAuthUiClient.signInWithIntent(
+//                                        intent = result.data ?: return@launch
+//                                    )
+//                                    loginViewModel.onSignInResult(signInResult)
+//                                }
+//                            }
+//                        }
+//                    )
+
+                    //Navigation(loginViewModel, state) //c'era prima..
+                    //Navigation(loginViewModel, state, launcher, googleAuthUiClient, context = applicationContext)
                     Navigation(loginViewModel)
                 }
             }
@@ -80,14 +98,15 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-//fun Navigation(){ c'era prima..
+//fun Navigation(loginViewModel: LoginViewModel, state: SignInState, launcher: ActivityResultLauncher<IntentSenderRequest>, googleAuthUiClient: GoogleAuthUiClient, context: Context){ // c'era prima
+//fun Navigation(loginViewModel: LoginViewModel, state: SignInState){
 fun Navigation(loginViewModel: LoginViewModel){
     val navigationController = rememberNavController()
     // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
     NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){
         composable(Screens.SignUp.screen){
-//            SignUpScreen(navigationController) // composable che verrà aperto per mostrare la creazione dell'account (c'era prima..)
-            SignUpScreen(navigationController, loginViewModel)
+            SignUpScreen(navigationController) // composable che verrà aperto per mostrare la creazione dell'account (c'era prima..)
+
         }
         composable(Screens.Login.screen){
             //LoginScreen(navigationController) // composable che verrà aperto per mostrare il login (c'era prima..)

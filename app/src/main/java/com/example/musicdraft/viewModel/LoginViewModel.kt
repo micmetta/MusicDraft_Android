@@ -1,23 +1,31 @@
 package com.example.musicdraft.viewModel
 
 import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.musicdraft.data.RegistrationUIState
 import com.example.musicdraft.data.LoginUIState
 import com.example.musicdraft.data.UIEventSignIn
 import com.example.musicdraft.data.UIEventSignUp
 import com.example.musicdraft.data.rules.ValidatorFields
+import com.example.musicdraft.login.GoogleSignInState
+import com.example.musicdraft.model.AuthRepository
 import com.example.musicdraft.sections.Screens
-import com.google.firebase.FirebaseApp
+import com.example.musicdraft.utility.Resource
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
+import kotlinx.coroutines.launch
 
 
 // - Nel momento in cui un 'UIEvent' verrà innescato, questo sarà catturato dal "LoginViewModel" che si
 //   preoccuperà di gestirlo andando a modificare lo stato dell'interfaccia chiamato 'registrationUIState'.
 class LoginViewModel() : ViewModel() {
+
+    private val authRepository: AuthRepository = AuthRepository() // istanzio il repository
 
     // - La variabile qui sotto sarà uno STATE di tipo "RegistrationUIState()" in modo tale che
     //   il viewModel possa aggiornarsi ogni volta che questo stato cambierà (ovvero ogni volta che
@@ -30,12 +38,21 @@ class LoginViewModel() : ViewModel() {
 
     var signUpInProgress = mutableStateOf(false) // stato che permetterà di attivare/disattivare l'indicatore di caricamento
     // una volta che l'utente avrà cliccato su "Register" durante la creazione dell'account.
-
     var signInInProgress = mutableStateOf(false) // stessa cosa di 'signUpInProgress' ma dopo aver cliccato su 'Login'
 
     private val TAG = LoginViewModel::class.simpleName
 
+//    // Variabili per gestire il login con Google:
+//    private val _state = MutableStateFlow(SignInState())
+//    val state = _state.asStateFlow()
+//    /////////////////////////////////////////////
 
+    // Variabili per gestire il login con Google:
+    val _googleState = mutableStateOf(GoogleSignInState()) // GoogleSignInState() è una data class creata appositamente
+    val googleState: State<GoogleSignInState> = _googleState // state pubblico legato al login con Google fatto dall'utente
+    /////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -395,4 +412,52 @@ class LoginViewModel() : ViewModel() {
         }
         firebaseAuth.addAuthStateListener(authStateListener)
     }
+
+    /*
+    - Funzione per eseguire il login con Google.
+    */
+//    fun onSignInResult(result: SignInResult){
+//        _state.update { it.copy(
+//            // se result.data != null allora vuol dire che il login è stato
+//            // eseguito con successo
+//            isLoginSuccessful = result.data != null,
+//            loginError = result.errorMessage
+//        ) }
+//    }
+
+//    /*
+//    - Funzione per resettare lo stato che fa riferimento al login con Google.
+//     */
+//    fun resetState(){
+//        // reimposto i valori standard dello stato
+//        // (isLoginSuccessful: Boolean = false,
+//        //  val loginError: String? = null)
+//        _state.update { SignInState() }
+//    }
+
+    /*
+    - Funzione che permette all'utente di eseguire il login con Google grazie a Firebase.
+    */
+    fun googleSignIn(credential: AuthCredential) = viewModelScope.launch{
+        authRepository.googleSignIn(credential).collect{ result ->
+
+            // Una volta ottenuta la risposta da 'repository.googleSignIn(credential)'
+            // in base al caso che si verificherà verrà aggiornato lo stato '_googleState'
+            // a cui l'UI è collegata e quindi in base al risultato l'interfaccia grafica
+            // si auto-aggiornerà:
+            when(result){
+                is Resource.Success ->{
+                    _googleState.value = GoogleSignInState(success = result.data)
+                }
+                is Resource.Loading ->{
+                    _googleState.value = GoogleSignInState(loading = true)
+                }
+                is Resource.Error ->{
+                    _googleState.value = GoogleSignInState(error = result.message!!)
+                }
+            }
+        }
+    }
+
+
 }
