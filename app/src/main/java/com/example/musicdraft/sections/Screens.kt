@@ -23,5 +23,6 @@ sealed class Screens (val screen: String) {
     data object Marketplace: Screens("marketplace")
     data object Matchmaking: Screens("matchmaking")
     data object Settings: Screens("settings")
+    data object ErrorDialog: Screens("errorDialog")
 
 }

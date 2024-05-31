@@ -1,8 +1,12 @@
 package com.example.musicdraft.viewModel
 
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -52,7 +56,12 @@ class LoginViewModel() : ViewModel() {
     val googleState: State<GoogleSignInState> = _googleState // state pubblico legato al login con Google fatto dall'utente
     /////////////////////////////////////////////
 
+    // stato per attivare/disattivare la finestra 'ErrorDialog':
+    var errorDialogActivated = mutableStateOf(false)
+    var stringToShowErrorDialog = mutableStateOf("")
+
     ///////////////////////////////////////////////////////////////
+
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -78,6 +87,7 @@ class LoginViewModel() : ViewModel() {
             }
 
             is UIEventSignUp.EmailChanged -> {
+                Log.d("LoginViewModel", "Sono entrato in is UIEventSignUp.EmailChanged ->")
                 registrationUIState.value = registrationUIState.value.copy(
                     email = event.email
                 )
@@ -353,6 +363,10 @@ class LoginViewModel() : ViewModel() {
                 Log.d(TAG, "Si è verificato un errore durante la creazione dell'utente su FIREBASE.")
                 Log.d(TAG, " Exception = ${it.message}") // messaggio d'errore
                 Log.d(TAG, " Exception = ${it.localizedMessage}")
+
+                // Attivo il Popup di errore che verrà mostrato all'utente:
+                stringToShowErrorDialog.value = it.message.toString()
+                errorDialogActivated.value = true
             }
     }
 
@@ -390,8 +404,13 @@ class LoginViewModel() : ViewModel() {
             .addOnFailureListener{
                 // lamda function che verrà eseguita qualora il login fallisse
                 Log.d(TAG, "Sono dentro addOnFailureListener di LOGIN!")
+                Log.d(TAG, "Si è verificato un errore durante il login dell'utente su FIREBASE.")
                 Log.d(TAG, " message = ${it.message}")
-                Log.d(TAG, "Login FALLITO..")
+                Log.d(TAG, " Exception = ${it.localizedMessage}")
+
+                // Attivo il Popup di errore che verrà mostrato all'utente:
+                stringToShowErrorDialog.value = it.message.toString()
+                errorDialogActivated.value = true
             }
     }
 
@@ -413,40 +432,29 @@ class LoginViewModel() : ViewModel() {
         firebaseAuth.addAuthStateListener(authStateListener)
     }
 
-    /*
-    - Funzione per eseguire il login con Google.
-    */
-//    fun onSignInResult(result: SignInResult){
-//        _state.update { it.copy(
-//            // se result.data != null allora vuol dire che il login è stato
-//            // eseguito con successo
-//            isLoginSuccessful = result.data != null,
-//            loginError = result.errorMessage
-//        ) }
-//    }
-
-//    /*
-//    - Funzione per resettare lo stato che fa riferimento al login con Google.
-//     */
-//    fun resetState(){
-//        // reimposto i valori standard dello stato
-//        // (isLoginSuccessful: Boolean = false,
-//        //  val loginError: String? = null)
-//        _state.update { SignInState() }
-//    }
 
     /*
     - Funzione che permette all'utente di eseguire il login con Google grazie a Firebase.
     */
     fun googleSignIn(credential: AuthCredential) = viewModelScope.launch{
-        authRepository.googleSignIn(credential).collect{ result ->
 
+        authRepository.googleSignIn(credential).collect{ result ->
             // Una volta ottenuta la risposta da 'repository.googleSignIn(credential)'
             // in base al caso che si verificherà verrà aggiornato lo stato '_googleState'
             // a cui l'UI è collegata e quindi in base al risultato l'interfaccia grafica
             // si auto-aggiornerà:
             when(result){
                 is Resource.Success ->{
+                    val email = result.data?.user?.email
+                    if (email != null) {
+                        Log.d("LoginViewModel", "Sono entrato in is googleSignIn -> is Resource.Success ->")
+                        Log.d("LoginViewModel", "email: $email")
+                        //registrationUIState.value = registrationUIState.value.copy(email = email)
+                        registrationUIState.value = registrationUIState.value.copy(
+                            email = email
+                        )
+                        printStateSignUp() // stampo per verificare che il registrationUIState sia stato aggiornato
+                    }
                     _googleState.value = GoogleSignInState(success = result.data)
                 }
                 is Resource.Loading ->{
@@ -457,6 +465,13 @@ class LoginViewModel() : ViewModel() {
                 }
             }
         }
+    }
+
+    fun reset_errorDialogActivated(value: MutableState<Boolean>){
+        errorDialogActivated = value
+    }
+    fun reset_stringToShowErrorDialog(value: MutableState<String>){
+        stringToShowErrorDialog = value
     }
 
 

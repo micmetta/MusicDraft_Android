@@ -1,21 +1,37 @@
 package com.example.musicdraft.screens_to_signUp_signIn
 
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -30,11 +46,48 @@ import com.example.musicdraft.components.PasswordTextFieldComponent
 import com.example.musicdraft.components.UnderLinedNormalTextComponent
 import com.example.musicdraft.data.UIEventSignIn
 import com.example.musicdraft.data.UIEventSignUp
+import com.example.musicdraft.utility.Constant
 import com.example.musicdraft.viewModel.LoginViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import kotlinx.coroutines.launch
 
 @Composable
 //fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = viewModel()){ // c'era prima..
 fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
+
+    val context = LocalContext.current
+    val googleSignInState = loginViewModel.googleState.value // collego il composable allo stato 'googleState' presente in 'loginViewModel'
+    val scope = rememberCoroutineScope()
+    var errorDialogActivated = loginViewModel.errorDialogActivated.value
+    var stringToShowErrorDialog = loginViewModel.stringToShowErrorDialog.value
+
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+            val account = GoogleSignIn.getSignedInAccountFromIntent(it.data) // per prendere le info sull'account dell'utente
+            try {
+                val result = account.getResult(ApiException::class.java) // memorizzo in 'result' le info sull'account
+                val email = result.email // prendo l'email dell'utente
+                Log.d("SignUpScreen", "L'utente vuole loggare con questa email: $email") // stampo l'email nel log
+                // se l'email non è null allora aggiorno il campo 'registrationUIState.email' generando l'evento 'UIEventSignUp.EmailChanged()' nel loginViewModel:
+                email?.let {
+                    Log.d("SignUpScreen", "Sono in email?.let")
+                    Log.d("SignUpScreen", "it: $it")
+                    loginViewModel.onEvent(UIEventSignIn.EmailChanged(it), navController) // Aggiorna lo stato dell'email nel ViewModel
+                }
+                // - Queste due righe qui sotto c'erano prima ma esegue direttamente il signup con google usando le 'credentials' senza aspettare che l'utente abbia inserito la password
+                //    e che solo dopo abbia premuto il button Register per questo motivo l'ho commentato:
+                //val credentials = GoogleAuthProvider.getCredential(result.idToken, null) // fornisco in input a 'getCredential' l'oggetto 'result'
+                //loginViewModel.googleSignIn(credentials) // invoco il metodo 'googleSignIn' del 'loginViewModel' passandogli le credenziali che si preoccuperà di aggiornare
+                // il "GoogleSignInState" in base a se si verifica un successo, un caricamento o un errore.
+
+            }catch (it: ApiException){
+                print(it) // stampo l'eventuale eccezione
+            }
+        }
+
+
 
     Box(modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -57,6 +110,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                 Spacer(modifier = Modifier.height(20.dp)) // spazio
 
                 MyTextFieldComponent(
+                    loginViewModel = loginViewModel,
                     stringResource(id = R.string.email),
                     Icons.Default.Email, // onTextSelected è una funzione di callback che verrà chiamata ogni volta che
                     // l'utente inserirà qualcosa all'interno del 'MyTextFieldComponent' corrente
@@ -104,6 +158,77 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                     navController.navigate("signUp")
                 })
 
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // - Button di SignUp con Google:
+                    IconButton(onClick = {
+                        // Una volta che l'utente avrà cliccato sull'account prenderemo tutte le info
+                        // come username e email
+                        val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(Constant.ServerClient) // id_token, ServerClient=è il client_id dell'app riconosciuta da Firebase
+                            .requestEmail() // email utente
+//                            .requestIdToken(ServerClient) // id_token, ServerClient=è il client_id dell'app riconosciuta da Firebase
+                            .build()
+                        val googleSignInClient = GoogleSignIn.getClient(context, googleSignInOptions)
+                        googleSignInClient.signOut() // serve per permettere all'utente di selezionare l'acocunt che desidera
+                        launcher.launch(googleSignInClient.signInIntent)
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_google),
+                            contentDescription = "Google Icon",
+                            modifier = Modifier.size(50.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
+                }
+
+                // LaunchedEffect permette di lanciare un'azione asincrona all'interno del composable corrente.
+                // In questo caso la funzione LaunchedEffect permette di avviare un'azione asincrona quando cambia il valore
+                // di una particolare chiave che in questo caso è la 'key1 = googleSignInState.success'.
+                // Quindi l'azione asincrona definita qui sotto si preoccuperà di monitorare i cambiamenti
+                // della proprietà 'googleSignInState.success':
+                LaunchedEffect(key1 = googleSignInState.success) {
+                    // lancio una coroutine per non bloccare il thread UI:
+                    scope.launch {
+                        if (googleSignInState.success != null) {
+                            // se entro qui vuol dire che il login con Google è avvenuto con successo e quindi
+                            // tramite Toast.makeText mostro un breve messaggio informativo all'utente sottoforma di
+                            // popup (che si sovrappone all'interfaccia) che in questo caso poichè c'è il parametro "Toast.LENGTH_LONG" durerà un tempo più lungo:
+                            Toast.makeText(context, "Sign In Success", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+
+                // mi permette di mostrare un messaggio di errore sullo schermo nel momento in cui l'utente cerca di regsitrarsi
+                // con un'email già registrata nel sistema:
+                LaunchedEffect(key1 = errorDialogActivated) {
+                    // lancio una coroutine per non bloccare il thread UI:
+                    scope.launch {
+                        if (errorDialogActivated) {
+                            // se entro qui vuol dire che il login con Google è avvenuto con successo e quindi
+                            // tramite Toast.makeText mostro un breve messaggio informativo all'utente sottoforma di
+                            // popup (che si sovrappone all'interfaccia) che in questo caso poichè c'è il parametro "Toast.LENGTH_LONG" durerà un tempo più lungo:
+                            Toast.makeText(context, stringToShowErrorDialog, Toast.LENGTH_LONG).show()
+                            loginViewModel.reset_errorDialogActivated(mutableStateOf(false))
+                            loginViewModel.reset_stringToShowErrorDialog(mutableStateOf(""))
+                        }
+                    }
+                }
+
+
+            }
+
+            // - Barra di caricamento che si attiverà nel momento in cui l'attributo
+            //   'loading' dello stato 'googleSignInState' sarà uguale a true:
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                if (googleSignInState.loading){
+                    CircularProgressIndicator()
+                }
             }
         }
 
