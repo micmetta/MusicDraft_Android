@@ -106,7 +106,6 @@ fun Navigation(loginViewModel: LoginViewModel){
     NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){
         composable(Screens.SignUp.screen){
             SignUpScreen(navigationController) // composable che verrà aperto per mostrare la creazione dell'account (c'era prima..)
-
         }
         composable(Screens.Login.screen){
             //LoginScreen(navigationController) // composable che verrà aperto per mostrare il login (c'era prima..)

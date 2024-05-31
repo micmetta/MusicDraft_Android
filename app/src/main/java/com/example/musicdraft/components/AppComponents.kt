@@ -25,8 +25,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,10 +55,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import com.example.musicdraft.ui.theme.TextColor
 import com.example.musicdraft.R
+import com.example.musicdraft.data.RegistrationUIState
 import com.example.musicdraft.ui.theme.BgColor
 import com.example.musicdraft.ui.theme.GrayColor
 import com.example.musicdraft.ui.theme.Primary
 import com.example.musicdraft.ui.theme.Secondary
+import com.example.musicdraft.viewModel.LoginViewModel
 
 
 @Composable
@@ -106,12 +111,17 @@ fun HeadingTextComponent(value:String){
 //   Il valore di default è 'false'.
 // - registration: mi permette di sapere se il 'MyTextFieldComponent' si trova nella schermata di registrazione (true) o no (false) (default = false).
 @Composable
-fun MyTextFieldComponent(labelValue:String, icon:ImageVector, onTextSelected:(String) -> Unit, errorStatus:Boolean = false, registration:Boolean = false){
+fun MyTextFieldComponent(loginViewModel: LoginViewModel, labelValue:String, icon:ImageVector, onTextSelected:(String) -> Unit, errorStatus:Boolean = false, registration:Boolean = false){
 
     // grazie alla funzione 'remember' mi ricordo dell'ultimo valore inserito dall'utente nell'OutlinedTextField di sotto
-    val textValue = remember {
+    var textValue = remember {
         mutableStateOf("")
     }
+    val registrationState by loginViewModel.registrationUIState // mi collego allo stato 'loginViewModel.registrationUIState' presente nel loginViewModel in questo modo
+    // posso aggiornare automaticamente il 'value' dell'OutlinedTextField presente qui sotto.
+
+    val loginState by loginViewModel.loginUIState // mi collego allo stato 'loginViewModel.registrationUIState' presente nel loginViewModel in questo modo
+    // posso aggiornare automaticamente il 'value' dell'OutlinedTextField presente qui sotto.
 
     // OutlinedTextField è un componente di JC che crea un campo di testo con un bordo esterno
     OutlinedTextField(
@@ -134,14 +144,38 @@ fun MyTextFieldComponent(labelValue:String, icon:ImageVector, onTextSelected:(St
         singleLine = true,
         maxLines = 1,
 
-        // In 'value' ci saranno i caratteri inseriti dall'utente nell'OutlinedTextField:
-        value = textValue.value, // la proprietà 'value' prende accetta solo una stringa e non un 'MutableState<String>' per questo ho inserito .value
-        // Dentro 'onValueChange' inserisco cosa deve accadere nel momento in cui l'utente aggiorna il l'OutlinedTextField:
+        // c'era prima:
+//        // In 'value' ci saranno i caratteri inseriti dall'utente nell'OutlinedTextField:
+//        value = textValue.value, // la proprietà 'value' prende accetta solo una stringa e non un 'MutableState<String>' per questo ho inserito .value
+//        // Dentro 'onValueChange' inserisco cosa deve accadere nel momento in cui l'utente aggiorna il l'OutlinedTextField:
+//        onValueChange = {
+//            Log.d("AppComponent", "Sono dentro onValueChange")
+//            textValue.value = it // aggiorno il valore del campo di testo dell'OutlinedTextField
+//            onTextSelected(it) // eseguo questa funzione di callback che mi permette di poter catturare la stringa di testo inserita
+//                              //  nel MyTextFieldComponent dall'utente e di passarla al LoginViewModel per fargli capire che è stato generato un evento.
+//            // In 'value' ci saranno i caratteri inseriti dall'utente nell'OutlinedTextField:
+//        },
+
+        // In 'value' ci saranno i caratteri inseriti dall'utente nell'OutlinedTextField e in base a se il 'MyTextFieldComponent' corrente fa riferimento all'email o al nickname
+        // verrà aggiornato automaticamente il campo che tra questi due sarà stato modificato dall'utente (anche eventualmente dopo aver selezionato l'account google):
+        value = (
+                if(registration){
+                    if(labelValue == "Email") {
+                        registrationState.email
+                    } else {
+                        registrationState.nickName
+                    }
+                }else{
+                    loginState.email
+                }
+        ),
         onValueChange = {
+            Log.d("AppComponent", "Sono dentro onValueChange")
             textValue.value = it // aggiorno il valore del campo di testo dell'OutlinedTextField
             onTextSelected(it) // eseguo questa funzione di callback che mi permette di poter catturare la stringa di testo inserita
                               //  nel MyTextFieldComponent dall'utente e di passarla al LoginViewModel per fargli capire che è stato generato un evento.
         },
+
         // inserisco l'icona all'interno dell'OutlinedTextField:
         leadingIcon = {
             Icon(imageVector = icon, contentDescription = "")
