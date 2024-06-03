@@ -34,10 +34,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
+import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.screens_to_signUp_signIn.LoginScreen
 import com.example.musicdraft.sections.Home
 import com.example.musicdraft.sections.Friends
@@ -63,14 +67,35 @@ class MainActivity : ComponentActivity() {
 //        )
 //    }
 
+//    private val db by lazy {
+//        Room.databaseBuilder(
+//            applicationContext,
+//            MusicDraftDatabase::class.java,
+//            "musicdraft.db"
+//        ).build()
+//    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
+            // QUI istanzio il DB:
+            val database = MusicDraftDatabase.getDatabase(this)
+
             MusicDraftTheme {
+
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    val loginViewModel: LoginViewModel by viewModels()
+//                    val loginViewModel: LoginViewModel by viewModels(
+//                        factoryProducer = {
+//                            object : ViewModelProvider.Factory {
+//                                override fun <T : ViewModel> create (modelClass: Class<T>): T {
+//                                    return LoginViewModel(database!!) as T
+//                                }
+//                            }
+//                        }
+//                    )
                     //val state by loginViewModel.state.collectAsStateWithLifecycle()
 
 //                    val launcher = rememberLauncherForActivityResult(
@@ -86,6 +111,32 @@ class MainActivity : ComponentActivity() {
 //                            }
 //                        }
 //                    )
+
+                    ////////////////////////////////////////////////////////////////////////////////////
+                    // istanzio il ViewModel, questo pezzo di codice lo potrai copiare così com'è per ogni progetto::
+                    val loginViewModel: LoginViewModel by viewModels {
+
+                        // Poichè il viewModel ha dei parametri bisogna usare la Factory:
+                        object : ViewModelProvider.Factory {
+
+                            // facciamo l'override della funzione create a cui passiamo un modelClass di tipo generico <T>
+                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+                                // a questo punto chiediamo se la modelClass fa riferimento allo SpaceVieModel
+                                if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+                                    @Suppress("UNCHECKED_CAST") // specifichiamo che il cast è sicuro
+
+                                    // e restituiamo l'oggetto di tipo SpaceViewModel che ha in input l'istanza del DB
+                                    // che abbiamo istanziato sopra:
+                                    return LoginViewModel(database!!) as T
+                                }
+                                throw IllegalArgumentException("Unknown ViewModel class")
+                            }
+                        }
+                    }
+                    ////////////////////////////////////////////////////////////////////////////////////
+
+
 
                     //Navigation(loginViewModel, state) //c'era prima..
                     //Navigation(loginViewModel, state, launcher, googleAuthUiClient, context = applicationContext)

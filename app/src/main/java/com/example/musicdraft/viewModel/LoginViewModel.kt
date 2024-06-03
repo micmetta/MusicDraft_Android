@@ -15,6 +15,9 @@ import com.example.musicdraft.data.LoginUIState
 import com.example.musicdraft.data.UIEventSignIn
 import com.example.musicdraft.data.UIEventSignUp
 import com.example.musicdraft.data.rules.ValidatorFields
+import com.example.musicdraft.data.tables.user.User
+import com.example.musicdraft.data.tables.user.UserDao
+import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.login.GoogleSignInState
 import com.example.musicdraft.model.AuthRepository
 import com.example.musicdraft.sections.Screens
@@ -27,7 +30,7 @@ import kotlinx.coroutines.launch
 
 // - Nel momento in cui un 'UIEvent' verrà innescato, questo sarà catturato dal "LoginViewModel" che si
 //   preoccuperà di gestirlo andando a modificare lo stato dell'interfaccia chiamato 'registrationUIState'.
-class LoginViewModel() : ViewModel() {
+class LoginViewModel(database: MusicDraftDatabase) : ViewModel() {
 
     private val authRepository: AuthRepository = AuthRepository() // istanzio il repository
 
@@ -59,8 +62,11 @@ class LoginViewModel() : ViewModel() {
     // stato per attivare/disattivare la finestra 'ErrorDialog':
     var errorDialogActivated = mutableStateOf(false)
     var stringToShowErrorDialog = mutableStateOf("")
-
     ///////////////////////////////////////////////////////////////
+
+    // definisco l'oggetto DAO che mi permetterà di eseguire le queries sul DB:
+    private var dao: UserDao? = database.dao()
+
 
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
@@ -224,6 +230,10 @@ class LoginViewModel() : ViewModel() {
 //            )
 //            navController.navigate(Screens.MusicDraftUI.screen)
 //        }
+
+        // Inserisco il nuovo utente nel DB:
+        SaveNewUserInDB(registrationUIState.value.email, registrationUIState.value.nickName, registrationUIState.value.password,)
+
 
     }
 
@@ -472,6 +482,21 @@ class LoginViewModel() : ViewModel() {
     }
     fun reset_stringToShowErrorDialog(value: MutableState<String>){
         stringToShowErrorDialog = value
+    }
+
+    fun SaveNewUserInDB(email: String, nickname: String, password: String){
+        ////////////////////////////////////////////////////
+        // inserisco il nuovo utente nel DB:
+        val user = User(
+            email = email,
+            nickname = nickname,
+            password = password,
+            points = 1000 // I points iniziali sono 1000
+        )
+        viewModelScope.launch {
+            dao?.insertUser(user)
+        }
+        ////////////////////////////////////////////////////
     }
 
 
