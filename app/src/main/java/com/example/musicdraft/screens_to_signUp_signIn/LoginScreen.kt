@@ -18,12 +18,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,8 +64,10 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
     val context = LocalContext.current
     val googleSignInState = loginViewModel.googleState.value // collego il composable allo stato 'googleState' presente in 'loginViewModel'
     val scope = rememberCoroutineScope()
-    var errorDialogActivated = loginViewModel.errorDialogActivated.value
-    var stringToShowErrorDialog = loginViewModel.stringToShowErrorDialog.value
+//    var errorDialogActivated = loginViewModel.errorDialogActivated.value
+//    var stringToShowErrorDialog = loginViewModel.stringToShowErrorDialog.value
+    val errorDialogActivated by loginViewModel.errorDialogActivated // mi lego allo state del loginViewModel
+    val stringToShowErrorDialog by loginViewModel.stringToShowErrorDialog // mi lego allo state del loginViewModel
 
     val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
@@ -204,23 +210,24 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                     }
                 }
 
-                // mi permette di mostrare un messaggio di errore sullo schermo nel momento in cui l'utente cerca di regsitrarsi
-                // con un'email già registrata nel sistema:
-                LaunchedEffect(key1 = errorDialogActivated) {
-                    // lancio una coroutine per non bloccare il thread UI:
-                    scope.launch {
-                        if (errorDialogActivated) {
-                            // se entro qui vuol dire che il login con Google è avvenuto con successo e quindi
-                            // tramite Toast.makeText mostro un breve messaggio informativo all'utente sottoforma di
-                            // popup (che si sovrappone all'interfaccia) che in questo caso poichè c'è il parametro "Toast.LENGTH_LONG" durerà un tempo più lungo:
-                            Toast.makeText(context, stringToShowErrorDialog, Toast.LENGTH_LONG).show()
-                            loginViewModel.reset_errorDialogActivated(mutableStateOf(false))
-                            loginViewModel.reset_stringToShowErrorDialog(mutableStateOf(""))
-                        }
-                    }
-                }
-
-
+//                // - COMPARE SOLO SU UNO SMARTPHONE FISICO!!!
+//                // mi permette di mostrare un messaggio di errore sullo schermo nel momento in cui l'utente cerca di regsitrarsi
+//                // con un'email già registrata nel sistema:
+//                LaunchedEffect(key1 = loginViewModel.errorDialogActivated.value) {
+//                    // lancio una coroutine per non bloccare il thread UI:
+//                    scope.launch {
+//                        if (loginViewModel.errorDialogActivated.value) {
+//                            // se entro qui vuol dire che il login con Google è avvenuto con successo e quindi
+//                            // tramite Toast.makeText mostro un breve messaggio informativo all'utente sottoforma di
+//                            // popup (che si sovrappone all'interfaccia) che in questo caso poichè c'è il parametro "Toast.LENGTH_LONG" durerà un tempo più lungo:
+//                            Toast.makeText(context, loginViewModel.stringToShowErrorDialog.value, Toast.LENGTH_LONG).show()
+////                            loginViewModel.reset_errorDialogActivated(mutableStateOf(false))
+////                            loginViewModel.reset_stringToShowErrorDialog(mutableStateOf(""))
+//                            loginViewModel.reset_errorDialogActivated()
+//                            loginViewModel.reset_stringToShowErrorDialog()
+//                        }
+//                    }
+//                }
             }
 
             // - Barra di caricamento che si attiverà nel momento in cui l'attributo
@@ -231,6 +238,37 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                 }
             }
         }
+
+        if(errorDialogActivated){
+            // In questo caso inserisco l'indicatore circolare di caricamento
+            // che verrà mostrato subito dopo che l'utente
+            // avrà cliccato su "Register":
+            //CircularProgressIndicator() c'era prima..
+            //Dialog(stringToShowErrorDialog, true)
+            Column {
+                AlertDialog(
+                    onDismissRequest = {
+                        loginViewModel.reset_errorDialogActivated()
+                        loginViewModel.reset_stringToShowErrorDialog()
+                    },
+                    title = {
+                        Text(text = "Error") },
+                    text = {
+                        Text(text = stringToShowErrorDialog) },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                loginViewModel.reset_errorDialogActivated()
+                                loginViewModel.reset_stringToShowErrorDialog()
+                            }
+                        ) {
+                            Text(text = "Ok")
+                        }
+                    }
+                )
+            }
+        }
+
 
         // controllo che lo stato "signUpInProgress" presente in "loginViewModel"
         // sia true:

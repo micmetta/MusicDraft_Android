@@ -19,6 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +46,7 @@ import com.example.musicdraft.R
 import com.example.musicdraft.components.ButtonComponent
 import com.example.musicdraft.components.CheckboxComponent
 import com.example.musicdraft.components.ClickableLoginTextComponent
+import com.example.musicdraft.components.Dialog
 import com.example.musicdraft.components.DividerTextComponent
 import com.example.musicdraft.components.HeadingTextComponent
 import com.example.musicdraft.components.MyTextFieldComponent
@@ -63,16 +66,17 @@ import kotlinx.coroutines.launch
 //   il LoginViewModel.
 // - I parametri state e onSignInClick() -> Click di questo composable servono per gestire il SignUp con Google.
 @Composable
-fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = viewModel()) { // c'era prima..
+fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel) { // c'era prima..
 //fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel, state: SignInState, onSignInClick: () -> Unit) {
 
     val context = LocalContext.current
     val googleSignInState = loginViewModel.googleState.value // collego il composable allo stato 'googleState' presente in 'loginViewModel'
     val scope = rememberCoroutineScope()
     //val registrationState by loginViewModel.registrationUIState
-    var errorDialogActivated = loginViewModel.errorDialogActivated.value
-    var stringToShowErrorDialog = loginViewModel.stringToShowErrorDialog.value
-
+//    val errorDialogActivated = loginViewModel.errorDialogActivated.value
+//    val stringToShowErrorDialog = loginViewModel.stringToShowErrorDialog.value
+    val errorDialogActivated by loginViewModel.errorDialogActivated // mi lego allo state del loginViewModel
+    val stringToShowErrorDialog by loginViewModel.stringToShowErrorDialog // mi lego allo state del loginViewModel
 
     // 'rememberLauncherForActivityResult' serve per gestire il risultato dell'intent di Google Sign-In:
     val launcher =
@@ -282,22 +286,26 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
                     }
                 }
 
+                // - COMPARE SOLO SU UNO SMARTPHONE FISICO!!!
                 // mi permette di mostrare un messaggio di errore sullo schermo nel momento in cui l'utente cerca di regsitrarsi
                 // con un'email già registrata nel sistema:
-                LaunchedEffect(key1 = errorDialogActivated) {
-                    // lancio una coroutine per non bloccare il thread UI:
-                    scope.launch {
-                        if (errorDialogActivated) {
-                            // se entro qui vuol dire che il login con Google è avvenuto con successo e quindi
-                            // tramite Toast.makeText mostro un breve messaggio informativo all'utente sottoforma di
-                            // popup (che si sovrappone all'interfaccia) che in questo caso poichè c'è il parametro "Toast.LENGTH_LONG" durerà un tempo più lungo:
-                            Toast.makeText(context, stringToShowErrorDialog, Toast.LENGTH_LONG).show()
-                            loginViewModel.reset_errorDialogActivated(mutableStateOf(false))
-                            loginViewModel.reset_stringToShowErrorDialog(mutableStateOf(""))
-                        }
-                    }
-                }
+//                LaunchedEffect(key1 = loginViewModel.errorDialogActivated.value) {
+//                    // lancio una coroutine per non bloccare il thread UI:
+//                    scope.launch {
+//                        if (loginViewModel.errorDialogActivated.value) {
+//                            // se entro qui vuol dire che il login con Google è avvenuto con successo e quindi
+//                            // tramite Toast.makeText mostro un breve messaggio informativo all'utente sottoforma di
+//                            // popup (che si sovrappone all'interfaccia) che in questo caso poichè c'è il parametro "Toast.LENGTH_LONG" durerà un tempo più lungo:
+//                            Toast.makeText(context, loginViewModel.stringToShowErrorDialog.value, Toast.LENGTH_LONG).show()
+//                            loginViewModel.reset_errorDialogActivated(mutableStateOf(false))
+//                            loginViewModel.reset_stringToShowErrorDialog(mutableStateOf(""))
+//                        }
+//                    }
+//                }
 
+//                if(errorDialogActivated){
+//                    Dialog()
+//                }
 
                 // usato solo per il debugging:
 //                OutlinedTextField(
@@ -321,11 +329,34 @@ fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel = 
 
         // controllo che lo stato "signUpInProgress" presente in "loginViewModel"
         // sia true:
-        if(loginViewModel.signUpInProgress.value){
+        if(errorDialogActivated){
             // In questo caso inserisco l'indicatore circolare di caricamento
             // che verrà mostrato subito dopo che l'utente
             // avrà cliccato su "Register":
-            CircularProgressIndicator()
+            //CircularProgressIndicator() c'era prima..
+            //Dialog(stringToShowErrorDialog, true)
+            Column {
+                AlertDialog(
+                    onDismissRequest = {
+                        loginViewModel.reset_errorDialogActivated()
+                        loginViewModel.reset_stringToShowErrorDialog()
+                    },
+                    title = {
+                        Text(text = "Error") },
+                    text = {
+                        Text(text = stringToShowErrorDialog) },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                loginViewModel.reset_errorDialogActivated()
+                                loginViewModel.reset_stringToShowErrorDialog()
+                            }
+                        ) {
+                            Text(text = "Ok")
+                        }
+                    }
+                )
+            }
         }
     }
 }

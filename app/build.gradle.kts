@@ -65,8 +65,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
-    implementation(libs.androidx.room.common)
-    implementation(libs.androidx.room.ktx)
+//    implementation(libs.androidx.room.common)
+//    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -98,4 +98,8 @@ dependencies {
 //    implementation("androix.room:room-ktx:2.5.0")
 //    kapt("androix.room:room-compiler:2.5.0")
 
+    // Room components
+    implementation (libs.androidx.room.ktx.v261)
+    kapt (libs.androidx.room.compiler.v261)
+    androidTestImplementation (libs.androidx.room.testing)
 }

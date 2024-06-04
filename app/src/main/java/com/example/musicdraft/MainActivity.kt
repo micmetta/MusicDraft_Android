@@ -1,5 +1,6 @@
 package com.example.musicdraft
 
+import LoginViewModelFactory
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -60,6 +61,8 @@ import com.example.musicdraft.viewModel.LoginViewModel
 
 class MainActivity : ComponentActivity() {
 
+    //private lateinit var loginViewModel: LoginViewModel
+
 //    private val googleAuthUiClient by lazy {
 //        GoogleAuthUiClient(
 //            context = applicationContext,
@@ -79,10 +82,69 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
+            val loginViewModel: LoginViewModel by viewModels()
+
+
             // QUI istanzio il DB:
-            val database = MusicDraftDatabase.getDatabase(this)
+            //val database = MusicDraftDatabase.getDatabase(this) //ok
+
+//            // Ottieni il database
+//            val database = MusicDraftDatabase.getInstance(applicationContext)
+//
+//            // Crea il factory
+//            val viewModelFactory = LoginViewModelFactory(database)
+//
+//            // Ottieni l'istanza del ViewModel usando il factory
+//            loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
+
+            // Ora puoi utilizzare loginViewModel nella tua MainActivity
+
+            //val database = MusicDraftDatabase.getInstance(this)
 
             MusicDraftTheme {
+
+////                ////////////////////////////////////////////////////////////////////////////////////
+//                // istanzio il ViewModel:
+//                val loginViewModel: LoginViewModel by viewModels {
+//
+//                    // Poichè il viewModel ha dei parametri bisogna usare la Factory:
+//                    object : ViewModelProvider.Factory {
+//
+//                        // facciamo l'override della funzione create a cui passiamo un modelClass di tipo generico <T>
+//                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//
+//                            // a questo punto chiediamo se la modelClass fa riferimento allo LoginViewModel
+//                            if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+//                                @Suppress("UNCHECKED_CAST") // specifichiamo che il cast è sicuro
+//
+//                                // e restituiamo l'oggetto di tipo SpaceViewModel che ha in input l'istanza del DB
+//                                // che abbiamo istanziato sopra:
+//                                return LoginViewModel(database) as T
+//                            }
+//                            throw IllegalArgumentException("Unknown ViewModel class")
+//                        }
+//                    }
+//                }
+
+//                // Ottieni il database
+//                val database = MusicDraftDatabase.getInstance(applicationContext)
+//
+//                // Crea il factory
+//                val viewModelFactory = LoginViewModelFactory(database)
+//
+//                // Ottieni l'istanza del ViewModel usando il factory
+//                loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
+
+//                ////////////////////////////////////////////////////////////////////////////////////
+//
+//                // Ottieni il database
+//                val database = MusicDraftDatabase.getInstance(applicationContext)
+//
+//                // Crea il factory
+//                val viewModelFactory = LoginViewModelFactory(database)
+//
+//                // Ottieni l'istanza del ViewModel usando il factory
+//                loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
 
                 Surface(
                     color = MaterialTheme.colorScheme.background
@@ -112,31 +174,38 @@ class MainActivity : ComponentActivity() {
 //                        }
 //                    )
 
-                    ////////////////////////////////////////////////////////////////////////////////////
-                    // istanzio il ViewModel, questo pezzo di codice lo potrai copiare così com'è per ogni progetto::
-                    val loginViewModel: LoginViewModel by viewModels {
+//                    ////////////////////////////////////////////////////////////////////////////////////
+//                    // istanzio il ViewModel, questo pezzo di codice lo potrai copiare così com'è per ogni progetto::
+//                    val loginViewModel: LoginViewModel by viewModels {
+//
+//                        // Poichè il viewModel ha dei parametri bisogna usare la Factory:
+//                        object : ViewModelProvider.Factory {
+//
+//                            // facciamo l'override della funzione create a cui passiamo un modelClass di tipo generico <T>
+//                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//
+//                                // a questo punto chiediamo se la modelClass fa riferimento allo SpaceVieModel
+//                                if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+//                                    @Suppress("UNCHECKED_CAST") // specifichiamo che il cast è sicuro
+//
+//                                    // e restituiamo l'oggetto di tipo SpaceViewModel che ha in input l'istanza del DB
+//                                    // che abbiamo istanziato sopra:
+//                                    return LoginViewModel(database!!) as T
+//                                }
+//                                throw IllegalArgumentException("Unknown ViewModel class")
+//                            }
+//                        }
+//                    }
+//                    ////////////////////////////////////////////////////////////////////////////////////
 
-                        // Poichè il viewModel ha dei parametri bisogna usare la Factory:
-                        object : ViewModelProvider.Factory {
-
-                            // facciamo l'override della funzione create a cui passiamo un modelClass di tipo generico <T>
-                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-
-                                // a questo punto chiediamo se la modelClass fa riferimento allo SpaceVieModel
-                                if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-                                    @Suppress("UNCHECKED_CAST") // specifichiamo che il cast è sicuro
-
-                                    // e restituiamo l'oggetto di tipo SpaceViewModel che ha in input l'istanza del DB
-                                    // che abbiamo istanziato sopra:
-                                    return LoginViewModel(database!!) as T
-                                }
-                                throw IllegalArgumentException("Unknown ViewModel class")
-                            }
-                        }
-                    }
-                    ////////////////////////////////////////////////////////////////////////////////////
-
-
+//                    // Ottieni il database
+//                    val database = MusicDraftDatabase.getInstance(applicationContext)
+//
+//                    // Crea il factory
+//                    val viewModelFactory = LoginViewModelFactory(database)
+//
+//                    // Ottieni l'istanza del ViewModel usando il factory
+//                    loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
 
                     //Navigation(loginViewModel, state) //c'era prima..
                     //Navigation(loginViewModel, state, launcher, googleAuthUiClient, context = applicationContext)
@@ -156,7 +225,7 @@ fun Navigation(loginViewModel: LoginViewModel){
     // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
     NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){
         composable(Screens.SignUp.screen){
-            SignUpScreen(navigationController) // composable che verrà aperto per mostrare la creazione dell'account (c'era prima..)
+            SignUpScreen(navigationController, loginViewModel) // composable che verrà aperto per mostrare la creazione dell'account (c'era prima..)
         }
         composable(Screens.Login.screen){
             //LoginScreen(navigationController) // composable che verrà aperto per mostrare il login (c'era prima..)

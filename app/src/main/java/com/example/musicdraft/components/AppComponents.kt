@@ -3,6 +3,7 @@ package com.example.musicdraft.components
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -544,3 +546,29 @@ fun UnderLinedNormalTextComponent(value:String){
     )
 }
 
+@Composable
+fun Dialog(message: String, active: Boolean){
+    Column {
+        val openDialog = remember {
+            mutableStateOf(active)
+        }
+        if(openDialog.value){
+            AlertDialog(
+                onDismissRequest = { openDialog.value = false },
+                title = {
+                    Text(text = "Error")
+                },
+                text = {
+                    Text(text = message)
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { openDialog.value = false }
+                    ) {
+                        Text(text = "Ok")
+                    }
+                }
+            )
+        }
+    }
+}

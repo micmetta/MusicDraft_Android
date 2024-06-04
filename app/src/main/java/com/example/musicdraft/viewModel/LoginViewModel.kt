@@ -1,5 +1,6 @@
 package com.example.musicdraft.viewModel
 
+import android.app.Application
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.LaunchedEffect
@@ -26,13 +27,22 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 import kotlinx.coroutines.launch
-
+import androidx.lifecycle.AndroidViewModel
 
 // - Nel momento in cui un 'UIEvent' verrà innescato, questo sarà catturato dal "LoginViewModel" che si
 //   preoccuperà di gestirlo andando a modificare lo stato dell'interfaccia chiamato 'registrationUIState'.
-class LoginViewModel(database: MusicDraftDatabase) : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val authRepository: AuthRepository = AuthRepository() // istanzio il repository
+
+//    // definisco l'oggetto DAO che mi permetterà di eseguire le queries sul DB:
+//    private var userDao = application.userDao()
+
+    // mi prendo il riferimento al DB:
+    private val database = MusicDraftDatabase.getDatabase(application)
+    private val userDao = database.userDao()
+    ///////
+
+    private val authRepository: AuthRepository = AuthRepository(this, userDao!!) // istanzio il repository
 
     // - La variabile qui sotto sarà uno STATE di tipo "RegistrationUIState()" in modo tale che
     //   il viewModel possa aggiornarsi ogni volta che questo stato cambierà (ovvero ogni volta che
@@ -61,11 +71,13 @@ class LoginViewModel(database: MusicDraftDatabase) : ViewModel() {
 
     // stato per attivare/disattivare la finestra 'ErrorDialog':
     var errorDialogActivated = mutableStateOf(false)
+        private set
     var stringToShowErrorDialog = mutableStateOf("")
+        private set
     ///////////////////////////////////////////////////////////////
 
     // definisco l'oggetto DAO che mi permetterà di eseguire le queries sul DB:
-    private var dao: UserDao? = database.dao()
+    //private var dao: UserDao? = database.dao()
 
 
 
@@ -231,10 +243,8 @@ class LoginViewModel(database: MusicDraftDatabase) : ViewModel() {
 //            navController.navigate(Screens.MusicDraftUI.screen)
 //        }
 
-        // Inserisco il nuovo utente nel DB:
-        SaveNewUserInDB(registrationUIState.value.email, registrationUIState.value.nickName, registrationUIState.value.password,)
-
-
+//        // Inserisco il nuovo utente nel DB:
+//        SaveNewUserInDB(registrationUIState.value.email, registrationUIState.value.nickName, registrationUIState.value.password)
     }
 
     // - Questa è la funzione che verrà eseguita una volta che l'utente avrà premuto sul button "Login".
@@ -354,9 +364,16 @@ class LoginViewModel(database: MusicDraftDatabase) : ViewModel() {
                 // qui dentro c'è quello che verrà eseguito nel momento in cui il processo di creazione viene completato.
                 Log.d(TAG, "Sono dentro addOnCompleteListener di CREATE USER IN FIREBASE!")
                 Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
-                Log.d(TAG, "Il nuovo utente è stato REGISTRATO NEL DB DI FIREBASE!")
 
                 if(it.isSuccessful){
+
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    // Adesso sono certo di poter inserire il nuovo utente nel DB:
+                    SaveNewUserInDB(registrationUIState.value.email, registrationUIState.value.nickName, registrationUIState.value.password)
+                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                    Log.d(TAG, "Il nuovo utente è stato REGISTRATO NEL DB DI FIREBASE!")
+
                     // resetto tutti i campi di "registrationUIState":
                     registrationUIState.value = registrationUIState.value.copy(
                         nickName = "",
@@ -364,7 +381,8 @@ class LoginViewModel(database: MusicDraftDatabase) : ViewModel() {
                         password = "",
                         privacyPolicyAccepted = false
                     )
-                    navController.navigate(Screens.MusicDraftUI.screen)
+                    navController.navigate(Screens.MusicDraftUI.screen) // cambio schermata
+
                 }
             }
             .addOnFailureListener {
@@ -477,11 +495,11 @@ class LoginViewModel(database: MusicDraftDatabase) : ViewModel() {
         }
     }
 
-    fun reset_errorDialogActivated(value: MutableState<Boolean>){
-        errorDialogActivated = value
+    fun reset_errorDialogActivated(){
+        errorDialogActivated.value = false
     }
-    fun reset_stringToShowErrorDialog(value: MutableState<String>){
-        stringToShowErrorDialog = value
+    fun reset_stringToShowErrorDialog(){
+        stringToShowErrorDialog.value = ""
     }
 
     fun SaveNewUserInDB(email: String, nickname: String, password: String){
@@ -493,9 +511,7 @@ class LoginViewModel(database: MusicDraftDatabase) : ViewModel() {
             password = password,
             points = 1000 // I points iniziali sono 1000
         )
-        viewModelScope.launch {
-            dao?.insertUser(user)
-        }
+        authRepository.insertNewUser(user)
         ////////////////////////////////////////////////////
     }
 
