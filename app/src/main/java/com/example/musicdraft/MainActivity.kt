@@ -1,17 +1,17 @@
 package com.example.musicdraft
 
+import LoginViewModelFactory
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Divider
@@ -35,9 +35,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
+import com.example.musicdraft.database.MusicDraftDatabase
+import com.example.musicdraft.screens_to_signUp_signIn.LoginScreen
 import com.example.musicdraft.sections.Home
 import com.example.musicdraft.sections.Friends
 import com.example.musicdraft.sections.Cards
@@ -46,20 +52,164 @@ import com.example.musicdraft.sections.Marketplace
 import com.example.musicdraft.sections.Matchmaking
 import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.sections.Screens
-import com.example.musicdraft.ui.theme.GreenJC
+import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
 import kotlinx.coroutines.launch
+import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
+import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
+import com.example.musicdraft.viewModel.LoginViewModel
 
-// test committo2
 class MainActivity : ComponentActivity() {
+
+    //private lateinit var loginViewModel: LoginViewModel
+
+//    private val googleAuthUiClient by lazy {
+//        GoogleAuthUiClient(
+//            context = applicationContext,
+//            oneTapClient = Identity.getSignInClient(applicationContext)
+//        )
+//    }
+
+//    private val db by lazy {
+//        Room.databaseBuilder(
+//            applicationContext,
+//            MusicDraftDatabase::class.java,
+//            "musicdraft.db"
+//        ).build()
+//    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
+            val loginViewModel: LoginViewModel by viewModels()
+
+
+            // QUI istanzio il DB:
+            //val database = MusicDraftDatabase.getDatabase(this) //ok
+
+//            // Ottieni il database
+//            val database = MusicDraftDatabase.getInstance(applicationContext)
+//
+//            // Crea il factory
+//            val viewModelFactory = LoginViewModelFactory(database)
+//
+//            // Ottieni l'istanza del ViewModel usando il factory
+//            loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
+
+            // Ora puoi utilizzare loginViewModel nella tua MainActivity
+
+            //val database = MusicDraftDatabase.getInstance(this)
+
             MusicDraftTheme {
+
+////                ////////////////////////////////////////////////////////////////////////////////////
+//                // istanzio il ViewModel:
+//                val loginViewModel: LoginViewModel by viewModels {
+//
+//                    // Poichè il viewModel ha dei parametri bisogna usare la Factory:
+//                    object : ViewModelProvider.Factory {
+//
+//                        // facciamo l'override della funzione create a cui passiamo un modelClass di tipo generico <T>
+//                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//
+//                            // a questo punto chiediamo se la modelClass fa riferimento allo LoginViewModel
+//                            if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+//                                @Suppress("UNCHECKED_CAST") // specifichiamo che il cast è sicuro
+//
+//                                // e restituiamo l'oggetto di tipo SpaceViewModel che ha in input l'istanza del DB
+//                                // che abbiamo istanziato sopra:
+//                                return LoginViewModel(database) as T
+//                            }
+//                            throw IllegalArgumentException("Unknown ViewModel class")
+//                        }
+//                    }
+//                }
+
+//                // Ottieni il database
+//                val database = MusicDraftDatabase.getInstance(applicationContext)
+//
+//                // Crea il factory
+//                val viewModelFactory = LoginViewModelFactory(database)
+//
+//                // Ottieni l'istanza del ViewModel usando il factory
+//                loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
+
+//                ////////////////////////////////////////////////////////////////////////////////////
+//
+//                // Ottieni il database
+//                val database = MusicDraftDatabase.getInstance(applicationContext)
+//
+//                // Crea il factory
+//                val viewModelFactory = LoginViewModelFactory(database)
+//
+//                // Ottieni l'istanza del ViewModel usando il factory
+//                loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
+
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    MusicDraftUI()
+//                    val loginViewModel: LoginViewModel by viewModels(
+//                        factoryProducer = {
+//                            object : ViewModelProvider.Factory {
+//                                override fun <T : ViewModel> create (modelClass: Class<T>): T {
+//                                    return LoginViewModel(database!!) as T
+//                                }
+//                            }
+//                        }
+//                    )
+                    //val state by loginViewModel.state.collectAsStateWithLifecycle()
+
+//                    val launcher = rememberLauncherForActivityResult(
+//                        contract = ActivityResultContracts.StartIntentSenderForResult(),
+//                        onResult = { result ->
+//                            if(result.resultCode == RESULT_OK) {
+//                                lifecycleScope.launch{
+//                                    val signInResult = googleAuthUiClient.signInWithIntent(
+//                                        intent = result.data ?: return@launch
+//                                    )
+//                                    loginViewModel.onSignInResult(signInResult)
+//                                }
+//                            }
+//                        }
+//                    )
+
+//                    ////////////////////////////////////////////////////////////////////////////////////
+//                    // istanzio il ViewModel, questo pezzo di codice lo potrai copiare così com'è per ogni progetto::
+//                    val loginViewModel: LoginViewModel by viewModels {
+//
+//                        // Poichè il viewModel ha dei parametri bisogna usare la Factory:
+//                        object : ViewModelProvider.Factory {
+//
+//                            // facciamo l'override della funzione create a cui passiamo un modelClass di tipo generico <T>
+//                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//
+//                                // a questo punto chiediamo se la modelClass fa riferimento allo SpaceVieModel
+//                                if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+//                                    @Suppress("UNCHECKED_CAST") // specifichiamo che il cast è sicuro
+//
+//                                    // e restituiamo l'oggetto di tipo SpaceViewModel che ha in input l'istanza del DB
+//                                    // che abbiamo istanziato sopra:
+//                                    return LoginViewModel(database!!) as T
+//                                }
+//                                throw IllegalArgumentException("Unknown ViewModel class")
+//                            }
+//                        }
+//                    }
+//                    ////////////////////////////////////////////////////////////////////////////////////
+
+//                    // Ottieni il database
+//                    val database = MusicDraftDatabase.getInstance(applicationContext)
+//
+//                    // Crea il factory
+//                    val viewModelFactory = LoginViewModelFactory(database)
+//
+//                    // Ottieni l'istanza del ViewModel usando il factory
+//                    loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
+
+                    //Navigation(loginViewModel, state) //c'era prima..
+                    //Navigation(loginViewModel, state, launcher, googleAuthUiClient, context = applicationContext)
+                    Navigation(loginViewModel)
                 }
             }
         }
@@ -67,10 +217,35 @@ class MainActivity : ComponentActivity() {
 }
 
 
+@Composable
+//fun Navigation(loginViewModel: LoginViewModel, state: SignInState, launcher: ActivityResultLauncher<IntentSenderRequest>, googleAuthUiClient: GoogleAuthUiClient, context: Context){ // c'era prima
+//fun Navigation(loginViewModel: LoginViewModel, state: SignInState){
+fun Navigation(loginViewModel: LoginViewModel){
+    val navigationController = rememberNavController()
+    // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
+    NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){
+        composable(Screens.SignUp.screen){
+            SignUpScreen(navigationController, loginViewModel) // composable che verrà aperto per mostrare la creazione dell'account (c'era prima..)
+        }
+        composable(Screens.Login.screen){
+            //LoginScreen(navigationController) // composable che verrà aperto per mostrare il login (c'era prima..)
+            LoginScreen(navigationController, loginViewModel)
+        }
+        composable(Screens.TermsAndConditionsScreen.screen){
+            TermsAndConditionsScreen() // composable che verrà aperto per mostrare i termini e condizioni dell'app
+        }
+        composable(Screens.MusicDraftUI.screen){
+            MusicDraftUI(navigationController, loginViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+        }
+    }
+}
+
+
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MusicDraftUI(){
+fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: LoginViewModel){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -84,11 +259,11 @@ fun MusicDraftUI(){
 
         drawerState = drawerState, // mi permette di gestire la chiusura e l'apertura del menù in verticale sulla sinistra che mostrerà tutte
         // le sezioni sulle quali l'utente potrà cliccare.
-        gesturesEnabled = true, // permette di aprire automaticamente lo swap il navigation draw
+        gesturesEnabled = true, // abilita lo swap del 'ModalNavigationDrawer'
         drawerContent = {
             ModalDrawerSheet {
                 Box(modifier = Modifier
-                    .background(GreenJC) // Imposta come colore di sfondo il GreenJC
+                    .background(BlueApp) // Imposta come colore di sfondo il BlueApp
                     .fillMaxWidth()
                     .height(150.dp)){
                     Text(text = "")
@@ -96,9 +271,9 @@ fun MusicDraftUI(){
                 Divider() // inserisco una linea sotto l'header del ModalNavigationDrawer
 
                 // Definisco la sezione "Home":
-                NavigationDrawerItem(label = { Text(text = "Home", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Home", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "home", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "home", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Home")
                     onClick = {
@@ -116,9 +291,9 @@ fun MusicDraftUI(){
                     })
 
                 // Definisco la sezione "Friends":
-                NavigationDrawerItem(label = { Text(text = "Friends", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Friends", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "friends", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "friends", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Friends")
                     onClick = {
@@ -136,9 +311,9 @@ fun MusicDraftUI(){
                     })
 
                 // Definisco la sezione "Cards":
-                NavigationDrawerItem(label = { Text(text = "Cards", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Cards", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "cards", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "cards", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Cards")
                     onClick = {
@@ -156,9 +331,9 @@ fun MusicDraftUI(){
                     })
 
                 // Definisco la sezione "Decks":
-                NavigationDrawerItem(label = { Text(text = "Decks", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Decks", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "decks", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "decks", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Decks")
                     onClick = {
@@ -177,9 +352,9 @@ fun MusicDraftUI(){
 
 
                 // Definisco la sezione "Marketplace":
-                NavigationDrawerItem(label = { Text(text = "Marketplace", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Marketplace", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "marketplace", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "marketplace", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Marketplace")
                     onClick = {
@@ -198,9 +373,9 @@ fun MusicDraftUI(){
 
 
                 // Definisco la sezione "Matchmaking":
-                NavigationDrawerItem(label = { Text(text = "Matchmaking", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Matchmaking", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "matchmaking", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "matchmaking", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Matchmaking")
                     onClick = {
@@ -219,9 +394,9 @@ fun MusicDraftUI(){
 
 
                 // Definisco la sezione "Settings":
-                NavigationDrawerItem(label = { Text(text = "Settings", color = GreenJC)},
+                NavigationDrawerItem(label = { Text(text = "Settings", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
-                    icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = "settings", tint = GreenJC)},
+                    icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = "settings", tint = BlueApp)},
 
                     // Qui dentro definisco quello che accade quando l'utente cliccherà sul navigation item (quindi in questo caso sulla sezione/item "Settings")
                     onClick = {
@@ -256,7 +431,7 @@ fun MusicDraftUI(){
                     title = { Text(text = "MusicDraft") }, // titolo della TopAppBar
                     colors = TopAppBarDefaults.topAppBarColors(
                               // parametri di colors:
-                              containerColor = GreenJC, // colore della TopAppBar:
+                              containerColor = BlueApp, // colore della TopAppBar:
                               titleContentColor = Color.White, // colore del titolo della TopAppBar
                               navigationIconContentColor = Color.White // colore dell'icona della TopAppBar
                     ),
@@ -278,7 +453,7 @@ fun MusicDraftUI(){
         ){
             // Qui definisco il NavHost che specificherà quali schermate dovranno aprirsi
             // in base alle sezioni sulle quali cliccherà l'utente.
-            // - Schermata iniziale sarà "Home"
+            // - La Schermata iniziale sarà "Home"
             NavHost(navController = navigationController, startDestination = Screens.Home.screen){
                 composable(Screens.Home.screen){
                     Home() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
@@ -287,22 +462,23 @@ fun MusicDraftUI(){
                     Friends() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
                 }
                 composable(Screens.Cards.screen){
-                    Cards() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Cards() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
                 }
                 composable(Screens.Decks.screen){
-                    Decks() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Decks() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"
                 }
                 composable(Screens.Marketplace.screen){
-                    Marketplace() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Marketplace() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Marketplace"
                 }
                 composable(Screens.Matchmaking.screen){
-                    Matchmaking() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Matchmaking() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Matchmaking"
                 }
                 composable(Screens.Settings.screen){
-                    Settings() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Settings"
+                    Settings(navControllerInitialScreens, loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Settings"
                 }
 
             }
         }
     }
 }
+

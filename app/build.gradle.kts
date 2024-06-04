@@ -1,6 +1,11 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+//  Add the dependency for the Google services Gradle plugin
+//  id("com.google.gms.google-services") version "4.4.1" apply false
+//    id("com.google.gms.google-services") version "4.3.15" apply false
+    id("com.google.gms.google-services")
+    id("kotlin-kapt")
 }
 
 android {
@@ -59,6 +64,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
+//    implementation(libs.androidx.room.common)
+//    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,4 +76,30 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation ("androidx.navigation:navigation-compose:2.7.6")
+    implementation ("androidx.compose.material:material-icons-extended:1.6.7")
+
+    // Import the Firebase BoM, with BoM, I don't specify versions in Firebase library dependencies
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+
+    // Add the dependency for the Firebase SDK for Google Analytics
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Here I can Add the dependencies for any other Firebase products I want to use:
+    // See https://firebase.google.com/docs/android/setup#available-libraries
+    // For example, add the dependencies for Firebase Authentication and Cloud Firestore
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+
+    implementation("com.google.firebase:firebase-auth-ktx:21.1.0")
+    implementation("com.google.android.gms:play-services-auth:20.4.1") // Google auth dependency
+    implementation("io.coil-kt:coil-compose:2.2.2")
+
+    // Room:
+//    implementation("androix.room:room-ktx:2.5.0")
+//    kapt("androix.room:room-compiler:2.5.0")
+
+    // Room components
+    implementation (libs.androidx.room.ktx.v261)
+    kapt (libs.androidx.room.compiler.v261)
+    androidTestImplementation (libs.androidx.room.testing)
 }
