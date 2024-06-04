@@ -1,20 +1,28 @@
 package com.example.musicdraft.database
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.musicdraft.data.tables.artisti.Artisti
+import com.example.musicdraft.data.tables.artisti.ArtistiDao
+import com.example.musicdraft.data.tables.track.Track
+import com.example.musicdraft.data.tables.track.TrackDao
 import com.example.musicdraft.data.tables.user.User
 import com.example.musicdraft.data.tables.user.UserDao
 
 @Database(
-    entities = [User::class],
+    entities = [User::class,Artisti::class,Track::class],
     version = 1
+
 )
 abstract class MusicDraftDatabase: RoomDatabase() {
 //    //    abstract val dao: UserDao
 //    //abstract fun dao(): UserDao?
     abstract fun userDao(): UserDao?
+    abstract fun artistDao(): ArtistiDao?
+    abstract fun trackDao():TrackDao?
 
     companion object {
         // marking the instance as volatile to ensure atomic access to the variable
@@ -28,7 +36,9 @@ abstract class MusicDraftDatabase: RoomDatabase() {
                     context.applicationContext,
                     MusicDraftDatabase::class.java,
                     "note_database"
-                ).build()
+                ).fallbackToDestructiveMigration()
+                    .build()
+
                 INSTANCE = instance
                 instance
             }

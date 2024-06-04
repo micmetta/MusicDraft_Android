@@ -2,27 +2,11 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="DefaultPreviewOfSignUpScreen">
-        <State />
-      </entry>
-      <entry key="HomePreview">
+      <entry key="SpotifyMainActivity (1)">
         <State />
       </entry>
       <entry key="app">
-        <State>
-          <runningDeviceTargetSelectedWithDropDown>
-            <Target>
-              <type value="RUNNING_DEVICE_TARGET" />
-              <deviceKey>
-                <Key>
-                  <type value="VIRTUAL_DEVICE_PATH" />
-                  <value value="C:\Users\miky9\.android\avd\Pixel_4_API_30.avd" />
-                </Key>
-              </deviceKey>
-            </Target>
-          </runningDeviceTargetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-06-04T11:06:47.162333700Z" />
-        </State>
+        <State />
       </entry>
     </value>
   </component>

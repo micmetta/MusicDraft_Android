@@ -79,6 +79,7 @@ class MainActivity : ComponentActivity() {
 //    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        this.deleteDatabase("note_database")
         super.onCreate(savedInstanceState)
         setContent {
 

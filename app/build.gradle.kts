@@ -23,6 +23,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
     }
 
     buildTypes {
@@ -102,4 +103,7 @@ dependencies {
     implementation (libs.androidx.room.ktx.v261)
     kapt (libs.androidx.room.compiler.v261)
     androidTestImplementation (libs.androidx.room.testing)
+
+    implementation("com.google.code.gson:gson:2.7")
+
 }
