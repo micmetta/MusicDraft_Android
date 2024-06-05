@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class CardsViewModel(application: Application) : AndroidViewModel(application)  {
-
+    //prima
     private val database = MusicDraftDatabase.getDatabase(application)
     val artistDao = database.artistDao()
     val trackDao = database.trackDao()
