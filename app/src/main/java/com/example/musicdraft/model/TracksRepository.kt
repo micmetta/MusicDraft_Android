@@ -5,13 +5,14 @@ import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.artisti.ArtistiDao
 import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.data.tables.track.TrackDao
+import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class TracksRepository(val viewModel: LoginViewModel, val dao: TrackDao) {
+class TracksRepository(val viewModel: CardsViewModel, val dao: TrackDao) {
     var tracks = dao.getAllTracks()
 
     fun init() {

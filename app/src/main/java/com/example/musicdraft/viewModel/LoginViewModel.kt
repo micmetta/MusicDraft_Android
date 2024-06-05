@@ -42,16 +42,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     // mi prendo il riferimento al DB:
     private val database = MusicDraftDatabase.getDatabase(application)
     private val userDao = database.userDao()
-    private val artistDao = database.artistDao()
-    private val trackDao = database.trackDao()
+
     ///////
 
     private val authRepository: AuthRepository = AuthRepository(this, userDao!!) // istanzio il repository
-    private val artistRepo: ArtistRepository = ArtistRepository(this, artistDao!!)
-    private val trackRepo: TracksRepository = TracksRepository(this, trackDao!!)
-    // inizializzazione tabelle artisti e brani
-    val a = artistRepo.init()
-    val t = trackRepo.init()
+
     // - La variabile qui sotto sarà uno STATE di tipo "RegistrationUIState()" in modo tale che
     //   il viewModel possa aggiornarsi ogni volta che questo stato cambierà (ovvero ogni volta che
     //   la schermata di creazione dell'account verrà modificata durante l'inserimento dei dati da parte dell'utente):

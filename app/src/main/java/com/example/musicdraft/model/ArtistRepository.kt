@@ -3,6 +3,7 @@ package com.example.musicdraft.model
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.artisti.ArtistiDao
+import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class ArtistRepository(val viewModel: LoginViewModel,val dao: ArtistiDao) {
+class ArtistRepository(val viewModel: CardsViewModel,val dao: ArtistiDao) {
     var artisti = dao.getAllArtisti()
 
     fun init() {
