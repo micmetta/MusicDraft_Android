@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
+    implementation(libs.play.services.fitness)
 //    implementation(libs.androidx.room.common)
 //    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
@@ -102,4 +103,7 @@ dependencies {
     implementation (libs.androidx.room.ktx.v261)
     kapt (libs.androidx.room.compiler.v261)
     androidTestImplementation (libs.androidx.room.testing)
+
+    // Per interfaccia:
+    implementation("co.yml:ycharts:2.1.0")
 }

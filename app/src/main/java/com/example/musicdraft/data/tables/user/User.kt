@@ -10,5 +10,6 @@ data class User(
     val email: String,
     val nickname: String,
     val password: String,
+    val isOnline: Boolean,
     val points: Int
 )

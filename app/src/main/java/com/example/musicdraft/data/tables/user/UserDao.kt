@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.example.musicdraft.data.tables.user.User
 import kotlinx.coroutines.flow.Flow
 
 
@@ -16,6 +15,10 @@ interface UserDao {
 
     @Insert
     suspend fun insertUser(user: User)
+
+
+    @Query("SELECT * FROM User WHERE email = :email")
+    fun getUserByEmail(email: String): Flow<User?>
 
     @Delete
     suspend fun deleteUser(user: User)

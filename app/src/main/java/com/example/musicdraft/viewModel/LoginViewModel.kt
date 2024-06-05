@@ -2,22 +2,17 @@ package com.example.musicdraft.viewModel
 
 import android.app.Application
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.musicdraft.data.RegistrationUIState
 import com.example.musicdraft.data.LoginUIState
+import com.example.musicdraft.data.RegistrationUIState
 import com.example.musicdraft.data.UIEventSignIn
 import com.example.musicdraft.data.UIEventSignUp
 import com.example.musicdraft.data.rules.ValidatorFields
 import com.example.musicdraft.data.tables.user.User
-import com.example.musicdraft.data.tables.user.UserDao
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.login.GoogleSignInState
 import com.example.musicdraft.model.AuthRepository
@@ -27,7 +22,6 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 import kotlinx.coroutines.launch
-import androidx.lifecycle.AndroidViewModel
 
 // - Nel momento in cui un 'UIEvent' verrà innescato, questo sarà catturato dal "LoginViewModel" che si
 //   preoccuperà di gestirlo andando a modificare lo stato dell'interfaccia chiamato 'registrationUIState'.
@@ -76,9 +70,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         private set
     ///////////////////////////////////////////////////////////////
 
-    // definisco l'oggetto DAO che mi permetterà di eseguire le queries sul DB:
-    //private var dao: UserDao? = database.dao()
 
+    // sottoscrizione alla variabile "userLoggedInfo" sempre del repository, in questo modo
+    // non appena "repository.userLoggedInfo" cambierà, automaticamente cambierà anche "userLoggedInfo" del LoginViewModel:
+    var userLoggedInfo =  authRepository.userLoggedInfo
+    //var userLoggedState = mutableStateOf(UserLoggedState())
 
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
@@ -421,11 +417,17 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
                 Log.d(TAG, "Login completato con successo!")
                 if(it.isSuccessful){
+
+                    // prendo le info principali dell'utente dalla tabella User:
+                    authRepository.getUserByEmail(email)
+
                     // resetto tutti i campi di "loginUIState":
                     loginUIState.value = loginUIState.value.copy(
                         email = "",
                         password = ""
                     )
+
+
                     navController.navigate(Screens.MusicDraftUI.screen)
                 }
             }
@@ -509,6 +511,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             email = email,
             nickname = nickname,
             password = password,
+            isOnline = true,
             points = 1000 // I points iniziali sono 1000
         )
         authRepository.insertNewUser(user)

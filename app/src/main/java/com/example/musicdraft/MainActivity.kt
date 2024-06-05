@@ -1,6 +1,5 @@
 package com.example.musicdraft
 
-import LoginViewModelFactory
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -35,180 +34,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
-import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.screens_to_signUp_signIn.LoginScreen
-import com.example.musicdraft.sections.Home
-import com.example.musicdraft.sections.Friends
-import com.example.musicdraft.sections.Cards
-import com.example.musicdraft.sections.Decks
-import com.example.musicdraft.sections.Marketplace
-import com.example.musicdraft.sections.Matchmaking
-import com.example.musicdraft.sections.Settings
-import com.example.musicdraft.sections.Screens
-import com.example.musicdraft.ui.theme.BlueApp
-import com.example.musicdraft.ui.theme.MusicDraftTheme
-import kotlinx.coroutines.launch
 import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
 import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
+import com.example.musicdraft.sections.Cards
+import com.example.musicdraft.sections.Decks
+import com.example.musicdraft.sections.Friends
+import com.example.musicdraft.sections.Home
+import com.example.musicdraft.sections.Marketplace
+import com.example.musicdraft.sections.Matchmaking
+import com.example.musicdraft.sections.Screens
+import com.example.musicdraft.sections.Settings
+import com.example.musicdraft.ui.theme.BlueApp
+import com.example.musicdraft.ui.theme.MusicDraftTheme
 import com.example.musicdraft.viewModel.LoginViewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    //private lateinit var loginViewModel: LoginViewModel
-
-//    private val googleAuthUiClient by lazy {
-//        GoogleAuthUiClient(
-//            context = applicationContext,
-//            oneTapClient = Identity.getSignInClient(applicationContext)
-//        )
-//    }
-
-//    private val db by lazy {
-//        Room.databaseBuilder(
-//            applicationContext,
-//            MusicDraftDatabase::class.java,
-//            "musicdraft.db"
-//        ).build()
-//    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        //this.deleteDatabase("musicDraftDB")
+
         super.onCreate(savedInstanceState)
         setContent {
 
             val loginViewModel: LoginViewModel by viewModels()
-
-
-            // QUI istanzio il DB:
-            //val database = MusicDraftDatabase.getDatabase(this) //ok
-
-//            // Ottieni il database
-//            val database = MusicDraftDatabase.getInstance(applicationContext)
-//
-//            // Crea il factory
-//            val viewModelFactory = LoginViewModelFactory(database)
-//
-//            // Ottieni l'istanza del ViewModel usando il factory
-//            loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
-
-            // Ora puoi utilizzare loginViewModel nella tua MainActivity
-
-            //val database = MusicDraftDatabase.getInstance(this)
-
             MusicDraftTheme {
-
-////                ////////////////////////////////////////////////////////////////////////////////////
-//                // istanzio il ViewModel:
-//                val loginViewModel: LoginViewModel by viewModels {
-//
-//                    // Poichè il viewModel ha dei parametri bisogna usare la Factory:
-//                    object : ViewModelProvider.Factory {
-//
-//                        // facciamo l'override della funzione create a cui passiamo un modelClass di tipo generico <T>
-//                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//
-//                            // a questo punto chiediamo se la modelClass fa riferimento allo LoginViewModel
-//                            if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-//                                @Suppress("UNCHECKED_CAST") // specifichiamo che il cast è sicuro
-//
-//                                // e restituiamo l'oggetto di tipo SpaceViewModel che ha in input l'istanza del DB
-//                                // che abbiamo istanziato sopra:
-//                                return LoginViewModel(database) as T
-//                            }
-//                            throw IllegalArgumentException("Unknown ViewModel class")
-//                        }
-//                    }
-//                }
-
-//                // Ottieni il database
-//                val database = MusicDraftDatabase.getInstance(applicationContext)
-//
-//                // Crea il factory
-//                val viewModelFactory = LoginViewModelFactory(database)
-//
-//                // Ottieni l'istanza del ViewModel usando il factory
-//                loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
-
-//                ////////////////////////////////////////////////////////////////////////////////////
-//
-//                // Ottieni il database
-//                val database = MusicDraftDatabase.getInstance(applicationContext)
-//
-//                // Crea il factory
-//                val viewModelFactory = LoginViewModelFactory(database)
-//
-//                // Ottieni l'istanza del ViewModel usando il factory
-//                loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
-
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-//                    val loginViewModel: LoginViewModel by viewModels(
-//                        factoryProducer = {
-//                            object : ViewModelProvider.Factory {
-//                                override fun <T : ViewModel> create (modelClass: Class<T>): T {
-//                                    return LoginViewModel(database!!) as T
-//                                }
-//                            }
-//                        }
-//                    )
-                    //val state by loginViewModel.state.collectAsStateWithLifecycle()
-
-//                    val launcher = rememberLauncherForActivityResult(
-//                        contract = ActivityResultContracts.StartIntentSenderForResult(),
-//                        onResult = { result ->
-//                            if(result.resultCode == RESULT_OK) {
-//                                lifecycleScope.launch{
-//                                    val signInResult = googleAuthUiClient.signInWithIntent(
-//                                        intent = result.data ?: return@launch
-//                                    )
-//                                    loginViewModel.onSignInResult(signInResult)
-//                                }
-//                            }
-//                        }
-//                    )
-
-//                    ////////////////////////////////////////////////////////////////////////////////////
-//                    // istanzio il ViewModel, questo pezzo di codice lo potrai copiare così com'è per ogni progetto::
-//                    val loginViewModel: LoginViewModel by viewModels {
-//
-//                        // Poichè il viewModel ha dei parametri bisogna usare la Factory:
-//                        object : ViewModelProvider.Factory {
-//
-//                            // facciamo l'override della funzione create a cui passiamo un modelClass di tipo generico <T>
-//                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//
-//                                // a questo punto chiediamo se la modelClass fa riferimento allo SpaceVieModel
-//                                if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-//                                    @Suppress("UNCHECKED_CAST") // specifichiamo che il cast è sicuro
-//
-//                                    // e restituiamo l'oggetto di tipo SpaceViewModel che ha in input l'istanza del DB
-//                                    // che abbiamo istanziato sopra:
-//                                    return LoginViewModel(database!!) as T
-//                                }
-//                                throw IllegalArgumentException("Unknown ViewModel class")
-//                            }
-//                        }
-//                    }
-//                    ////////////////////////////////////////////////////////////////////////////////////
-
-//                    // Ottieni il database
-//                    val database = MusicDraftDatabase.getInstance(applicationContext)
-//
-//                    // Crea il factory
-//                    val viewModelFactory = LoginViewModelFactory(database)
-//
-//                    // Ottieni l'istanza del ViewModel usando il factory
-//                    loginViewModel = ViewModelProvider(this, viewModelFactory).get(LoginViewModel::class.java)
-
-                    //Navigation(loginViewModel, state) //c'era prima..
-                    //Navigation(loginViewModel, state, launcher, googleAuthUiClient, context = applicationContext)
                     Navigation(loginViewModel)
                 }
             }
@@ -456,7 +315,7 @@ fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: Log
             // - La Schermata iniziale sarà "Home"
             NavHost(navController = navigationController, startDestination = Screens.Home.screen){
                 composable(Screens.Home.screen){
-                    Home() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Home(loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
                 }
                 composable(Screens.Friends.screen){
                     Friends() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
