@@ -13,8 +13,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TracksRepository(val viewModel: CardsViewModel, val dao: TrackDao) {
-    var tracks = dao.getAllTracks()
-
+    suspend fun getAllTracks(): List<Track> {
+        return dao.getAllTracks()
+    }
     fun init() {
         viewModel.viewModelScope.launch {
             // Perform database operation off the main thread

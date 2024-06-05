@@ -12,8 +12,9 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class ArtistRepository(val viewModel: CardsViewModel,val dao: ArtistiDao) {
-    var artisti = dao.getAllArtisti()
-
+    suspend fun getAllArtisti(): List<Artisti> {
+        return dao.getAllArtisti()
+    }
     fun init() {
         viewModel.viewModelScope.launch {
             // Perform database operation off the main thread

@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TrackDao {
     @Query("SELECT * FROM Track")
-    fun getAllTracks(): Flow<List<Track>>
+    fun getAllTracks(): List<Track>
 
     @Insert
     suspend fun insertTrack(track: Track)

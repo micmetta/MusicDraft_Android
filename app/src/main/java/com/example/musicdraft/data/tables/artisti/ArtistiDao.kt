@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ArtistiDao {
     @Query("SELECT * FROM Artisti")
-    fun getAllArtisti(): Flow<List<Artisti>>
+    fun getAllArtisti(): List<Artisti>
 
     @Insert
     suspend fun insertArtist(artista: Artisti)
