@@ -13,9 +13,11 @@ interface UserDao {
     @Query("SELECT * FROM User")
     fun getAllUser(): Flow<List<User>>
 
+    @Query("SELECT * FROM User WHERE email LIKE '%' || :email || '%'")
+    fun getAllUsersFilterEmail(email: String): Flow<List<User>?>
+
     @Insert
     suspend fun insertUser(user: User)
-
 
     @Query("SELECT * FROM User WHERE email = :email")
     fun getUserByEmail(email: String): Flow<User?>

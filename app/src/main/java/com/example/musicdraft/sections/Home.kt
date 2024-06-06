@@ -48,7 +48,6 @@ import com.example.musicdraft.viewModel.LoginViewModel
 @Composable
 fun Home(loginViewModel: LoginViewModel) {
 
-
     val infoUserCurrent by loginViewModel.userLoggedInfo.collectAsState(initial = null)
 
     infoUserCurrent?.let{

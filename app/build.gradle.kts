@@ -106,4 +106,7 @@ dependencies {
 
     // Per interfaccia:
     implementation("co.yml:ycharts:2.1.0")
+
+    // Per avere più icone disponibili:
+    implementation("androidx.compose.material:material-icons-extended-android:1.6.7")
 }

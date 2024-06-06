@@ -51,6 +51,7 @@ import com.example.musicdraft.sections.Screens
 import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
+import com.example.musicdraft.viewModel.HandleFriendsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 import kotlinx.coroutines.launch
 
@@ -64,11 +65,13 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val loginViewModel: LoginViewModel by viewModels()
+            val handleFriendsViewModel: HandleFriendsViewModel by viewModels()
+
             MusicDraftTheme {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    Navigation(loginViewModel)
+                    Navigation(loginViewModel, handleFriendsViewModel)
                 }
             }
         }
@@ -79,7 +82,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState, launcher: ActivityResultLauncher<IntentSenderRequest>, googleAuthUiClient: GoogleAuthUiClient, context: Context){ // c'era prima
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState){
-fun Navigation(loginViewModel: LoginViewModel){
+fun Navigation(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsViewModel){
     val navigationController = rememberNavController()
     // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
     NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){
@@ -94,7 +97,7 @@ fun Navigation(loginViewModel: LoginViewModel){
             TermsAndConditionsScreen() // composable che verrà aperto per mostrare i termini e condizioni dell'app
         }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -104,7 +107,7 @@ fun Navigation(loginViewModel: LoginViewModel){
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: LoginViewModel){
+fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsViewModel){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -318,7 +321,8 @@ fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: Log
                     Home(loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
                 }
                 composable(Screens.Friends.screen){
-                    Friends() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+//                    Friends(navigationController) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Friends(handleFriendsViewModel, loginViewModel)
                 }
                 composable(Screens.Cards.screen){
                     Cards() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
