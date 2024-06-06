@@ -13,9 +13,12 @@ class ArtistRepository(val viewModel: MarketplaceViewModel, val dao: ArtistiDao)
     suspend fun getAllArtisti(): List<Artisti> {
         return dao.getAllArtisti()
     }
+    /*
+    * la funzione init serve a inizializzare il db con dati presi da un file JSOn estrattto da una tabella presa
+    * tramite l'api di spotify
+    * */
     fun init() {
         viewModel.viewModelScope.launch {
-            // Perform database operation off the main thread
             withContext(Dispatchers.IO) {
                 val filePath = "C:\\Users\\pietr\\AndroidStudioProjects\\MusicDraft_Android\\artista.json" // Replace with your JSON file path
                 val file = "[{\"id\":\"00eXgMv8c9rsPVyhs7Lyu0\", \"genere\":\"Non disponibile\", \"immagine\":\"https://i.scdn.co/image/ab67616d0000b27340bc03af5cb8b3e31137bd6e\", \"nome\":\"Baybe Heem\", \"popolarita\":16},\n" +

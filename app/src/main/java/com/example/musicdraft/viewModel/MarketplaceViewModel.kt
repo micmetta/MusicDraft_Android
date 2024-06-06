@@ -17,24 +17,30 @@ class MarketplaceViewModel(application: Application) : AndroidViewModel(applicat
 
 
 
-    //prima
+    // Database e repository per artisti e tracce
     private val database = MusicDraftDatabase.getDatabase(application)
     val artistDao = database.artistDao()
     val trackDao = database.trackDao()
     private val artistRepo: ArtistRepository = ArtistRepository(this, artistDao!!)
     private val trackRepo: TracksRepository = TracksRepository(this, trackDao!!)
 
-    // inizializzazione tabelle artisti e brani
+    // Inizializzazione delle tabelle artisti e brani
     val initArtisti = artistRepo.init()
     val inittrack = trackRepo.init()
+
+    // Variabili LiveData per visualizzare tutti gli artisti e tutte le tracce
+    val allArtist: LiveData<List<Artisti>>
+    val allTracks: LiveData<List<Track>>
+
+    // Variabili MutableLiveData per visualizzare gli artisti e le tracce filtrati
     private val _filteredArtisti = MutableLiveData<List<Artisti>>()
     val filteredArtisti: LiveData<List<Artisti>> get() = _filteredArtisti
     private val _filteredBrani = MutableLiveData<List<Track>>()
     val filteredBrani: LiveData<List<Track>> get() = _filteredBrani
-    val allArtist: LiveData<List<Artisti>>
-    val allTracks: LiveData<List<Track>>
+
 
     init {
+        // Inizializzazione dei LiveData per visualizzare tutti gli artisti e tutte le tracce
         allArtist = liveData {
             val artists = withContext(Dispatchers.IO) {
                 artistDao?.getAllArtisti()
@@ -50,6 +56,12 @@ class MarketplaceViewModel(application: Application) : AndroidViewModel(applicat
         }
 
     }
+    /**
+     * Applica i filtri agli artisti e aggiorna la lista visualizzata.
+     * @param popThreshold La popolarità massima degli artisti da visualizzare.
+     * @param nameQuery La query per filtrare gli artisti per nome.
+     * @param genreQuery La query per filtrare gli artisti per genere.
+     */
     fun applyArtistFilter(popThreshold: Int?, nameQuery: String?, genreQuery: String?) {
 
         val filteredArtisti = allArtist.value?.filter { artist ->
@@ -67,7 +79,10 @@ class MarketplaceViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-
+    /**
+     * Applica il filtro di popolarità alle tracce e aggiorna la lista visualizzata.
+     * @param popThreshold La popolarità massima delle tracce da visualizzare.
+     */
     fun applyBraniFilter(popThreshold: Int?) {
         val filteredBrani = allTracks.value?.filter { brano ->
             val popFilter = popThreshold?.let { brano.popolarita <= it } ?: true
