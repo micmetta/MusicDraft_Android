@@ -31,4 +31,7 @@ interface TrackDao {
 
     @Query("SELECT * FROM Track ORDER BY nome ASC")
     fun getTrackOrderedByName(): Flow<List<Track>>
+
+    @Query("SELECT * FROM Track WHERE popolarita <= :maxPopolarita ORDER BY popolarita ASC")
+    fun getTracksWithMaxPop(maxPopolarita: Int): Flow<List<Track>>
 }

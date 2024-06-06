@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -28,13 +29,79 @@ import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.viewModel.CardsViewModel
 
 
+@Composable
+fun ArtistiFilter(
+    popThreshold: String,
+    nameQuery: String,
+    genreQuery: String,
+    onPopThresholdChange: (String) -> Unit,
+    onNameQueryChange: (String) -> Unit,
+    onGenreQueryChange: (String) -> Unit,
+    onApplyFilter: () -> Unit
+) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        TextField(
+            value = popThreshold,
+            onValueChange = { onPopThresholdChange(it) },
+            label = { Text("Popolarità massima") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        TextField(
+            value = nameQuery,
+            onValueChange = { onNameQueryChange(it) },
+            label = { Text("Nome") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        TextField(
+            value = genreQuery,
+            onValueChange = { onGenreQueryChange(it) },
+            label = { Text("Genere") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(onClick = { onApplyFilter() }) {
+            Text("Applica filtro")
+        }
+    }
+}
+
+@Composable
+fun BraniFilter(
+    popThreshold: String,
+    onPopThresholdChange: (String) -> Unit,
+    onApplyFilter: () -> Unit
+) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        TextField(
+        value = popThreshold,
+        onValueChange = { onPopThresholdChange(it) },
+        label = { Text("Popolarità massima") },
+        modifier = Modifier.fillMaxWidth()
+    )
+        Button(onClick = { onApplyFilter() }) {
+            Text("Applica filtro")
+        }
+    }
+}
+
 //pafina delle CARDS
 @Composable
 fun Cards(viewModel: CardsViewModel) {
-    val artisti by viewModel.allArtist.observeAsState(emptyList())
-    val brani by viewModel.allTracks.observeAsState(emptyList())
-
     var selectedTab by remember { mutableStateOf(0) }
+    var popThreshold by remember { mutableStateOf("") }
+    var nameQuery by remember { mutableStateOf("") }
+    var genreQuery by remember { mutableStateOf("") }
+
+    val artisti by if (!(popThreshold.isNullOrEmpty())) {
+        viewModel.filteredArtisti.observeAsState(emptyList())
+    } else {
+        viewModel.allArtist.observeAsState(emptyList())
+    }
+
+    val brani by if (!(popThreshold.isNullOrEmpty())) {
+        viewModel.filteredBrani.observeAsState(emptyList())
+    } else {
+        viewModel.allTracks.observeAsState(emptyList())
+    }
 
     Column(modifier = Modifier.padding(top = 65.dp)) {
         TabRow(selectedTabIndex = selectedTab, modifier = Modifier.fillMaxWidth()) {
@@ -45,6 +112,35 @@ fun Cards(viewModel: CardsViewModel) {
                 Text("Brani")
             }
         }
+
+        if (selectedTab == 0) {
+            ArtistiFilter(
+                popThreshold = popThreshold,
+                nameQuery = nameQuery,
+                genreQuery = genreQuery,
+                onPopThresholdChange = { popThreshold = it },
+                onNameQueryChange = { nameQuery = it },
+                onGenreQueryChange = { genreQuery = it },
+                onApplyFilter = {
+                    viewModel.applyArtistFilter(
+                        popThreshold.toIntOrNull(),
+                        nameQuery.takeIf { it.isNotEmpty() },
+                        genreQuery.takeIf { it.isNotEmpty() }
+                    )
+                }
+            )
+        } else {
+            BraniFilter(
+                popThreshold = popThreshold,
+                onPopThresholdChange = { popThreshold = it },
+                onApplyFilter = {
+                    viewModel.applyBraniFilter(
+                        popThreshold.toIntOrNull()
+                    )
+                }
+            )
+        }
+
         when (selectedTab) {
             0 -> ArtistiScreen(artisti)
             1 -> BraniScreen(brani)
@@ -61,7 +157,6 @@ fun ArtistiScreen(artisti: List<Artisti>) {
     }
 }
 
-
 @Composable
 fun BraniScreen(brani: List<Track>) {
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
@@ -71,8 +166,9 @@ fun BraniScreen(brani: List<Track>) {
     }
 }
 
+
 @Composable
-fun BranoCard(brano: Track, weight: Modifier) {
+fun BranoCard(brano: Track, height: Modifier) {
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = brano.nome, style = MaterialTheme.typography.bodyLarge)
@@ -95,7 +191,7 @@ fun BranoCard(brano: Track, weight: Modifier) {
 }
 
 @Composable
-fun ArtistaCard(artista: Artisti, weight: Modifier) {
+fun ArtistaCard(artista: Artisti, height: Modifier) {
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = artista.nome, style = MaterialTheme.typography.bodyLarge)

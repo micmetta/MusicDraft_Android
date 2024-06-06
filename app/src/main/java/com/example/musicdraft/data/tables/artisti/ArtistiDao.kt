@@ -32,4 +32,6 @@ interface ArtistiDao {
     @Query("SELECT * FROM Artisti ORDER BY nome ASC")
     fun getArtistiOrderedByNome(): Flow<List<Artisti>>
 
+    @Query("SELECT * FROM Artisti WHERE popolarita <= :maxPopolarita ORDER BY popolarita ASC")
+    fun getArtistiWithMaxPop(maxPopolarita: Int): Flow<List<Artisti>>
 }
