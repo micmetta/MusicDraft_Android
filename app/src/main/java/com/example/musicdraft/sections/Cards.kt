@@ -27,6 +27,8 @@ import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.viewModel.CardsViewModel
 
+
+//pafina delle CARDS
 @Composable
 fun Cards(viewModel: CardsViewModel) {
     val artisti by viewModel.allArtist.observeAsState(emptyList())
