@@ -5,19 +5,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
-import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.ArtistRepository
 import com.example.musicdraft.model.TracksRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class CardsViewModel(application: Application) : AndroidViewModel(application) {
+class MarketplaceViewModel(application: Application) : AndroidViewModel(application) {
 
 
 

@@ -1,18 +1,15 @@
 package com.example.musicdraft.model
 
 import androidx.lifecycle.viewModelScope
-import com.example.musicdraft.data.tables.artisti.Artisti
-import com.example.musicdraft.data.tables.artisti.ArtistiDao
 import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.data.tables.track.TrackDao
-import com.example.musicdraft.viewModel.CardsViewModel
-import com.example.musicdraft.viewModel.LoginViewModel
+import com.example.musicdraft.viewModel.MarketplaceViewModel
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class TracksRepository(val viewModel: CardsViewModel, val dao: TrackDao) {
+class TracksRepository(val viewModel: MarketplaceViewModel, val dao: TrackDao) {
     suspend fun getAllTracks(): List<Track> {
         return dao.getAllTracks()
     }
