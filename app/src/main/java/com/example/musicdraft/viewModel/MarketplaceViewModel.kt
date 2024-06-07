@@ -5,15 +5,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.ArtistRepository
 import com.example.musicdraft.model.TracksRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MarketplaceViewModel(application: Application, loginViewModel: LoginViewModel) : AndroidViewModel(application) {
+class MarketplaceViewModel(application: Application, private val cardsViewModel: CardsViewModel,private val loginViewModel: LoginViewModel) : AndroidViewModel(application) {
 
 
 
@@ -33,8 +35,8 @@ class MarketplaceViewModel(application: Application, loginViewModel: LoginViewMo
     val allTracks: LiveData<List<Track>>
 
     // Variabili MutableLiveData per visualizzare gli artisti e le tracce filtrati
-    private val _filteredArtisti = MutableLiveData<List<Artisti>>()
-    val filteredArtisti: LiveData<List<Artisti>> get() = _filteredArtisti
+    private val _filteredArtisti = MutableLiveData<List<Artisti>?>()
+    val filteredArtisti: MutableLiveData<List<Artisti>?> get() = _filteredArtisti
     private val _filteredBrani = MutableLiveData<List<Track>>()
     val filteredBrani: LiveData<List<Track>> get() = _filteredBrani
 
@@ -94,6 +96,27 @@ class MarketplaceViewModel(application: Application, loginViewModel: LoginViewMo
             filteredBrani ?: emptyList()
         }
         println("Filter applied with popThreshold: $popThreshold, result count: ${_filteredBrani.value?.size}")
+    }
+    // Funzione per comprare un artista
+    fun compra(artista: Artisti) {
+        viewModelScope.launch {
+            performCompra(artista)
+        }
+    }
+
+    // Funzione sospesa per eseguire la logica di acquisto
+    private suspend fun performCompra(artista: Artisti) {
+        withContext(Dispatchers.IO) {
+            // Logica sospesa, ad esempio una chiamata al database
+            // Aggiorna il database, se necessario
+
+            // Aggiorna le liste di artisti filtrati e le carte acquistate
+            val updatedFilteredList = _filteredArtisti.value?.toMutableList()?.apply {
+                remove(artista)
+            }
+            _filteredArtisti.postValue(updatedFilteredList)
+            loginViewModel.userLoggedInfo.value?.let { cardsViewModel.insertArtistToUser(artista, it.email) }
+        }
     }
 
 }

@@ -12,9 +12,11 @@ import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.data.tables.track.TrackDao
 import com.example.musicdraft.data.tables.user.User
 import com.example.musicdraft.data.tables.user.UserDao
+import com.example.musicdraft.data.tables.user_cards.UCADao
+import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 
 @Database(
-    entities = [User::class,Artisti::class,Track::class, HandleFriends::class],
+    entities = [User::class,Artisti::class,Track::class, User_Cards_Artisti::class, HandleFriends::class],
     version = 1
 )
 abstract class MusicDraftDatabase: RoomDatabase() {
@@ -23,6 +25,7 @@ abstract class MusicDraftDatabase: RoomDatabase() {
     abstract fun userDao(): UserDao?
     abstract fun artistDao(): ArtistiDao?
     abstract fun trackDao():TrackDao?
+    abstract fun ownArtCardsDao():UCADao?
     abstract fun handleFriendsDao(): HandleFriendsDao?
 
     companion object {

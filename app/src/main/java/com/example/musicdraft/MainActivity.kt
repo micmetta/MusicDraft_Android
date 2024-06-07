@@ -51,6 +51,7 @@ import com.example.musicdraft.sections.Screens
 import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
+import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.HandleFriendsViewModel
 import kotlinx.coroutines.launch
 import com.example.musicdraft.viewModel.MarketplaceViewModel
@@ -76,18 +77,20 @@ class MainActivity : ComponentActivity() {
 //    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        this.deleteDatabase("note_database")
+        this.deleteDatabase("musicDraftDB")
         super.onCreate(savedInstanceState)
         setContent {
 
             val loginViewModel: LoginViewModel by viewModels()
             val handleFriendsViewModel: HandleFriendsViewModel by viewModels()
+            val marketPlaceViewModel:MarketplaceViewModel by viewModels()
+            val cardsViewModel: CardsViewModel by viewModels()
 
             MusicDraftTheme {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    Navigation(loginViewModel, handleFriendsViewModel)
+                    Navigation(loginViewModel, handleFriendsViewModel,marketPlaceViewModel,cardsViewModel)
                 }
             }
         }
@@ -98,7 +101,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState, launcher: ActivityResultLauncher<IntentSenderRequest>, googleAuthUiClient: GoogleAuthUiClient, context: Context){ // c'era prima
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState){
-fun Navigation(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsViewModel,marketplaceViewmodel: MarketplaceViewModel){
+fun Navigation(
+    loginViewModel: LoginViewModel,
+    handleFriendsViewModel: HandleFriendsViewModel,
+    marketplaceViewmodel: MarketplaceViewModel,
+    cardsViewModel: CardsViewModel
+){
     val navigationController = rememberNavController()
     // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
     NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){
@@ -113,7 +121,7 @@ fun Navigation(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFri
             TermsAndConditionsScreen() // composable che verrà aperto per mostrare i termini e condizioni dell'app
         }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel,marketplaceViewmodel, handleFriendsViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel,marketplaceViewmodel, handleFriendsViewModel,cardsViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -127,7 +135,8 @@ fun MusicDraftUI(
     navControllerInitialScreens: NavController,
     loginViewModel: LoginViewModel,
     marketplaceViewmodel: MarketplaceViewModel,
-    handleFriendsViewModel: HandleFriendsViewModel
+    handleFriendsViewModel: HandleFriendsViewModel,
+    cardsViewModel: CardsViewModel
 ){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()
@@ -346,7 +355,7 @@ fun MusicDraftUI(
                     Friends(handleFriendsViewModel, loginViewModel)
                 }
                 composable(Screens.Cards.screen){
-                    Cards() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
+                    Cards(cardsViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
                 }
                 composable(Screens.Decks.screen){
                     Decks() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"

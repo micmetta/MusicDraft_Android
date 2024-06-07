@@ -91,7 +91,7 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
         }
         // Visualizza la lista degli artisti o delle tracce in base alla scheda selezionata
         when (selectedTab) {
-            0 -> ArtistiScreen(artisti)
+            0 -> artisti?.let { ArtistiScreen(it,viewModel) }
             1 -> BraniScreen(brani)
         }
     }
@@ -177,12 +177,12 @@ fun BraniFilter(
  * @param artisti Elenco degli artisti da visualizzare.
  */
 @Composable
-fun ArtistiScreen(artisti: List<Artisti>) {
+fun ArtistiScreen(artisti: List<Artisti>, viewModel: MarketplaceViewModel) {
     // Visualizza una griglia di carte per gli artisti
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso gli artisti e visualizza una carta per ciascuno
         items(artisti.size) { index ->
-            ArtistaCard(artisti[index], Modifier.height(8.dp))
+            ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel)
         }
     }
 }
@@ -237,7 +237,7 @@ fun BranoCard(brano: Track, height: Modifier) {
  * @param height Modificatore per la altezza della carta.
  */
 @Composable
-fun ArtistaCard(artista: Artisti, height: Modifier) {
+fun ArtistaCard(artista: Artisti, height: Modifier, viewModel: MarketplaceViewModel) {
     // Carta contenente le informazioni dell'artista
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -253,7 +253,7 @@ fun ArtistaCard(artista: Artisti, height: Modifier) {
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Button(onClick = { /* da implw */ }) {
+            Button(onClick = { viewModel.compra(artista) }) {
                 Text("Compra")
             }
         }
