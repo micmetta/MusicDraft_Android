@@ -63,4 +63,8 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
             }
         }
     }
+
+    suspend fun doesUserExist(email: String): Boolean {
+        return dao.doesUserExist(email)
+    }
 }
