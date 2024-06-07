@@ -45,7 +45,7 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
         viewModel.allArtist.observeAsState(emptyList())
     }
 
-    val brani by if (popThreshold == "") {
+    val brani by if (!(popThreshold.isNullOrEmpty())) {
         viewModel.filteredBrani.observeAsState(emptyList())
     } else {
         viewModel.allTracks.observeAsState(emptyList())

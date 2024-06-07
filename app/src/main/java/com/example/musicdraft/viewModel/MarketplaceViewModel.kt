@@ -13,7 +13,7 @@ import com.example.musicdraft.model.TracksRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class MarketplaceViewModel(application: Application) : AndroidViewModel(application) {
+class MarketplaceViewModel(application: Application, loginViewModel: LoginViewModel) : AndroidViewModel(application) {
 
 
 
@@ -89,11 +89,11 @@ class MarketplaceViewModel(application: Application) : AndroidViewModel(applicat
             popFilter
         }
         _filteredBrani.value = if (popThreshold == null) {
-            // Se il campo di filtro della popolarità è vuoto, visualizza tutte le tracce senza applicare alcun filtro
             allTracks.value ?: emptyList()
         } else {
-            // Altrimenti, applica il filtro normalmente
             filteredBrani ?: emptyList()
         }
+        println("Filter applied with popThreshold: $popThreshold, result count: ${_filteredBrani.value?.size}")
     }
+
 }
