@@ -10,5 +10,20 @@ data class User(
     val email: String,
     val nickname: String,
     val password: String,
+    val isOnline: Boolean,
     val points: Int
 )
+//{
+//    fun doesMatchSearchQUery(query: String): Boolean{
+//        val matchingCombinations = listOf(
+//            "${nickname}",
+//            "${email}",
+//            "${nickname.first()}",
+//            "${email.first()}"
+//        )
+//
+//        return matchingCombinations.any {
+//            it.contains(query, ignoreCase = true) // ignoreCase mi permette di eliminare il Case Sensitive
+//        }
+//    }
+//}

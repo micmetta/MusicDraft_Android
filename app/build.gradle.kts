@@ -23,7 +23,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
     }
 
     buildTypes {
@@ -103,6 +102,12 @@ dependencies {
     implementation (libs.androidx.room.ktx.v261)
     kapt (libs.androidx.room.compiler.v261)
     androidTestImplementation (libs.androidx.room.testing)
+
+    // Per interfaccia:
+    implementation("co.yml:ycharts:2.1.0")
+
+    // Per avere più icone disponibili:
+    implementation("androidx.compose.material:material-icons-extended-android:1.6.7")
 
     implementation("com.google.code.gson:gson:2.7")
     implementation ("androidx.compose.runtime:runtime-livedata:1.4.0")

@@ -1,5 +1,7 @@
 package com.example.musicdraft.model
 
+import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.user.User
 import com.example.musicdraft.data.tables.user.UserDao
 import com.example.musicdraft.utility.Resource
@@ -8,12 +10,14 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.tasks.await
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 /*
 - Questo è il model che si preoccupa di gestire in login con Google tramite l'utilizzo di Firebase.
@@ -23,6 +27,7 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
 
     private val firebaseAuth = Firebase.auth
     var users = dao.getAllUser()
+    val userLoggedInfo: MutableStateFlow<User?> = MutableStateFlow(null)
 
     /*
     - Questa funzione verrà invocata dal loginViewModel nel momento in cui l'utente cliccherà sull'interfaccia
@@ -44,4 +49,18 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
+    fun getUserByEmail(email: String) {
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                // mi faccio restituire dalla funzione "getUserByEmail(email)" del DAO
+                // il flow:
+                val userFlow = dao.getUserByEmail(email)
+                userFlow.collect { user ->
+                    userLoggedInfo.value = user
+                    Log.i("TG", "info utente prese dal DB updated: ${userLoggedInfo.value}")
+                }
+
+            }
+        }
+    }
 }
