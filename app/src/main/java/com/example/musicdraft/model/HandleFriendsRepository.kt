@@ -24,7 +24,7 @@ class HandleFriendsRepository(val handleFriendsViewModel: HandleFriendsViewModel
     /////////////////////
     val handleFriends: List<HandleFriends>? = null
     val reqReceivedCurrentUser: MutableStateFlow<List<HandleFriends>?> = MutableStateFlow(handleFriends)
-
+    val allFriendsCurrentUser: MutableStateFlow<List<HandleFriends>?> = MutableStateFlow(handleFriends)
 
     fun insertNewRequest(email1: String, email2: String){
         handleFriendsViewModel.viewModelScope.launch {
@@ -43,7 +43,19 @@ class HandleFriendsRepository(val handleFriendsViewModel: HandleFriendsViewModel
                 val requestsReceived = HandleFriendsdao.getRequestReceivedByUser(email2)
                 requestsReceived.collect { response ->
                     reqReceivedCurrentUser.value = response
-                    Log.i("TG", "reqReceivedCurrentUser updated: $reqReceivedCurrentUser")
+                    Log.i("TG", "reqReceivedCurrentUser updated: ${reqReceivedCurrentUser.value}")
+                }
+            }
+        }
+    }
+
+    fun getAllFriendsByUser(email_user: String){
+        handleFriendsViewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val friends = HandleFriendsdao.getAllFriendsByUser(email_user)
+                friends.collect { response ->
+                    allFriendsCurrentUser.value = response
+                    Log.i("TG", "Tutti gli amici dell'utente corrente: ${allFriendsCurrentUser.value}")
                 }
             }
         }
@@ -64,6 +76,29 @@ class HandleFriendsRepository(val handleFriendsViewModel: HandleFriendsViewModel
                         Log.i("TG", "Utenti filtrati: ${usersFilter.value}")
                     }
                 }
+            }
+        }
+    }
+
+    fun acceptRequest(email1: String, email2: String){
+        handleFriendsViewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO){
+                HandleFriendsdao.acceptRequest(email1, email2, "accepted")
+
+//                // eseguo l'aggiornamento delle richieste dell'utente che ha accettato la richiesta:
+//                getRequestReceivedByUser(email2)
+
+            }
+        }
+    }
+
+    fun refuseRequest(email1: String, email2: String){
+        handleFriendsViewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO){
+                HandleFriendsdao.deleteRequest(email1, email2)
+
+//                // eseguo l'aggiornamento delle richieste dell'utente che ha rifiutato la richiesta:
+//                getRequestReceivedByUser(email2)
             }
         }
     }

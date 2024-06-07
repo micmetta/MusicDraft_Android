@@ -22,6 +22,9 @@ interface UserDao {
     @Query("SELECT * FROM User WHERE email = :email")
     fun getUserByEmail(email: String): Flow<User?>
 
+    @Query("SELECT EXISTS(SELECT 1 FROM User WHERE email = :email)")
+    suspend fun doesUserExist(email: String): Boolean
+
     @Delete
     suspend fun deleteUser(user: User)
 

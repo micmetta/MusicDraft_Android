@@ -21,7 +21,9 @@ import com.example.musicdraft.utility.Resource
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 // - Nel momento in cui un 'UIEvent' verrà innescato, questo sarà catturato dal "LoginViewModel" che si
 //   preoccuperà di gestirlo andando a modificare lo stato dell'interfaccia chiamato 'registrationUIState'.
@@ -404,44 +406,59 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
         val email = loginUIState.value.email
         val password = loginUIState.value.password
-        FirebaseAuth
-            .getInstance()
-            .signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener{
-                // lamda function che verrà eseguita qualora il login avesse successo
 
-                // disattivo l'indicatore di caricamento:
-                signInInProgress.value = false
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Qui controllo se nel DB esiste tale utente prima di richiamare il servizio di FirebaseAuth in modo tale da
+        // utilizzare il CASE SENSITIVE poichè Firebase non lo implementa per le email:
+        checkUserExistence(email) { exists ->
+            if (exists) {
+                // L'utente esiste, fai qualcosa
+                println("User exist!")
+                FirebaseAuth
+                    .getInstance()
+                    .signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener{
+                        // lamda function che verrà eseguita qualora il login avesse successo
+                        Log.d(TAG, "Sono dentro addOnCompleteListener di LOGIN!")
+                        Log.d(TAG, "l'utente vuole loggare con questa mail: ${email}")
 
-                Log.d(TAG, "Sono dentro addOnCompleteListener di LOGIN!")
-                Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
-                Log.d(TAG, "Login completato con successo!")
-                if(it.isSuccessful){
+                        Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
+                        Log.d(TAG, "Login completato con successo!")
+                        if(it.isSuccessful){
 
-                    // prendo le info principali dell'utente dalla tabella User:
-                    authRepository.getUserByEmail(email)
+                            // prendo le info principali dell'utente dalla tabella User:
+                            authRepository.getUserByEmail(email)
 
-                    // resetto tutti i campi di "loginUIState":
-                    loginUIState.value = loginUIState.value.copy(
-                        email = "",
-                        password = ""
-                    )
+                            // resetto tutti i campi di "loginUIState":
+                            loginUIState.value = loginUIState.value.copy(
+                                email = "",
+                                password = ""
+                            )
+                            navController.navigate(Screens.MusicDraftUI.screen)
+                        }
+                    }
+                    .addOnFailureListener{
+                        // lamda function che verrà eseguita qualora il login fallisse
+                        Log.d(TAG, "Sono dentro addOnFailureListener di LOGIN!")
+                        Log.d(TAG, "Si è verificato un errore durante il login dell'utente su FIREBASE.")
+                        Log.d(TAG, " message = ${it.message}")
+                        Log.d(TAG, " Exception = ${it.localizedMessage}")
 
-
-                    navController.navigate(Screens.MusicDraftUI.screen)
-                }
-            }
-            .addOnFailureListener{
-                // lamda function che verrà eseguita qualora il login fallisse
-                Log.d(TAG, "Sono dentro addOnFailureListener di LOGIN!")
-                Log.d(TAG, "Si è verificato un errore durante il login dell'utente su FIREBASE.")
-                Log.d(TAG, " message = ${it.message}")
-                Log.d(TAG, " Exception = ${it.localizedMessage}")
-
+                        // Attivo il Popup di errore che verrà mostrato all'utente:
+                        stringToShowErrorDialog.value = it.message.toString()
+                        errorDialogActivated.value = true
+                    }
+            } else {
+                // L'utente non esiste, fai qualcos'altro
+                println("User not exist..")
                 // Attivo il Popup di errore che verrà mostrato all'utente:
-                stringToShowErrorDialog.value = it.message.toString()
+                stringToShowErrorDialog.value = "User not exist into Database.."
                 errorDialogActivated.value = true
             }
+            // disattivo l'indicatore di caricamento:
+            signInInProgress.value = false
+        }
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     }
 
     /*
@@ -518,5 +535,14 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         ////////////////////////////////////////////////////
     }
 
+
+    fun checkUserExistence(email: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val exists = withContext(Dispatchers.IO) {
+                authRepository.doesUserExist(email)
+            }
+            onResult(exists)
+        }
+    }
 
 }

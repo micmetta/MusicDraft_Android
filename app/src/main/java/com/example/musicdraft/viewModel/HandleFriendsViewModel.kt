@@ -22,6 +22,8 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
     //val infoUserCurrent = loginViewModel.userLoggedInfo.value // c'era prima.. problema
     var reqReceivedCurrentUser = handleFriendsRepository.reqReceivedCurrentUser
 
+    var allFriendsCurrentUser = handleFriendsRepository.allFriendsCurrentUser
+
 //    var reqReceivedCurrentUser = handleFriendsRepository.reqReceivedCurrentUser
 //        private set
 
@@ -62,5 +64,17 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
 
     fun getRequestReceivedByUser(email2: String){
         handleFriendsRepository.getRequestReceivedByUser(email2)
+    }
+
+    fun getAllFriendsByUser(email_user: String){
+        handleFriendsRepository.getAllFriendsByUser(email_user)
+    }
+
+    fun acceptRequest(email1: String, email2: String){
+        handleFriendsRepository.acceptRequest(email1, email2)
+    }
+
+    fun refuseRequest(email1: String, email2: String){
+        handleFriendsRepository.refuseRequest(email1, email2)
     }
 }
