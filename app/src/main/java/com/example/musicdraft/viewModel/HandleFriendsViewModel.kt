@@ -12,7 +12,9 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
     private val database = MusicDraftDatabase.getDatabase(application)
     private val handleFriendsDao = database.handleFriendsDao()
     private val userDao = database.userDao()
+    // istanzio il repository:
     private val handleFriendsRepository: HandleFriendsRepository = HandleFriendsRepository(this, handleFriendsDao!!, userDao!!) // istanzio il repository
+    //////////////////////////
     var usersFilter =  handleFriendsRepository.usersFilter
     //var reqReceivedCurrentUser =  handleFriendsRepository.reqReceivedCurrentUser
     //////////////////////////////////////////////////////
@@ -23,6 +25,9 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
     var reqReceivedCurrentUser = handleFriendsRepository.reqReceivedCurrentUser
 
     var allFriendsCurrentUser = handleFriendsRepository.allFriendsCurrentUser
+
+    var allPendingRequest = handleFriendsRepository.allPendingRequest
+
 
 //    var reqReceivedCurrentUser = handleFriendsRepository.reqReceivedCurrentUser
 //        private set
@@ -70,6 +75,10 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
         handleFriendsRepository.getAllFriendsByUser(email_user)
     }
 
+    fun getAllPendingRequestByUser(email_user: String){
+        handleFriendsRepository.getAllPendingRequestByUser(email_user)
+    }
+
     fun acceptRequest(email1: String, email2: String){
         handleFriendsRepository.acceptRequest(email1, email2)
     }
@@ -77,4 +86,5 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
     fun refuseRequest(email1: String, email2: String){
         handleFriendsRepository.refuseRequest(email1, email2)
     }
+
 }

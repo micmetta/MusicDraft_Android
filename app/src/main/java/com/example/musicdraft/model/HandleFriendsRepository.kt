@@ -25,6 +25,8 @@ class HandleFriendsRepository(val handleFriendsViewModel: HandleFriendsViewModel
     val handleFriends: List<HandleFriends>? = null
     val reqReceivedCurrentUser: MutableStateFlow<List<HandleFriends>?> = MutableStateFlow(handleFriends)
     val allFriendsCurrentUser: MutableStateFlow<List<HandleFriends>?> = MutableStateFlow(handleFriends)
+    val allPendingRequest: MutableStateFlow<List<HandleFriends>?> = MutableStateFlow(handleFriends)
+
 
     fun insertNewRequest(email1: String, email2: String){
         handleFriendsViewModel.viewModelScope.launch {
@@ -56,6 +58,18 @@ class HandleFriendsRepository(val handleFriendsViewModel: HandleFriendsViewModel
                 friends.collect { response ->
                     allFriendsCurrentUser.value = response
                     Log.i("TG", "Tutti gli amici dell'utente corrente: ${allFriendsCurrentUser.value}")
+                }
+            }
+        }
+    }
+
+    fun getAllPendingRequestByUser(email_user: String){
+        handleFriendsViewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val pendingRequest = HandleFriendsdao.getAllPendingRequestByUser(email_user)
+                pendingRequest.collect { response ->
+                    allPendingRequest.value = response
+                    Log.i("TG", "Tutte le richieste in attesa sono le seguenti: ${allPendingRequest.value}")
                 }
             }
         }

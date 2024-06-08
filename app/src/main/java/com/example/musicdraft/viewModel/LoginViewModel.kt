@@ -78,6 +78,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     var userLoggedInfo =  authRepository.userLoggedInfo
     //var userLoggedState = mutableStateOf(UserLoggedState())
 
+    // altra sottoscrizione ad una variabile del repository:
+    var allUsersFriendsOfCurrentUser =  authRepository.allUsersFriendsOfCurrentUser
+
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -223,6 +226,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // - Controllerà se la registrazione potrà andare a buon fine o meno:
         createUserInFirebase(
+            nickname = registrationUIState.value.nickName,
             email = registrationUIState.value.email,
             password = registrationUIState.value.password,
             navController
@@ -346,54 +350,70 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
      - Questa funzione verrà invocata dalla funzione di SignUp per creare e memorizzare nel DB di firebase
        il nuovo utente con tutte le sue info.
     */
-    private fun createUserInFirebase(email:String, password:String, navController: NavController){
+    private fun createUserInFirebase(nickname: String, email:String, password:String, navController: NavController){
 
         // attivo l'indicatore di caricamento:
         signUpInProgress.value = true
 
-        FirebaseAuth
-            .getInstance() // ottengo l'istanza di Firebase
-            .createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener{
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Qui controllo se nel DB esiste già un tale utente con il nickname inserito
+        // prima di richiamare il servizio di FirebaseAuth in modo tale da
+        // avere l'unicità anche sul Nickname poichè Firebase controlla l'unicità solo sul campo email:
+        checkUserExistenceWithNickname(nickname) { exists ->
+            if (!exists) {
+                FirebaseAuth
+                    .getInstance() // ottengo l'istanza di Firebase
+                    .createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener{
 
-                // disattivo l'indicatore di caricamento:
-                signUpInProgress.value = false
+//                        // disattivo l'indicatore di caricamento:
+//                        signUpInProgress.value = false
 
-                // qui dentro c'è quello che verrà eseguito nel momento in cui il processo di creazione viene completato.
-                Log.d(TAG, "Sono dentro addOnCompleteListener di CREATE USER IN FIREBASE!")
-                Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
+                        // qui dentro c'è quello che verrà eseguito nel momento in cui il processo di creazione viene completato.
+                        Log.d(TAG, "Sono dentro addOnCompleteListener di CREATE USER IN FIREBASE!")
+                        Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
 
-                if(it.isSuccessful){
+                        if(it.isSuccessful){
 
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    // Adesso sono certo di poter inserire il nuovo utente nel DB:
-                    SaveNewUserInDB(registrationUIState.value.email, registrationUIState.value.nickName, registrationUIState.value.password)
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            // Adesso sono certo di poter inserire il nuovo utente nel DB:
+                            SaveNewUserInDB(registrationUIState.value.email, registrationUIState.value.nickName, registrationUIState.value.password)
+                            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                    Log.d(TAG, "Il nuovo utente è stato REGISTRATO NEL DB DI FIREBASE!")
+                            Log.d(TAG, "Il nuovo utente è stato REGISTRATO NEL DB DI FIREBASE!")
 
-                    // resetto tutti i campi di "registrationUIState":
-                    registrationUIState.value = registrationUIState.value.copy(
-                        nickName = "",
-                        email = "",
-                        password = "",
-                        privacyPolicyAccepted = false
-                    )
-                    navController.navigate(Screens.MusicDraftUI.screen) // cambio schermata
+                            // resetto tutti i campi di "registrationUIState":
+                            registrationUIState.value = registrationUIState.value.copy(
+                                nickName = "",
+                                email = "",
+                                password = "",
+                                privacyPolicyAccepted = false
+                            )
+                            navController.navigate(Screens.MusicDraftUI.screen) // cambio schermata
 
-                }
-            }
-            .addOnFailureListener {
-                // qui dentro c'è quello che verrà eseguito nel momento in cui si verifica un qualche errore durante il processo di creazione.
-                Log.d(TAG, "Sono dentro addOnFailureListener ")
-                Log.d(TAG, "Si è verificato un errore durante la creazione dell'utente su FIREBASE.")
-                Log.d(TAG, " Exception = ${it.message}") // messaggio d'errore
-                Log.d(TAG, " Exception = ${it.localizedMessage}")
+                        }
+                    }
+                    .addOnFailureListener {
+                        // qui dentro c'è quello che verrà eseguito nel momento in cui si verifica un qualche errore durante il processo di creazione.
+                        Log.d(TAG, "Sono dentro addOnFailureListener ")
+                        Log.d(TAG, "Si è verificato un errore durante la creazione dell'utente su FIREBASE.")
+                        Log.d(TAG, " Exception = ${it.message}") // messaggio d'errore
+                        Log.d(TAG, " Exception = ${it.localizedMessage}")
 
+                        // Attivo il Popup di errore che verrà mostrato all'utente:
+                        stringToShowErrorDialog.value = it.message.toString()
+                        errorDialogActivated.value = true
+                    }
+            }else{
+                // L'utente non esiste, fai qualcos'altro
+                println("Nickname already exists..")
                 // Attivo il Popup di errore che verrà mostrato all'utente:
-                stringToShowErrorDialog.value = it.message.toString()
+                stringToShowErrorDialog.value = "Nickname already exists into Database.."
                 errorDialogActivated.value = true
             }
+            // disattivo l'indicatore di caricamento:
+            signUpInProgress.value = false
+        }
     }
 
     /*
@@ -410,7 +430,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Qui controllo se nel DB esiste tale utente prima di richiamare il servizio di FirebaseAuth in modo tale da
         // utilizzare il CASE SENSITIVE poichè Firebase non lo implementa per le email:
-        checkUserExistence(email) { exists ->
+        checkUserExistenceWithEmail(email) { exists ->
             if (exists) {
                 // L'utente esiste, fai qualcosa
                 println("User exist!")
@@ -536,13 +556,25 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    fun checkUserExistence(email: String, onResult: (Boolean) -> Unit) {
+    fun checkUserExistenceWithEmail(email: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val exists = withContext(Dispatchers.IO) {
-                authRepository.doesUserExist(email)
+                authRepository.doesUserExistWithEmail(email)
             }
             onResult(exists)
         }
     }
 
+    fun checkUserExistenceWithNickname(nickname: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val exists = withContext(Dispatchers.IO) {
+                authRepository.doesUserExistWithNickname(nickname)
+            }
+            onResult(exists)
+        }
+    }
+
+    fun getAllNicknameFriendsOfCurrentUser(emails: List<String>){
+        authRepository.getAllUsersFriendsOfCurrentUser(emails)
+    }
 }

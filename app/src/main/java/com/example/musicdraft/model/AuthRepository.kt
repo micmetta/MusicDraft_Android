@@ -26,8 +26,12 @@ import kotlinx.coroutines.withContext
 class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
 
     private val firebaseAuth = Firebase.auth
-    var users = dao.getAllUser()
+    //var users = dao.getAllUser()
+    val users: List<User>? = null
     val userLoggedInfo: MutableStateFlow<User?> = MutableStateFlow(null)
+    val allUsersFriendsOfCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
+
+
 
     /*
     - Questa funzione verrà invocata dal loginViewModel nel momento in cui l'utente cliccherà sull'interfaccia
@@ -64,7 +68,26 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
-    suspend fun doesUserExist(email: String): Boolean {
-        return dao.doesUserExist(email)
+
+    fun getAllUsersFriendsOfCurrentUser(emails: List<String>){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val friends = dao.getNicknamesByEmails(emails)
+                friends.collect { response ->
+                    allUsersFriendsOfCurrentUser.value = response
+                    Log.i("TG", "Tutti gli amici dell'utente corrente (tutte le loro info): ${allUsersFriendsOfCurrentUser.value}")
+                }
+            }
+        }
+    }
+
+
+
+    suspend fun doesUserExistWithEmail(email: String): Boolean {
+        return dao.doesUserExistWithEmail(email)
+    }
+
+    suspend fun doesUserExistWithNickname(nickname: String): Boolean {
+        return dao.doesUserExistWithNickname(nickname)
     }
 }

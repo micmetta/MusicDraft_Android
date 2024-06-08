@@ -34,7 +34,11 @@ interface HandleFriendsDao {
     suspend fun acceptRequest(email1:String, email2: String, state: String)
 
     // Prendo tutti gli amici dell'utente con 'email_user':
-    @Query("SELECT * FROM HandleFriends WHERE email1 = :email_user OR email2 = :email_user")
+    @Query("SELECT * FROM HandleFriends WHERE (email1 = :email_user OR email2 = :email_user) AND state = 'accepted'")
     fun getAllFriendsByUser(email_user: String): Flow<List<HandleFriends>>
+
+    // Prendo tutte le richieste in 'pending' dell'utente con 'email_user':
+    @Query("SELECT * FROM HandleFriends WHERE (email1 = :email_user OR email2 = :email_user) AND state = 'pending'")
+    fun getAllPendingRequestByUser(email_user: String): Flow<List<HandleFriends>>
 
 }
