@@ -16,6 +16,7 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
     private val handleFriendsRepository: HandleFriendsRepository = HandleFriendsRepository(this, handleFriendsDao!!, userDao!!) // istanzio il repository
     //////////////////////////
     var usersFilter =  handleFriendsRepository.usersFilter
+    var usersFilterbyNickname =  handleFriendsRepository.usersFilterbyNickname
     //var reqReceivedCurrentUser =  handleFriendsRepository.reqReceivedCurrentUser
     //////////////////////////////////////////////////////
 
@@ -23,6 +24,8 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
 
     //val infoUserCurrent = loginViewModel.userLoggedInfo.value // c'era prima.. problema
     var reqReceivedCurrentUser = handleFriendsRepository.reqReceivedCurrentUser
+
+    var reqSentFromCurrentUser = handleFriendsRepository.reqSentFromCurrentUser
 
     var allFriendsCurrentUser = handleFriendsRepository.allFriendsCurrentUser
 
@@ -61,14 +64,24 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
         handleFriendsRepository.insertNewRequest(email1, email2)
     }
 
-    // per cercare un utente nel DB:
+    // per cercare un utente nel DB partendo dall'email:
     fun onSearchTextChange(filter: String){
         //_searchText.value = text
         handleFriendsRepository.getUsersByFilter(filter)
     }
 
+    // per cercare un utente nel DB partendo dal nickname:
+    fun onSearchTextChangeByNickname(filter: String){
+        handleFriendsRepository.getUsersByFilterNickname(filter)
+    }
+
+
     fun getRequestReceivedByUser(email2: String){
         handleFriendsRepository.getRequestReceivedByUser(email2)
+    }
+
+    fun getRequestSent(email1: String){
+        handleFriendsRepository.getRequestSent(email1)
     }
 
     fun getAllFriendsByUser(email_user: String){
@@ -85,6 +98,10 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
 
     fun refuseRequest(email1: String, email2: String){
         handleFriendsRepository.refuseRequest(email1, email2)
+    }
+
+    fun deleteFriendship(email1: String, email2: String){
+        handleFriendsRepository.deleteFriendship(email1, email2)
     }
 
 }

@@ -16,8 +16,18 @@ interface UserDao {
     @Query("SELECT * FROM User WHERE email LIKE '%' || :email || '%'")
     fun getAllUsersFilterEmail(email: String): Flow<List<User>?>
 
+
+    @Query("SELECT * FROM User WHERE nickname LIKE '%' || :nickname || '%'")
+    fun getAllUsersFilterNickname(nickname: String): Flow<List<User>?>
+
     @Insert
     suspend fun insertUser(user: User)
+
+    /*
+    - Query per settare il campo 'isOnline' di un utente uguale a false.
+    */
+    @Query("UPDATE User SET isOnline = false WHERE email = :email")
+    suspend fun updateIsOfflineUser(email: String)
 
     @Query("SELECT * FROM User WHERE email = :email")
     fun getUserByEmail(email: String): Flow<User?>
@@ -25,7 +35,6 @@ interface UserDao {
 
     @Query("SELECT * FROM User WHERE email IN (:emails)")
     fun getNicknamesByEmails(emails: List<String>): Flow<List<User>>
-
 
 
     @Query("SELECT EXISTS(SELECT 1 FROM User WHERE email = :email)")

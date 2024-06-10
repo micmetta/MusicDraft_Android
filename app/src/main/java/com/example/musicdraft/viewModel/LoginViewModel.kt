@@ -12,6 +12,7 @@ import com.example.musicdraft.data.RegistrationUIState
 import com.example.musicdraft.data.UIEventSignIn
 import com.example.musicdraft.data.UIEventSignUp
 import com.example.musicdraft.data.rules.ValidatorFields
+import com.example.musicdraft.data.tables.handleFriends.HandleFriends
 import com.example.musicdraft.data.tables.user.User
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.login.GoogleSignInState
@@ -78,9 +79,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     var userLoggedInfo =  authRepository.userLoggedInfo
     //var userLoggedState = mutableStateOf(UserLoggedState())
 
-    // altra sottoscrizione ad una variabile del repository:
+    // altre sottoscrizioni a variabili del repository:
     var allUsersFriendsOfCurrentUser =  authRepository.allUsersFriendsOfCurrentUser
-
+    var allUsersrReceivedRequestByCurrentUser =  authRepository.allUsersrReceivedRequestByCurrentUser
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -382,6 +383,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
                             Log.d(TAG, "Il nuovo utente è stato REGISTRATO NEL DB DI FIREBASE!")
 
+                            // prendo le info principali dell'utente dalla tabella User:
+                            authRepository.getUserByEmail(email)
+
                             // resetto tutti i campi di "registrationUIState":
                             registrationUIState.value = registrationUIState.value.copy(
                                 nickName = "",
@@ -490,6 +494,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         val authStateListener = AuthStateListener {
             if(it.currentUser == null){
                 // se entro qui vuol dire che il logout è andato a buon fine.
+                userLoggedInfo.value?.let { it1 -> authRepository.LogoutUserLoggedInfo(it1.email) }
                 Log.d(TAG, "Logout eseguito con successo!")
                 navController.navigate(Screens.Login.screen)
             }else{
@@ -576,5 +581,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getAllNicknameFriendsOfCurrentUser(emails: List<String>){
         authRepository.getAllUsersFriendsOfCurrentUser(emails)
+    }
+
+    fun getallUsersrReceivedRequestByCurrentUser(emails: List<HandleFriends>?){
+        // Da ogni 'handleFriends' presente in emails prendo solo il valore del campo 'email2' in modo tale da crearmi
+        // una lista di email di utenti che hanno ricevuto la richiesta dall'utente corrente e dopodchè
+        // fornisco tale lista in input al metodo 'authRepository.getallUsersrReceivedRequestByCurrentUser'
+        // per prendermi tutti i nickname di questi utenti:
+        val email2List: List<String>? = emails?.map { it.email2 }
+        if (email2List != null) {
+            authRepository.getallUsersrReceivedRequestByCurrentUser(email2List)
+        }
     }
 }

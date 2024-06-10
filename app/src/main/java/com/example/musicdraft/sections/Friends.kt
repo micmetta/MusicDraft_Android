@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.Pending
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.musicdraft.data.tables.handleFriends.HandleFriends
@@ -70,12 +72,14 @@ fun Friends(handleFriendsViewModel: HandleFriendsViewModel, loginViewModel: Logi
 //    var showConfirmationDialog by remember { mutableStateOf(false) }
 
     val usersFilter by handleFriendsViewModel.usersFilter.collectAsState()
+    val usersFilterbyNickname by handleFriendsViewModel.usersFilterbyNickname.collectAsState()
+
     val reqReceivedCurrentUser by handleFriendsViewModel.reqReceivedCurrentUser.collectAsState(null)
+    val reqSentFromCurrentUser by handleFriendsViewModel.reqSentFromCurrentUser.collectAsState(null)
     val infoUserCurrent by loginViewModel.userLoggedInfo.collectAsState(initial = null)
 
     val allFriendsCurrentUser by handleFriendsViewModel.allFriendsCurrentUser.collectAsState(null)
     val allUsersFriendsOfCurrentUser by loginViewModel.allUsersFriendsOfCurrentUser.collectAsState(null)
-
 
     val tabItems = listOf(
         TabItem(
@@ -192,53 +196,14 @@ fun Friends(handleFriendsViewModel: HandleFriendsViewModel, loginViewModel: Logi
                             if (emailsList != null) {
                                 loginViewModel.getAllNicknameFriendsOfCurrentUser(emailsList)
                             }
-                            RequestMatesList(allUsersFriendsOfCurrentUser, infoUserCurrent)
+                            RequestMatesList(handleFriendsViewModel, allUsersFriendsOfCurrentUser, infoUserCurrent)
                         }
                     }
                     1 -> RequestReceivedList(handleFriendsViewModel, reqReceivedCurrentUser = reqReceivedCurrentUser, infoUserCurrent)
-                    2 -> RequestSent(handleFriendsViewModel, usersFilter, infoUserCurrent, allUsersFriendsOfCurrentUser)
+                    2 -> RequestSent(handleFriendsViewModel, loginViewModel, usersFilter, usersFilterbyNickname, infoUserCurrent, reqSentFromCurrentUser = reqSentFromCurrentUser, allUsersFriendsOfCurrentUser)
                 }
             }
         }
-
-//        if (showDialog) {
-//            AlertDialog(
-//                onDismissRequest = { showDialog = false },
-//                title = { Text(text = "Friend Request") },
-//                text = { Text(text = "Do you want to send a friend request to this user?") },
-//                confirmButton = {
-//                    TextButton(
-//                        onClick = {
-//                            selectedUser?.email?.let { handleFriendsViewModel.insertNewRequest(email1 = infoUserCurrent!!.email, email2 = it) }
-//                            showDialog = false
-//                            showConfirmationDialog = true
-//                        }
-//                    ) {
-//                        Text("Yes")
-//                    }
-//                },
-//                dismissButton = {
-//                    TextButton(onClick = { showDialog = false }) {
-//                        Text("No")
-//                    }
-//                }
-//            )
-//        }
-
-//        if (showConfirmationDialog) {
-//            AlertDialog(
-//                onDismissRequest = { showConfirmationDialog = false },
-//                title = { Text(text = "Success") },
-//                text = { Text(text = "Friend request sent successfully!") },
-//                confirmButton = {
-//                    TextButton(
-//                        onClick = { showConfirmationDialog = false }
-//                    ) {
-//                        Text("OK")
-//                    }
-//                }
-//            )
-//        }
     }
 }
 
@@ -251,7 +216,11 @@ data class TabItem(
 
 
 @Composable
-fun RequestMatesList(allUsersFriendsOfCurrentUser: List<User>?, infoUserCurrent: User?) {
+fun RequestMatesList(handleFriendsViewModel: HandleFriendsViewModel, allUsersFriendsOfCurrentUser: List<User>?, infoUserCurrent: User?) {
+
+    var showDialogToDeleteFriendship by remember { mutableStateOf(false) }
+    var showDialogToConfirmDeleteFriendship by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.height(16.dp))
         if (allUsersFriendsOfCurrentUser.isNullOrEmpty()) {
@@ -294,9 +263,38 @@ fun RequestMatesList(allUsersFriendsOfCurrentUser: List<User>?, infoUserCurrent:
                             IconButton(onClick = { /* Azione quando si clicca sull'icona 2 */ }) {
                                 Icon(imageVector = Icons.Default.LocalFireDepartment, contentDescription = "ChallengeFriend")
                             }
-                            IconButton(onClick = { /* Azione quando si clicca sull'icona 3 */ }) {
+                            IconButton(onClick = {
+                                // quando clicco su questa icona, viene chiesto all'utente se è sicuro di voler cancellare
+                                // dalla sua lista amici l'amico che ha selezionato e se conferma allora verrà cancellata dal
+                                // DB la riga che rappresentava l'amiciza tra questi due utenti:
+                                showDialogToDeleteFriendship = true
+                            }) {
                                 Icon(imageVector = Icons.Default.DeleteForever, contentDescription = "DeleteFriend")
                             }
+                        }
+
+                        if(showDialogToDeleteFriendship){
+                            AlertDialog(
+                                onDismissRequest = { showDialogToDeleteFriendship = false },
+                                title = { Text(text = "Delete Friendship") },
+                                text = { Text(text = "Do you really want to remove this user from your friends list?") },
+                                confirmButton = {
+                                    TextButton(
+                                        onClick = {
+                                            handleFriendsViewModel.deleteFriendship(infoUserCurrent.email, friendUser.email)
+                                            showDialogToDeleteFriendship = false
+                                            showDialogToConfirmDeleteFriendship = true
+                                        }
+                                    ) {
+                                        Text("Yes")
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showDialogToDeleteFriendship = false }) {
+                                        Text("No")
+                                    }
+                                }
+                            )
                         }
                     }
                     Divider(
@@ -308,16 +306,25 @@ fun RequestMatesList(allUsersFriendsOfCurrentUser: List<User>?, infoUserCurrent:
             }
         }
     }
+
+
+    if (showDialogToConfirmDeleteFriendship) {
+        AlertDialog(
+            onDismissRequest = { showDialogToConfirmDeleteFriendship = false },
+            title = { Text(text = "Delete Friendship Success") },
+            text = { Text(text = "Friendship successfully deleted!") },
+            confirmButton = {
+                TextButton(
+                    onClick = { showDialogToConfirmDeleteFriendship = false }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
 }
 
-
-
-
-//text = if (friendUser.email1 != infoUserCurrent.email) {
-//    friendUser.email1 // sono certo che l'email dell'amico è questa perchè friendUser.email2 è l'email dell'utente corrente
-//} else {
-//    friendUser.email2 // sono certo che l'email dell'amico è questa perchè friendUser.email1 è l'email dell'utente corrente
-//},
 
 
 @Composable
@@ -429,44 +436,6 @@ fun FriendRequestItem(handleFriendsViewModel: HandleFriendsViewModel, email1: St
                 }
             }
         }
-
-
-//        if (showAcceptedDialog) {
-//            AlertDialog(
-//                onDismissRequest = { showAcceptedDialog = false },
-//                title = { Text(text = "Success") },
-//                text = { Text(text = "Now you and this user are friends!") },
-//                confirmButton = {
-//                    TextButton(
-//                        onClick = {
-//                            showAcceptedDialog = false
-//                            handleFriendsViewModel.getRequestReceivedByUser(email2) // richiedo l'aggiornamento delle richieste d'amicizia
-//                        }
-//                    ) {
-//                        Text("OK")
-//                    }
-//                }
-//            )
-//        }
-//
-//        if (showRefuseDialog) {
-//            AlertDialog(
-//                onDismissRequest = { showAcceptedDialog = false },
-//                title = { Text(text = "Success") },
-//                text = { Text(text = "Request friend refused!") },
-//                confirmButton = {
-//                    TextButton(
-//                        onClick = {
-//                            showAcceptedDialog = false
-//                            handleFriendsViewModel.getRequestReceivedByUser(email2) // richiedo l'aggiornamento delle richieste d'amicizia
-//                        }
-//                    ) {
-//                        Text("OK")
-//                    }
-//                }
-//            )
-//        }
-
     }
 }
 
@@ -474,125 +443,354 @@ fun FriendRequestItem(handleFriendsViewModel: HandleFriendsViewModel, email1: St
 @Composable
 fun RequestSent(
     handleFriendsViewModel: HandleFriendsViewModel,
+    loginViewModel: LoginViewModel,
     usersFilter: List<User>?,
+    usersFilterbyNickname: List<User>?,
     infoUserCurrent: User?,
+    reqSentFromCurrentUser: List<HandleFriends>?,
     allUsersFriendsOfCurrentUser: List<User>?,
-   ){
-
+) {
     var showDialog by remember { mutableStateOf(false) }
     var selectedUser by remember { mutableStateOf<User?>(null) }
     var showConfirmationDialog by remember { mutableStateOf(false) }
     var showDialogYouHaveAlreadyReceived by remember { mutableStateOf(false) }
     var showDialogYouHaveAlreadySent by remember { mutableStateOf(false) }
+    var showDialogToDeleteRequestFriendship by remember { mutableStateOf(false) }
+    var showDialogToConfirmDeleteRequestFriendship by remember { mutableStateOf(false) }
+
 
     val allPendingRequest by handleFriendsViewModel.allPendingRequest.collectAsState(null)
+    val allUsersrReceivedRequestByCurrentUser by loginViewModel.allUsersrReceivedRequestByCurrentUser.collectAsState(null)
+
+    // Chiamo subito questi due metodi che mi permetteranno di aggiornare rispettivamente
+    // handleFriendsViewModel.getRequestSent(it) -> 'reqSentFromCurrentUser'
+    // loginViewModel.getallUsersrReceivedRequestByCurrentUser(reqSentFromCurrentUser) -> 'allUsersrReceivedRequestByCurrentUser'
+    infoUserCurrent?.email?.let{
+        // Chiamata al metodo per aggiornare le richieste di amicizia inviate dall'utente corrente:
+        handleFriendsViewModel.getRequestSent(it)
+        // aggiorno tutti i nicknames degli utenti ai quali l'utente corrente ha inviato una richiesta
+        loginViewModel.getallUsersrReceivedRequestByCurrentUser(reqSentFromCurrentUser)
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        var searchText by remember { mutableStateOf(TextFieldValue("")) }
 
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = { newText ->
-                searchText = newText
-                handleFriendsViewModel.onSearchTextChange(newText.text)
-            },
-            label = { Text("Search by email") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        var searchText by remember { mutableStateOf(TextFieldValue("")) }
+        var searchByEmail by remember { mutableStateOf(false) }
+        var searchByNickname by remember { mutableStateOf(false) }
+
+        Row {
+            Checkbox(
+                checked = searchByEmail,
+                onCheckedChange = {
+                    searchByEmail = it
+                    if (it) searchByNickname = false
+                }
+            )
+            Text("Search by email")
+            Spacer(modifier = Modifier.width(16.dp))
+            Checkbox(
+                checked = searchByNickname,
+                onCheckedChange = {
+                    searchByNickname = it
+                    if (it) searchByEmail = false
+                }
+            )
+            Text("Search by nickname")
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
-        usersFilter?.let { users ->
-            if (users.isNotEmpty()) {
+        if (searchByEmail) {
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = {
+                    searchText = it
+                    handleFriendsViewModel.onSearchTextChange(it.text)
+                    handleFriendsViewModel.onSearchTextChangeByNickname(it.text) // eseguo anche questo aggiornamento in modo tale che
+                    // se l'utente dovesse fare il check su "Search by nickname" potrà vedere immeddiatamente l'aggiornamento
+                    // in base ai caratteri che aveva inserito quando aveva la spunta su "Sarch by email".
+                },
+                label = { Text("Search for the email of a user to send the friend request to") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                usersFilter?.let { users ->
+                    if (users.isNotEmpty()) {
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////
+                        // Chiamata al metodo per aggiornare le richieste pendenti nelle quali è coinvolto l'utente corrente:
+                        infoUserCurrent?.email?.let { handleFriendsViewModel.getAllPendingRequestByUser(it) }
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                            items(users) { user ->
+                                if (
+                                // - L'utente filtrato (ovvero 'user.email') è quell'utente al quale l'utente corrente
+                                //   può inviare la richiesta di amicizia.
+                                //   Devono però essere rispettatte queste due condizioni:
+                                // 1) l'email dell'utente filtrato non deve essere uguale all'email dell'utente corrente:
+                                    (user.email != infoUserCurrent?.email) &&
+                                    // 2) l'email dell'utente filtrato non è già presente nella lista amici dell'utente corrente;
+                                    //    il true alla fine verifica che la condizione 2) valga per tutti gli elementi della
+                                    //    lista 'allUsersFriendsOfCurrentUser' (con 'it' prendo ogni valore presente nella lista
+                                    //    'allUsersFriendsOfCurrentUser'):
+                                    (allUsersFriendsOfCurrentUser?.none { it.email == user.email } == true)
+                                ) {
+                                    Text(
+                                        text = user.email,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                            .clickable {
 
+                                                infoUserCurrent?.email?.let {
 
-                ////////////////////////////////////////////////////////////////////////////////////////////////////
-                // Chiamata al metodo per aggiornare le richieste pendenti nelle quali è coinvolto l'utente corrente:
-                infoUserCurrent?.email?.let { handleFriendsViewModel.getAllPendingRequestByUser(it) }
-                ////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                    //handleFriendsViewModel.getAllPendingRequestByUser(it) // aggiorno le richieste pendenti
+                                                    // 1) controllo che l'utente corrente non abbia già mandato la richiesta a 'selectedUser'
+                                                    // 2) controllo che l'utente corrente non abbia già ricevuto una richiesta da parte di 'selectedUser'
+                                                    val requestStatus = when {
+                                                        allPendingRequest?.any { pendingRequest ->
+                                                            pendingRequest.email1 == user.email && pendingRequest.email2 == infoUserCurrent.email
+                                                        } == true -> {
+                                                            // La richiesta è stata già inviata dall'utente filtrato all'utente corrente
+                                                            "This user has already sent you a request!"
+                                                        }
+                                                        allPendingRequest?.any { pendingRequest ->
+                                                            pendingRequest.email1 == infoUserCurrent.email && pendingRequest.email2 == user.email
+                                                        } == true -> {
+                                                            // La richiesta è stata inviata dall'utente corrente all'utente filtrato
+                                                            "You have already sent a request to this user!"
+                                                        }
+                                                        else -> {
+                                                            // Nessuna richiesta è stata inviata tra questi due utenti
+                                                            "NoRequest"
+                                                        }
+                                                    }
 
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // scorro tutti gli utenti filtrati (ogni utente filtrato è rappresentato da 'user'):
-                    users.forEach { user ->
+                                                    // Controllo il 'requestStatus':
+                                                    when (requestStatus) {
+                                                        "This user has already sent you a request!" -> {
+                                                            // La richiesta è stata già inviata dall'utente filtrato all'utente corrente
+                                                            showDialogYouHaveAlreadyReceived = true
+                                                        }
+                                                        "You have already sent a request to this user!" -> {
+                                                            // La richiesta è stata inviata dall'utente corrente all'utente filtrato
+                                                            showDialogYouHaveAlreadySent = true
+                                                        }
+                                                        "NoRequest" -> {
+                                                            // Nessuna richiesta è stata inviata tra questi due utenti
+                                                            selectedUser = user
+                                                            showDialog = true
+                                                        }
+                                                    }
 
-                        if (
-                        // - L'utente filtrato (ovvero 'user.email') è quell'utente al quale l'utente corrente
-                        //   può inviare la richiesta di amicizia.
-                        //   Devono però essere rispettatte queste due condizioni:
-                        // 1) l'email dell'utente filtrato non deve essere uguale all'email dell'utente corrente:
-                            (user.email != infoUserCurrent?.email) &&
-                            // 2) l'email dell'utente filtrato non è già presente nella lista amici dell'utente corrente;
-                            //    il true alla fine verifica che la condizione 2) valga per tutti gli elementi della
-                            //    lista 'allUsersFriendsOfCurrentUser' (con 'it' prendo ogni valore presente nella lista
-                            //    'allUsersFriendsOfCurrentUser'):
-                            (allUsersFriendsOfCurrentUser?.none { it.email == user.email } == true)
-                        ) {
-
-                            Text(
-                                text = user.email,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                                    .clickable {
-
-                                        infoUserCurrent?.email?.let {
-
-                                            //handleFriendsViewModel.getAllPendingRequestByUser(it) // aggiorno le richieste pendenti
-                                            // 1) controllo che l'utente corrente non abbia già mandato la richiesta a 'selectedUser'
-                                            // 2) controllo che l'utente corrente non abbia già ricevuto una richiesta da parte di 'selectedUser'
-                                            val requestStatus = when {
-                                                allPendingRequest?.any { pendingRequest ->
-                                                    pendingRequest.email1 == user.email && pendingRequest.email2 == infoUserCurrent.email
-                                                } == true -> {
-                                                    // La richiesta è stata già inviata dall'utente filtrato all'utente corrente
-                                                    "This user has already sent you a request!"
                                                 }
-                                                allPendingRequest?.any { pendingRequest ->
-                                                    pendingRequest.email1 == infoUserCurrent.email && pendingRequest.email2 == user.email
-                                                } == true -> {
-                                                    // La richiesta è stata inviata dall'utente corrente all'utente filtrato
-                                                    "You have already sent a request to this user!"
-                                                }
-                                                else -> {
-                                                    // Nessuna richiesta è stata inviata tra questi due utenti
-                                                    "NoRequest"
-                                                }
-                                            }
-
-                                            // Controllo il 'requestStatus':
-                                            when (requestStatus) {
-                                                "This user has already sent you a request!" -> {
-                                                    // La richiesta è stata già inviata dall'utente filtrato all'utente corrente
-                                                    showDialogYouHaveAlreadyReceived = true
-                                                }
-                                                "You have already sent a request to this user!" -> {
-                                                    // La richiesta è stata inviata dall'utente corrente all'utente filtrato
-                                                    showDialogYouHaveAlreadySent = true
-                                                }
-                                                "NoRequest" -> {
-                                                    // Nessuna richiesta è stata inviata tra questi due utenti
-                                                    selectedUser = user
-                                                    showDialog = true
-                                                }
-                                            }
-
-                                        }
-                                    },
-                                style = MaterialTheme.typography.bodyLarge
-                            )
+                                            },
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                            }
                         }
+                    } else {
+                        Text(
+                            text = "No users found",
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
                     }
                 }
-            } else {
-                Text(
-                    text = "No users found",
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+            }
+        } else if (searchByNickname) {
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = {
+                    searchText = it
+                    handleFriendsViewModel.onSearchTextChangeByNickname(it.text)
+                    handleFriendsViewModel.onSearchTextChange(it.text) // eseguo anche questo aggiornamento in modo tale che
+                    // se l'utente dovesse fare il check su "Search by email" potrà vedere immeddiatamente l'aggiornamento
+                    // in base ai caratteri che aveva inserito quando aveva la spunta su "Sarch by nickname".
+                },
+                label = { Text("Search for the nickname of a user to send the friend request to") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                usersFilterbyNickname?.let { users ->
+                    if (users.isNotEmpty()) {
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////
+                        // Chiamata al metodo per aggiornare le richieste pendenti nelle quali è coinvolto l'utente corrente:
+                        infoUserCurrent?.email?.let { handleFriendsViewModel.getAllPendingRequestByUser(it) }
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                            items(users) { user ->
+                                if (
+                                // - L'utente filtrato (ovvero 'user.email') è quell'utente al quale l'utente corrente
+                                //   può inviare la richiesta di amicizia.
+                                //   Devono però essere rispettatte queste due condizioni:
+                                // 1) l'email dell'utente filtrato non deve essere uguale all'email dell'utente corrente:
+                                    (user.email != infoUserCurrent?.email) &&
+                                    // 2) l'email dell'utente filtrato non è già presente nella lista amici dell'utente corrente;
+                                    //    il true alla fine verifica che la condizione 2) valga per tutti gli elementi della
+                                    //    lista 'allUsersFriendsOfCurrentUser' (con 'it' prendo ogni valore presente nella lista
+                                    //    'allUsersFriendsOfCurrentUser'):
+                                    (allUsersFriendsOfCurrentUser?.none { it.email == user.email } == true)
+                                ) {
+                                    Text(
+                                        text = user.nickname,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                            .clickable {
+
+                                                infoUserCurrent?.email?.let {
+
+                                                    //handleFriendsViewModel.getAllPendingRequestByUser(it) // aggiorno le richieste pendenti
+                                                    // 1) controllo che l'utente corrente non abbia già mandato la richiesta a 'selectedUser'
+                                                    // 2) controllo che l'utente corrente non abbia già ricevuto una richiesta da parte di 'selectedUser'
+                                                    val requestStatus = when {
+                                                        allPendingRequest?.any { pendingRequest ->
+                                                            pendingRequest.email1 == user.email && pendingRequest.email2 == infoUserCurrent.email
+                                                        } == true -> {
+                                                            // La richiesta è stata già inviata dall'utente filtrato all'utente corrente
+                                                            "This user has already sent you a request!"
+                                                        }
+                                                        allPendingRequest?.any { pendingRequest ->
+                                                            pendingRequest.email1 == infoUserCurrent.email && pendingRequest.email2 == user.email
+                                                        } == true -> {
+                                                            // La richiesta è stata inviata dall'utente corrente all'utente filtrato
+                                                            "You have already sent a request to this user!"
+                                                        }
+                                                        else -> {
+                                                            // Nessuna richiesta è stata inviata tra questi due utenti
+                                                            "NoRequest"
+                                                        }
+                                                    }
+
+                                                    // Controllo il 'requestStatus':
+                                                    when (requestStatus) {
+                                                        "This user has already sent you a request!" -> {
+                                                            // La richiesta è stata già inviata dall'utente filtrato all'utente corrente
+                                                            showDialogYouHaveAlreadyReceived = true
+                                                        }
+                                                        "You have already sent a request to this user!" -> {
+                                                            // La richiesta è stata inviata dall'utente corrente all'utente filtrato
+                                                            showDialogYouHaveAlreadySent = true
+                                                        }
+                                                        "NoRequest" -> {
+                                                            // Nessuna richiesta è stata inviata tra questi due utenti
+                                                            selectedUser = user
+                                                            showDialog = true
+                                                        }
+                                                    }
+
+                                                }
+                                            },
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "No users found",
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if(!allUsersrReceivedRequestByCurrentUser.isNullOrEmpty()){
+            // Se l'utente corrente ha già inviato almeno una richiesta di amicizia a un qualsiasi altro utente
+            // allora mostro queste richieste, altrimenti NON MOSTRO NULLA.
+            Text(
+                text = "Users to whom you have already sent requests:",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                infoUserCurrent?.email?.let {
+//                // Chiamata al metodo per aggiornare le richieste di amicizia inviate dall'utente corrente:
+//                handleFriendsViewModel.getRequestSent(it)
+//
+//                // aggiorno tutti i nicknames degli utenti ai quali l'utente corrente ha inviato una richiesta
+//                loginViewModel.getallUsersrReceivedRequestByCurrentUser(reqSentFromCurrentUser)
+
+                    // Scorro la lista delle richieste di amicizia inviate dall'utente corrente:
+                    items(allUsersrReceivedRequestByCurrentUser ?: emptyList()) { userReceivedRequestByCurrentUser ->
+                        // Singolo elemento della lista:
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "User Icon",
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .size(24.dp)
+                            )
+                            // Testo con il nickname dell'utente:
+                            Text(
+                                text = userReceivedRequestByCurrentUser.nickname, // mostro SOLO il nickname dell'utente
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(vertical = 4.dp),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            // Icona per eliminare la richiesta di amicizia
+                            IconButton(onClick = {
+                                // quando clicco su questa icona, viene chiesto all'utente se è sicuro di voler cancellare
+                                // la richiesta inviata all'utente corrente e se conferma allora verrà cancellata dal
+                                // DB la riga che rappresentava la richiesta di amicizia tra questi due utenti:
+                                showDialogToDeleteRequestFriendship = true
+                            }) {
+                                Icon(imageVector = Icons.Default.DeleteForever, contentDescription = "DeleteFriend")
+                            }
+                        }
+                        if(showDialogToDeleteRequestFriendship){
+                            AlertDialog(
+                                onDismissRequest = { showDialogToDeleteRequestFriendship = false },
+                                title = { Text(text = "Delete Friendship") },
+                                text = { Text(text = "Do you really want to delete this request?") },
+                                confirmButton = {
+                                    TextButton(
+                                        onClick = {
+                                            handleFriendsViewModel.refuseRequest(infoUserCurrent.email, userReceivedRequestByCurrentUser.email)
+                                            showDialogToDeleteRequestFriendship = false
+                                            showDialogToConfirmDeleteRequestFriendship = true
+                                        }
+                                    ) {
+                                        Text("Yes")
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showDialogToDeleteRequestFriendship = false }) {
+                                        Text("No")
+                                    }
+                                }
+                            )
+                        }
+
+                        // linea di divisione tra un utente e il successivo:
+                        Divider(
+                            color = Color.Black,
+                            thickness = 2.dp,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+
+                    }
+                }
             }
         }
     }
@@ -666,4 +864,18 @@ fun RequestSent(
         )
     }
 
+    if (showDialogToConfirmDeleteRequestFriendship) {
+        AlertDialog(
+            onDismissRequest = { showDialogToConfirmDeleteRequestFriendship = false },
+            title = { Text(text = "Delete Request Friendship Success") },
+            text = { Text(text = "Request Friendship successfully deleted!") },
+            confirmButton = {
+                TextButton(
+                    onClick = { showDialogToConfirmDeleteRequestFriendship = false }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }

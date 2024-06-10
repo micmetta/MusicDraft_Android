@@ -12,10 +12,17 @@ interface HandleFriendsDao {
     suspend fun insertRequest(handleFriends: HandleFriends)
 
     // Quando una richiesta di amicizia da parte dell'utente con email2 viene
-    // rifiutata (oppure anche dopo che questa era stata accettata uno dei due
-    // utenti decide di cancellarla), allora tale richiesta verrà eliminata direttamente dal DB:
+    // rifiutata, allora tale richiesta verrà eliminata direttamente dal DB; questa query verrà eseguita
+    // anche quando ad esempio l'utente con 'email1'
+    // decide di cancellare la richiesta di amicizia che aveva mandato all'utente con 'email2':
     @Query("DELETE FROM HandleFriends WHERE email1 = :email1 AND email2 = :email2")
     suspend fun deleteRequest(email1: String, email2: String)
+
+    // Data una certa coppia che rappresenta un'amicizia tra
+    // utente1-utente2, uno dei due utenti decide di rimuovere l'altro dalla sua lista amici e quindi
+    // questa riga del DB viene cancellata:
+    @Query("DELETE FROM HandleFriends WHERE (email1 = :email1 AND email2 = :email2) OR (email2 = :email1 AND email1 = :email2)")
+    suspend fun deleteFriendship(email1: String, email2: String)
 
     // restituisce la lista di utenti che hanno mandato richieste di amicizia
     // all'utente con email2 e quindi permette ad un utente di vedere queste
@@ -25,9 +32,10 @@ interface HandleFriendsDao {
 
     // restituisce la lista di utenti a cui l'utente corrente ha mandato
     // la richiesta e quindi permette ad un utente di vedere a quali utenti
-    // ha mandato lui stesso la richiesta nella schermata Friends.RequestsSent:
-    @Query("SELECT * FROM HandleFriends WHERE email1 = :email1")
-    fun getRequestSent(email1: String): List<HandleFriends>
+    // ha mandato lui stesso la richiesta nella schermata Friends.RequestsSent per le quali non ha
+    // ancora ricevuto risposta:
+    @Query("SELECT * FROM HandleFriends WHERE email1 = :email1 AND state = 'pending'")
+    fun getRequestSent(email1: String): Flow<List<HandleFriends>>
 
     // Richiesta di amicizia accettata dall'utente con 'email2':
     @Query("UPDATE HandleFriends SET state = :state WHERE email1 = :email1 AND email2 = :email2")

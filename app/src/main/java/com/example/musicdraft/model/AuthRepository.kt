@@ -30,7 +30,7 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
     val users: List<User>? = null
     val userLoggedInfo: MutableStateFlow<User?> = MutableStateFlow(null)
     val allUsersFriendsOfCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
-
+    val allUsersrReceivedRequestByCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
 
 
     /*
@@ -68,6 +68,25 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
+    /*
+    - Resetto i dati dell'utente corrente.
+      (Questo metodo verrà invocato quando l'utente eseguirà il logout dall'applicazione.
+    */
+    fun LogoutUserLoggedInfo(email: String){
+        userLoggedInfo.value?.email = ""
+        userLoggedInfo.value?.nickname = ""
+        userLoggedInfo.value?.password = ""
+        userLoggedInfo.value?.isOnline = false
+        userLoggedInfo.value?.points = 0
+
+        // setto nel DB che l'utente che ha l'email passata in input è andato offline:
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO){
+                dao.updateIsOfflineUser(email)
+                Log.i("TG", "Ho settato a false lo stato isOnline dell'utente con questa email: ${email}")
+            }
+        }
+    }
 
     fun getAllUsersFriendsOfCurrentUser(emails: List<String>){
         viewModel.viewModelScope.launch {
@@ -76,6 +95,18 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
                 friends.collect { response ->
                     allUsersFriendsOfCurrentUser.value = response
                     Log.i("TG", "Tutti gli amici dell'utente corrente (tutte le loro info): ${allUsersFriendsOfCurrentUser.value}")
+                }
+            }
+        }
+    }
+
+    fun getallUsersrReceivedRequestByCurrentUser(emails: List<String>){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val friends = dao.getNicknamesByEmails(emails)
+                friends.collect { response ->
+                    allUsersrReceivedRequestByCurrentUser.value = response
+                    Log.i("TG", "Tutti gli utenti che hanno ricevuto la richiesta dall'utente corrente (tutte le loro info): ${allUsersrReceivedRequestByCurrentUser.value}")
                 }
             }
         }
