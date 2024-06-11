@@ -44,6 +44,9 @@ import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
 import com.example.musicdraft.sections.Cards
 import com.example.musicdraft.sections.Decks
 import Marketplace
+import androidx.lifecycle.ViewModelProvider
+import com.example.musicdraft.factory.CardsViewModelFactory
+import com.example.musicdraft.factory.MarketplaceViewModelFactory
 import com.example.musicdraft.sections.Friends
 import com.example.musicdraft.sections.Home
 import com.example.musicdraft.sections.Matchmaking
@@ -83,14 +86,19 @@ class MainActivity : ComponentActivity() {
 
             val loginViewModel: LoginViewModel by viewModels()
             val handleFriendsViewModel: HandleFriendsViewModel by viewModels()
-            val marketPlaceViewModel:MarketplaceViewModel by viewModels()
-            val cardsViewModel: CardsViewModel by viewModels()
+
+            val cardsViewModelFactory = CardsViewModelFactory(application, loginViewModel)
+            val cardsViewModel: CardsViewModel = ViewModelProvider(this, cardsViewModelFactory).get(CardsViewModel::class.java)
+
+            val marketplaceViewModelFactory = MarketplaceViewModelFactory(application, cardsViewModel, loginViewModel)
+            val marketplaceViewModel: MarketplaceViewModel = ViewModelProvider(this, marketplaceViewModelFactory).get(MarketplaceViewModel::class.java)
+
 
             MusicDraftTheme {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    Navigation(loginViewModel, handleFriendsViewModel,marketPlaceViewModel,cardsViewModel)
+                    Navigation(loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewModel)
                 }
             }
         }
@@ -104,8 +112,8 @@ class MainActivity : ComponentActivity() {
 fun Navigation(
     loginViewModel: LoginViewModel,
     handleFriendsViewModel: HandleFriendsViewModel,
-    marketplaceViewmodel: MarketplaceViewModel,
-    cardsViewModel: CardsViewModel
+    cardsViewModel: CardsViewModel,
+    marketplaceViewmodel: MarketplaceViewModel
 ){
     val navigationController = rememberNavController()
     // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
@@ -121,7 +129,7 @@ fun Navigation(
             TermsAndConditionsScreen() // composable che verrà aperto per mostrare i termini e condizioni dell'app
         }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel,marketplaceViewmodel, handleFriendsViewModel,cardsViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -134,9 +142,10 @@ fun Navigation(
 fun MusicDraftUI(
     navControllerInitialScreens: NavController,
     loginViewModel: LoginViewModel,
-    marketplaceViewmodel: MarketplaceViewModel,
+
     handleFriendsViewModel: HandleFriendsViewModel,
-    cardsViewModel: CardsViewModel
+    cardsViewModel: CardsViewModel,
+    marketplaceViewmodel: MarketplaceViewModel
 ){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()

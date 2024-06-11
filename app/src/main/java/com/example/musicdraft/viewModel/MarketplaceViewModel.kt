@@ -1,6 +1,7 @@
 package com.example.musicdraft.viewModel
 
 import android.app.Application
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -100,23 +101,28 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     // Funzione per comprare un artista
     fun compra(artista: Artisti) {
         viewModelScope.launch {
-            performCompra(artista)
-        }
-    }
 
-    // Funzione sospesa per eseguire la logica di acquisto
-    private suspend fun performCompra(artista: Artisti) {
-        withContext(Dispatchers.IO) {
-            // Logica sospesa, ad esempio una chiamata al database
-            // Aggiorna il database, se necessario
+                // Logica sospesa, ad esempio una chiamata al database
+                // Aggiorna il database, se necessario
 
+                // Aggiorna le liste di artisti filtrati e le carte acquistate
+
+            val size = _filteredArtisti.value?.size
+            val currentFilteredList = if( size == null){
+                allArtist.value
+            }else{
+                _filteredArtisti.value
+            }
             // Aggiorna le liste di artisti filtrati e le carte acquistate
-            val updatedFilteredList = _filteredArtisti.value?.toMutableList()?.apply {
+            val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
                 remove(artista)
             }
-            _filteredArtisti.postValue(updatedFilteredList)
-            loginViewModel.userLoggedInfo.value?.let { cardsViewModel.insertArtistToUser(artista, it.email) }
+                _filteredArtisti.postValue(updatedFilteredList)
+                loginViewModel.userLoggedInfo.value?.let { cardsViewModel.insertArtistToUser(artista, it.email) }
+
         }
     }
+
+
 
 }
