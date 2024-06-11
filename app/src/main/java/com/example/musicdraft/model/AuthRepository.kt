@@ -53,6 +53,12 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
+    fun setisOnlineUser(email: String, isOnline: Boolean){
+        viewModel.viewModelScope.launch {
+            dao.updateIsOnlineUser(email, isOnline)
+        }
+    }
+
     fun getUserByEmail(email: String) {
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -75,14 +81,14 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
     fun LogoutUserLoggedInfo(email: String){
         userLoggedInfo.value?.email = ""
         userLoggedInfo.value?.nickname = ""
-        userLoggedInfo.value?.password = ""
+        //userLoggedInfo.value?.password = ""
         userLoggedInfo.value?.isOnline = false
         userLoggedInfo.value?.points = 0
 
         // setto nel DB che l'utente che ha l'email passata in input è andato offline:
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO){
-                dao.updateIsOfflineUser(email)
+                dao.updateIsOnlineUser(email, false)
                 Log.i("TG", "Ho settato a false lo stato isOnline dell'utente con questa email: ${email}")
             }
         }
@@ -111,7 +117,6 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
             }
         }
     }
-
 
 
     suspend fun doesUserExistWithEmail(email: String): Boolean {

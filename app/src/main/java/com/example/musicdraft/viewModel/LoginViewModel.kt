@@ -3,7 +3,9 @@ package com.example.musicdraft.viewModel
 import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -18,8 +20,6 @@ import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.login.GoogleSignInState
 import com.example.musicdraft.model.AuthRepository
 import com.example.musicdraft.sections.Screens
-import com.example.musicdraft.utility.Resource
-import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 import kotlinx.coroutines.Dispatchers
@@ -82,6 +82,19 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     // altre sottoscrizioni a variabili del repository:
     var allUsersFriendsOfCurrentUser =  authRepository.allUsersFriendsOfCurrentUser
     var allUsersrReceivedRequestByCurrentUser =  authRepository.allUsersrReceivedRequestByCurrentUser
+
+
+    // States utili per permettere all'utente di eseguire il reset della password:
+    var email by mutableStateOf("")
+    var forgotPasswordInProgress by mutableStateOf(false)
+    var forgotPasswordSuccess by mutableStateOf<String?>(null)
+    var forgotPasswordError by mutableStateOf<String?>(null)
+    var showDialogSentEmail = mutableStateOf(false)
+        private set
+    var showDialogErrorSentEmail = mutableStateOf(false)
+        private set
+
+
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -179,6 +192,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
             is UIEventSignIn.InvalidateDataSignIn -> {
                 invalidateDataSigIn()
+            }
+
+            // evento che viene generato nel momento in cui l'utente vuole aggiornare la password
+            is UIEventSignIn.forgotPassword -> {
+                navController.navigate(Screens.ForgotPassword.screen)
             }
         }
 
@@ -453,6 +471,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                             // prendo le info principali dell'utente dalla tabella User:
                             authRepository.getUserByEmail(email)
 
+                            // setto che l'utente è online (in modo tale da avere isOnline=true nel DB in
+                            // corrispondenza dell'utente corrente):
+                            authRepository.setisOnlineUser(email, true)
+
                             // resetto tutti i campi di "loginUIState":
                             loginUIState.value = loginUIState.value.copy(
                                 email = "",
@@ -504,44 +526,44 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         firebaseAuth.addAuthStateListener(authStateListener)
     }
 
+    fun forgotPassword(email: String) {
+        forgotPasswordInProgress = true
+        forgotPasswordSuccess = null
+        forgotPasswordError = null
 
-    /*
-    - Funzione che permette all'utente di eseguire il login con Google grazie a Firebase.
-    */
-    fun googleSignIn(credential: AuthCredential) = viewModelScope.launch{
-
-        authRepository.googleSignIn(credential).collect{ result ->
-            // Una volta ottenuta la risposta da 'repository.googleSignIn(credential)'
-            // in base al caso che si verificherà verrà aggiornato lo stato '_googleState'
-            // a cui l'UI è collegata e quindi in base al risultato l'interfaccia grafica
-            // si auto-aggiornerà:
-            when(result){
-                is Resource.Success ->{
-                    val email = result.data?.user?.email
-                    if (email != null) {
-                        Log.d("LoginViewModel", "Sono entrato in is googleSignIn -> is Resource.Success ->")
-                        Log.d("LoginViewModel", "email: $email")
-                        //registrationUIState.value = registrationUIState.value.copy(email = email)
-                        registrationUIState.value = registrationUIState.value.copy(
-                            email = email
-                        )
-                        printStateSignUp() // stampo per verificare che il registrationUIState sia stato aggiornato
+        checkUserExistenceWithEmail(email) { exists ->
+            if (exists) {
+                // L'utente esiste, fai qualcosa
+                Log.d(TAG, "L'email: ${email} esiste nel DB e quindi avvio il processo di reset della password.")
+                FirebaseAuth
+                    .getInstance()
+                    .sendPasswordResetEmail(email)
+                    .addOnCompleteListener { task ->
+                        forgotPasswordInProgress = false
+                        if (task.isSuccessful) {
+                            forgotPasswordSuccess = "Email sent, check it to reset your password"
+                            showDialogSentEmail.value = true
+                        } else {
+                            forgotPasswordError = "Error sending the reset email: ${task.exception?.message}"
+                        }
                     }
-                    _googleState.value = GoogleSignInState(success = result.data)
-                }
-                is Resource.Loading ->{
-                    _googleState.value = GoogleSignInState(loading = true)
-                }
-                is Resource.Error ->{
-                    _googleState.value = GoogleSignInState(error = result.message!!)
-                }
+                    .addOnFailureListener { exception ->
+                        forgotPasswordInProgress = false
+                        forgotPasswordError = "Error sending the reset email: ${exception.message}"
+                    }
+            }else{
+                Log.d(TAG, "L'email: ${email} NON esiste nel DB e quindi NON POSSO AVVIARE IL processo di reset della password..")
+                showDialogErrorSentEmail.value = true
             }
+
         }
     }
+
 
     fun reset_errorDialogActivated(){
         errorDialogActivated.value = false
     }
+
     fun reset_stringToShowErrorDialog(){
         stringToShowErrorDialog.value = ""
     }
@@ -552,14 +574,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         val user = User(
             email = email,
             nickname = nickname,
-            password = password,
-            isOnline = true,
+            //password = password,
+            isOnline = true, // setto che l'utente in questo momento è online
             points = 1000 // I points iniziali sono 1000
         )
         authRepository.insertNewUser(user)
         ////////////////////////////////////////////////////
     }
-
 
     fun checkUserExistenceWithEmail(email: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {

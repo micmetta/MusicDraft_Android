@@ -23,11 +23,12 @@ interface UserDao {
     @Insert
     suspend fun insertUser(user: User)
 
+
     /*
-    - Query per settare il campo 'isOnline' di un utente uguale a false.
+    - Query per aggiornare il campo 'isOnline' in base ai parametro 'email' e 'isOnline' (true o false) passati in input.
     */
-    @Query("UPDATE User SET isOnline = false WHERE email = :email")
-    suspend fun updateIsOfflineUser(email: String)
+    @Query("UPDATE User SET isOnline = :isOnline WHERE email = :email")
+    suspend fun updateIsOnlineUser(email: String, isOnline: Boolean)
 
     @Query("SELECT * FROM User WHERE email = :email")
     fun getUserByEmail(email: String): Flow<User?>

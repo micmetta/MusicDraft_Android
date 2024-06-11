@@ -1,6 +1,8 @@
 package com.example.musicdraft.sections
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -16,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChangeCircle
 import androidx.compose.material.icons.filled.Delete
@@ -475,7 +479,7 @@ fun RequestSent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(12.dp)
     ) {
 
         var searchText by remember { mutableStateOf(TextFieldValue("")) }
@@ -517,7 +521,12 @@ fun RequestSent(
                 label = { Text("Search for the email of a user to send the friend request to") },
                 modifier = Modifier.fillMaxWidth()
             )
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier
+                //.weight(1f)
+                .heightIn(max = 100.dp) // altezza massima occupata in verticale dalla colonna nella quale compariranno le emails degli utenti ricercarti
+                                        // (una volta raggiunta questa altezza massima, le emails potranno essere scrollate dall'utente.
+            )
+            {
                 usersFilter?.let { users ->
                     if (users.isNotEmpty()) {
                         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -525,7 +534,11 @@ fun RequestSent(
                         infoUserCurrent?.email?.let { handleFriendsViewModel.getAllPendingRequestByUser(it) }
                         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        LazyColumn(modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(4.dp))
+                            .padding(4.dp)
+                        ) {
                             items(users) { user ->
                                 if (
                                 // - L'utente filtrato (ovvero 'user.email') è quell'utente al quale l'utente corrente
@@ -539,15 +552,21 @@ fun RequestSent(
                                     //    'allUsersFriendsOfCurrentUser'):
                                     (allUsersFriendsOfCurrentUser?.none { it.email == user.email } == true)
                                 ) {
+
+                                    var backgroundColor by remember { mutableStateOf(Color.White) }
+
+
+                                    Log.d("Friends", "user.email SOTTO LA BARRA DI RICERCA IN Friends: ${user.email}")
                                     Text(
                                         text = user.email,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp)
+                                            .background(backgroundColor, shape = RoundedCornerShape(4.dp))
                                             .clickable {
+                                                backgroundColor = Color.LightGray
 
                                                 infoUserCurrent?.email?.let {
-
                                                     //handleFriendsViewModel.getAllPendingRequestByUser(it) // aggiorno le richieste pendenti
                                                     // 1) controllo che l'utente corrente non abbia già mandato la richiesta a 'selectedUser'
                                                     // 2) controllo che l'utente corrente non abbia già ricevuto una richiesta da parte di 'selectedUser'
@@ -586,10 +605,14 @@ fun RequestSent(
                                                             showDialog = true
                                                         }
                                                     }
-
                                                 }
-                                            },
-                                        style = MaterialTheme.typography.bodyLarge
+                                                backgroundColor = Color.White
+                                            }
+                                            .background(backgroundColor, shape = RoundedCornerShape(4.dp))
+                                            .padding(horizontal = 8.dp)
+                                        //.padding(horizontal = 8.dp),
+                                        //style = MaterialTheme.typography.bodyLarge
+                                        //style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
                                     )
                                 }
                             }
@@ -616,7 +639,12 @@ fun RequestSent(
                 label = { Text("Search for the nickname of a user to send the friend request to") },
                 modifier = Modifier.fillMaxWidth()
             )
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier =
+                    Modifier
+                    //.weight(1f)
+                    .heightIn(max = 100.dp) // altezza massima occupata in verticale dalla colonna nella quale compariranno i nicknames degli utenti ricercarti
+                                            // (una volta raggiunta questa altezza massima, i nicknames potranno essere scrollati dall'utente.
+            ) {
                 usersFilterbyNickname?.let { users ->
                     if (users.isNotEmpty()) {
                         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -624,7 +652,11 @@ fun RequestSent(
                         infoUserCurrent?.email?.let { handleFriendsViewModel.getAllPendingRequestByUser(it) }
                         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        LazyColumn(modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(4.dp))
+                            .padding(4.dp)
+                        ) {
                             items(users) { user ->
                                 if (
                                 // - L'utente filtrato (ovvero 'user.email') è quell'utente al quale l'utente corrente
@@ -638,13 +670,17 @@ fun RequestSent(
                                     //    'allUsersFriendsOfCurrentUser'):
                                     (allUsersFriendsOfCurrentUser?.none { it.email == user.email } == true)
                                 ) {
+
+                                    var backgroundColor by remember { mutableStateOf(Color.White) }
+
                                     Text(
                                         text = user.nickname,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp)
+                                            .background(backgroundColor, shape = RoundedCornerShape(4.dp))
                                             .clickable {
-
+                                                backgroundColor = Color.LightGray
                                                 infoUserCurrent?.email?.let {
 
                                                     //handleFriendsViewModel.getAllPendingRequestByUser(it) // aggiorno le richieste pendenti
@@ -685,10 +721,11 @@ fun RequestSent(
                                                             showDialog = true
                                                         }
                                                     }
-
                                                 }
-                                            },
-                                        style = MaterialTheme.typography.bodyLarge
+                                                backgroundColor = Color.White
+                                            }
+                                            .background(backgroundColor, shape = RoundedCornerShape(4.dp))
+                                            .padding(horizontal = 8.dp)
                                     )
                                 }
                             }
@@ -703,9 +740,11 @@ fun RequestSent(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
 
         if(!allUsersrReceivedRequestByCurrentUser.isNullOrEmpty()){
+
+            Spacer(modifier = Modifier.height(50.dp))
+
             // Se l'utente corrente ha già inviato almeno una richiesta di amicizia a un qualsiasi altro utente
             // allora mostro queste richieste, altrimenti NON MOSTRO NULLA.
             Text(
