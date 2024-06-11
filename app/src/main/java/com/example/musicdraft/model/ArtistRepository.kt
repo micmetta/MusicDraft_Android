@@ -13,6 +13,11 @@ class ArtistRepository(val viewModel: MarketplaceViewModel, val dao: ArtistiDao)
     suspend fun getAllArtisti(): List<Artisti> {
         return dao.getAllArtisti()
     }
+
+
+    suspend fun getArtistbyPopMax(popThr: Int){
+
+    }
     /*
     * la funzione init serve a inizializzare il db con dati presi da un file JSOn estrattto da una tabella presa
     * tramite l'api di spotify

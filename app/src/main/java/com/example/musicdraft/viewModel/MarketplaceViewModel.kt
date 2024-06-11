@@ -27,9 +27,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     private val artistRepo: ArtistRepository = ArtistRepository(this, artistDao!!)
     private val trackRepo: TracksRepository = TracksRepository(this, trackDao!!)
 
-    // Inizializzazione delle tabelle artisti e brani
-    val initArtisti = artistRepo.init()
-    val inittrack = trackRepo.init()
+
 
     // Variabili LiveData per visualizzare tutti gli artisti e tutte le tracce
     val allArtist: LiveData<List<Artisti>>
@@ -43,12 +41,15 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
 
 
     init {
+        // Inizializzazione delle tabelle artisti e brani
+        val initArtisti = artistRepo.init()
+        val inittrack = trackRepo.init()
         // Inizializzazione dei LiveData per visualizzare tutti gli artisti e tutte le tracce
         allArtist = liveData {
-            val artists = withContext(Dispatchers.IO) {
+            val tracks = withContext(Dispatchers.IO) {
                 artistDao?.getAllArtisti()
             }
-            emit(artists ?: emptyList())
+            emit(tracks ?: emptyList())
         }
 
         allTracks = liveData {
@@ -59,6 +60,9 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
         }
 
     }
+
+
+
     /**
      * Applica i filtri agli artisti e aggiorna la lista visualizzata.
      * @param popThreshold La popolarità massima degli artisti da visualizzare.
@@ -117,7 +121,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
             val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
                 remove(artista)
             }
-                _filteredArtisti.postValue(updatedFilteredList)
+                (updatedFilteredList)
                 loginViewModel.userLoggedInfo.value?.let { cardsViewModel.insertArtistToUser(artista, it.email) }
 
         }

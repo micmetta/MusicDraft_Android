@@ -20,7 +20,7 @@ interface ArtistiDao {
 
 
     @Delete
-    suspend fun deleteUser(artista: Artisti)
+    suspend fun deleteArtist(artista: Artisti)
 
     // con il Flow qui sotto, ogni volta che ci sarà un aggiornamento
     // nella tabella artista (ad esempio viene inserito un nuovo artista,
