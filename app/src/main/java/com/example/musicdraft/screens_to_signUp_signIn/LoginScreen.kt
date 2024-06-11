@@ -28,8 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,14 +40,13 @@ import androidx.navigation.NavController
 import com.example.musicdraft.R
 import com.example.musicdraft.components.ButtonComponentLogin
 import com.example.musicdraft.components.ClickableLoginTextComponent
+import com.example.musicdraft.components.ClickableUnderLinedNormalTextComponent
 import com.example.musicdraft.components.DividerTextComponent
 import com.example.musicdraft.components.HeadingTextComponent
 import com.example.musicdraft.components.MyTextFieldComponent
 import com.example.musicdraft.components.NormalTextComponent
 import com.example.musicdraft.components.PasswordTextFieldComponent
-import com.example.musicdraft.components.UnderLinedNormalTextComponent
 import com.example.musicdraft.data.UIEventSignIn
-import com.example.musicdraft.data.UIEventSignUp
 import com.example.musicdraft.utility.Constant
 import com.example.musicdraft.viewModel.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -142,7 +139,10 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                     })
 
                 Spacer(modifier = Modifier.height(40.dp)) // spazio
-                UnderLinedNormalTextComponent(stringResource(id = R.string.forgot_password))
+
+                ClickableUnderLinedNormalTextComponent(stringResource(id = R.string.forgot_password)){
+                    loginViewModel.onEvent(UIEventSignIn.forgotPassword, navController)
+                }
 
                 Spacer(modifier = Modifier.height(40.dp)) // spazio
                 ButtonComponentLogin(value = stringResource(id = R.string.login),

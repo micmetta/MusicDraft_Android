@@ -9,7 +9,7 @@ data class User(
     val id: Int = 0,
     var email: String,
     var nickname: String,
-    var password: String,
+    //var password: String,
     var isOnline: Boolean,
     var points: Int
 )
