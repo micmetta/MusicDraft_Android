@@ -26,8 +26,12 @@ import kotlinx.coroutines.withContext
 class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
 
     private val firebaseAuth = Firebase.auth
-    var users = dao.getAllUser()
+    //var users = dao.getAllUser()
+    val users: List<User>? = null
     val userLoggedInfo: MutableStateFlow<User?> = MutableStateFlow(null)
+    val allUsersFriendsOfCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
+    val allUsersrReceivedRequestByCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
+
 
     /*
     - Questa funzione verrà invocata dal loginViewModel nel momento in cui l'utente cliccherà sull'interfaccia
@@ -49,6 +53,12 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
+    fun setisOnlineUser(email: String, isOnline: Boolean){
+        viewModel.viewModelScope.launch {
+            dao.updateIsOnlineUser(email, isOnline)
+        }
+    }
+
     fun getUserByEmail(email: String) {
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -64,7 +74,56 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
-    suspend fun doesUserExist(email: String): Boolean {
-        return dao.doesUserExist(email)
+    /*
+    - Resetto i dati dell'utente corrente.
+      (Questo metodo verrà invocato quando l'utente eseguirà il logout dall'applicazione.
+    */
+    fun LogoutUserLoggedInfo(email: String){
+        userLoggedInfo.value?.email = ""
+        userLoggedInfo.value?.nickname = ""
+        //userLoggedInfo.value?.password = ""
+        userLoggedInfo.value?.isOnline = false
+        userLoggedInfo.value?.points = 0
+
+        // setto nel DB che l'utente che ha l'email passata in input è andato offline:
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO){
+                dao.updateIsOnlineUser(email, false)
+                Log.i("TG", "Ho settato a false lo stato isOnline dell'utente con questa email: ${email}")
+            }
+        }
+    }
+
+    fun getAllUsersFriendsOfCurrentUser(emails: List<String>){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val friends = dao.getNicknamesByEmails(emails)
+                friends.collect { response ->
+                    allUsersFriendsOfCurrentUser.value = response
+                    Log.i("TG", "Tutti gli amici dell'utente corrente (tutte le loro info): ${allUsersFriendsOfCurrentUser.value}")
+                }
+            }
+        }
+    }
+
+    fun getallUsersrReceivedRequestByCurrentUser(emails: List<String>){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val friends = dao.getNicknamesByEmails(emails)
+                friends.collect { response ->
+                    allUsersrReceivedRequestByCurrentUser.value = response
+                    Log.i("TG", "Tutti gli utenti che hanno ricevuto la richiesta dall'utente corrente (tutte le loro info): ${allUsersrReceivedRequestByCurrentUser.value}")
+                }
+            }
+        }
+    }
+
+
+    suspend fun doesUserExistWithEmail(email: String): Boolean {
+        return dao.doesUserExistWithEmail(email)
+    }
+
+    suspend fun doesUserExistWithNickname(nickname: String): Boolean {
+        return dao.doesUserExistWithNickname(nickname)
     }
 }

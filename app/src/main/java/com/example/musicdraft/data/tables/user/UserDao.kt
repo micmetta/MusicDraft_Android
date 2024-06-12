@@ -16,14 +16,33 @@ interface UserDao {
     @Query("SELECT * FROM User WHERE email LIKE '%' || :email || '%'")
     fun getAllUsersFilterEmail(email: String): Flow<List<User>?>
 
+
+    @Query("SELECT * FROM User WHERE nickname LIKE '%' || :nickname || '%'")
+    fun getAllUsersFilterNickname(nickname: String): Flow<List<User>?>
+
     @Insert
     suspend fun insertUser(user: User)
+
+
+    /*
+    - Query per aggiornare il campo 'isOnline' in base ai parametro 'email' e 'isOnline' (true o false) passati in input.
+    */
+    @Query("UPDATE User SET isOnline = :isOnline WHERE email = :email")
+    suspend fun updateIsOnlineUser(email: String, isOnline: Boolean)
 
     @Query("SELECT * FROM User WHERE email = :email")
     fun getUserByEmail(email: String): Flow<User?>
 
+
+    @Query("SELECT * FROM User WHERE email IN (:emails)")
+    fun getNicknamesByEmails(emails: List<String>): Flow<List<User>>
+
+
     @Query("SELECT EXISTS(SELECT 1 FROM User WHERE email = :email)")
-    suspend fun doesUserExist(email: String): Boolean
+    suspend fun doesUserExistWithEmail(email: String): Boolean
+
+    @Query("SELECT EXISTS(SELECT 1 FROM User WHERE nickname = :nickname)")
+    suspend fun doesUserExistWithNickname(nickname: String): Boolean
 
     @Delete
     suspend fun deleteUser(user: User)

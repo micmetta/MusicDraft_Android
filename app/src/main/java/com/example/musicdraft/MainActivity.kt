@@ -38,6 +38,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.musicdraft.screens_to_signUp_signIn.ForgotPassword
 import com.example.musicdraft.screens_to_signUp_signIn.LoginScreen
 import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
 import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
@@ -127,6 +128,9 @@ fun Navigation(
         }
         composable(Screens.TermsAndConditionsScreen.screen){
             TermsAndConditionsScreen() // composable che verrà aperto per mostrare i termini e condizioni dell'app
+        }
+        composable(Screens.ForgotPassword.screen){
+            ForgotPassword(navigationController, loginViewModel)
         }
         composable(Screens.MusicDraftUI.screen){
             MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app

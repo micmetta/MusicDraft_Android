@@ -7,11 +7,11 @@ import androidx.room.PrimaryKey
 data class User(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val email: String,
-    val nickname: String,
-    val password: String,
-    val isOnline: Boolean,
-    val points: Int
+    var email: String,
+    var nickname: String,
+    //var password: String,
+    var isOnline: Boolean,
+    var points: Int
 )
 //{
 //    fun doesMatchSearchQUery(query: String): Boolean{

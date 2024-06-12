@@ -9,17 +9,17 @@ object ValidatorFields {
     fun validateNickname(nickname: String) : ValidationResult{
         return ValidationResult(
             // Il nickname non deve essere Null o Empty e deve essere di almeno 6 caratteri
-            (!nickname.isNullOrEmpty() && nickname.length>=6) // restituisce true solamente se le due condizioni sono rispettate
+            (nickname.isNotEmpty() && nickname.length>=6) // restituisce true solamente se le due condizioni sono rispettate
         )
     }
     fun validateEmail(email: String): ValidationResult{
         return ValidationResult(
-            (!email.isNullOrEmpty()) // restituisce true solamente se la condizione è rispettata
+            (email.isNotEmpty()) // restituisce true solamente se la condizione è rispettata
         )
     }
     fun validatePassword(password: String): ValidationResult{
         return ValidationResult(
-            (!password.isNullOrEmpty() && password.length>=4) // restituisce true solamente se le due condizioni sono rispettate
+            (password.isNotEmpty() && password.length>=6) // restituisce true solamente se le due condizioni sono rispettate
         )
     }
 
@@ -28,9 +28,6 @@ object ValidatorFields {
             statusValue // restituisce statusValue (che sarà 'true' se l'utente ha validato la checkbox dei termini d'uso altrimenti sarà false)
         )
     }
-
-
-
 }
 
 data class ValidationResult(
