@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Track(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true) val identifier: Int,
     val id: String,
     val anno_pubblicazione: String,
     val durata: String,

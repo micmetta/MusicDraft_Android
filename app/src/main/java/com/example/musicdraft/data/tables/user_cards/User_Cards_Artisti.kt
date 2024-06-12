@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "user_cards_artisti")
 data class User_Cards_Artisti(
-    @PrimaryKey val id_carta: String,
+    @PrimaryKey(autoGenerate = true) val identifier:Int,
+    val id_carta: String,
     val email: String
  ){}

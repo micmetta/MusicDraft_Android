@@ -18,6 +18,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -44,9 +45,9 @@ fun Cards(viewModel: CardsViewModel) {
     var popThreshold by remember { mutableStateOf("") }
     var nameQuery by remember { mutableStateOf("") }
     var genreQuery by remember { mutableStateOf("") }
-
+    viewModel.getallcards()
     // Ottieni la lista degli artisti e delle tracce in base alla scheda selezionata e ai filtri applicati
-    val artisti by viewModel.acquiredCards.observeAsState(emptyList())
+    val artisti by viewModel.acquiredCards.collectAsState(emptyList())
     val brani = emptyList<Track>()
 
     // Composable principale per la schermata del Marketplace
@@ -64,7 +65,7 @@ fun Cards(viewModel: CardsViewModel) {
 
         // Visualizza la lista degli artisti o delle tracce in base alla scheda selezionata
         when (selectedTab) {
-            0 -> ArtistiScreen(artisti, viewModel )
+            0 -> artisti?.let { ArtistiScreen(it) }
             1 -> brani?.let { BraniScreen(it) }
         }
     }
@@ -150,12 +151,12 @@ fun BraniFilter(
  * @param artisti Elenco degli artisti da visualizzare.
  */
 @Composable
-fun ArtistiScreen(artisti: List<Artisti>, viewModel: CardsViewModel) {
+fun ArtistiScreen(artisti: List<Artisti>) {
     // Visualizza una griglia di carte per gli artisti
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso gli artisti e visualizza una carta per ciascuno
         items(artisti.size) { index ->
-            ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel)
+            ArtistaCard(artisti[index], Modifier.height(8.dp))
         }
     }
 }
@@ -188,6 +189,7 @@ fun BranoCard(brano: Track, height: Modifier) {
             Text(text = brano.anno_pubblicazione)
             Text(text = brano.durata)
             Text(text = "Pop: ${brano.popolarita}")
+            Text(text = "Costo: ${brano.popolarita*10}")
             // Immagine del brano con dimensioni specificate
             Image(
                 painter = rememberAsyncImagePainter(brano.immagine),
@@ -210,13 +212,14 @@ fun BranoCard(brano: Track, height: Modifier) {
  * @param height Modificatore per la altezza della carta.
  */
 @Composable
-fun ArtistaCard(artista: Artisti, height: Modifier, viewModel: CardsViewModel) {
+fun ArtistaCard(artista: Artisti, height: Modifier) {
     // Carta contenente le informazioni dell'artista
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = artista.nome, style = MaterialTheme.typography.bodyLarge)
             Text(text = artista.genere)
             Text(text = "Pop: ${artista.popolarita}")
+            Text(text = "Costo: ${artista.popolarita*10}")
             // Immagine dell'artista con dimensioni specificate
             Image(
                 painter = rememberAsyncImagePainter(artista.immagine),

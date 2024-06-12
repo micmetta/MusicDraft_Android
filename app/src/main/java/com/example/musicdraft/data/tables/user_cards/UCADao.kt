@@ -18,9 +18,12 @@ interface UCADao {
     @Delete
     suspend fun deleteUserCardArt(card_user: User_Cards_Artisti)
 
-    @Query("SELECT a.id, a.genere, a.immagine, a.nome, a.popolarita\n" +
+    @Query("SELECT a.identifier,a.id, a.genere, a.immagine, a.nome, a.popolarita\n" +
             "FROM Artisti a\n" +
             "INNER JOIN User_Cards_Artisti uca ON a.id = uca.id_carta\n" +
             "WHERE uca.email = :email")
     fun getAllCardArtForUser(email: String): Flow<List<Artisti>>
+
+    @Query("SELECT * FROM user_cards_artisti")
+    fun getallcards(): Flow<List<User_Cards_Artisti>>
 }

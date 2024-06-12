@@ -30,6 +30,9 @@ interface UserDao {
     @Query("UPDATE User SET isOnline = :isOnline WHERE email = :email")
     suspend fun updateIsOnlineUser(email: String, isOnline: Boolean)
 
+    @Query("UPDATE User SET points = :points WHERE email =:email")
+    suspend fun updatePoints(points:Int, email:String)
+
     @Query("SELECT * FROM User WHERE email = :email")
     fun getUserByEmail(email: String): Flow<User?>
 

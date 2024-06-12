@@ -38,8 +38,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     val allTracks: LiveData<List<Track>>
 
     // Variabili MutableLiveData per visualizzare gli artisti e le tracce filtrati
-    private val _filteredArtisti = MutableLiveData<List<Artisti>?>()
-    val filteredArtisti: MutableLiveData<List<Artisti>?> get() = _filteredArtisti
+    val _filteredArtisti = MutableStateFlow<List<Artisti>?>(artists)
     private val _filteredBrani = MutableLiveData<List<Track>>()
     val filteredBrani: LiveData<List<Track>> get() = _filteredBrani
 
@@ -119,18 +118,26 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                 // Aggiorna le liste di artisti filtrati e le carte acquistate
 
             val size = _filteredArtisti.value?.size
-            val currentFilteredList = if( size == null){
-                allartist.value
-            }else{
-                _filteredArtisti.value
-            }
-            // Aggiorna le liste di artisti filtrati e le carte acquistate
-            val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                remove(artista)
-            }
+            if( size == null){
+                val currentFilteredList = allartist.value
+                // Aggiorna le liste di artisti filtrati e le carte acquistate
+                val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                    remove(artista)
+                }
                 allartist.value = (updatedFilteredList)
-            val email = loginViewModel.userLoggedInfo.value!!.email
-            cardsViewModel.insertArtistToUser(artista, email)
+                val email = loginViewModel.userLoggedInfo.value!!.email
+                cardsViewModel.insertArtistToUser(artista, email)
+            }else{
+                val currentFilteredList =_filteredArtisti.value
+                val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                    remove(artista)
+                }
+                _filteredArtisti.value = (updatedFilteredList)
+                val email = loginViewModel.userLoggedInfo.value!!.email
+                cardsViewModel.insertArtistToUser(artista, email)
+            }
+
+
 
         }
     }

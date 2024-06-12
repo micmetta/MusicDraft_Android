@@ -41,7 +41,7 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
 
     // Ottieni la lista degli artisti e delle tracce in base alla scheda selezionata e ai filtri applicati
     val artisti by if (!(popThreshold.isNullOrEmpty())) {
-        viewModel.filteredArtisti.observeAsState(emptyList())
+        viewModel._filteredArtisti.collectAsState(emptyList())
     } else {
         viewModel.allartist.collectAsState(emptyList())
     }
