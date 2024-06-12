@@ -13,6 +13,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +43,7 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
     val artisti by if (!(popThreshold.isNullOrEmpty())) {
         viewModel.filteredArtisti.observeAsState(emptyList())
     } else {
-        viewModel.allArtist.observeAsState(emptyList())
+        viewModel.allartist.collectAsState(emptyList())
     }
 
     val brani by if (!(popThreshold.isNullOrEmpty())) {

@@ -6,11 +6,12 @@ import com.example.musicdraft.data.tables.artisti.ArtistiDao
 import com.example.musicdraft.viewModel.MarketplaceViewModel
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ArtistRepository(val viewModel: MarketplaceViewModel, val dao: ArtistiDao) {
-    suspend fun getAllArtisti(): List<Artisti> {
+    suspend fun getAllArtisti(): Flow<List<Artisti>> {
         return dao.getAllArtisti()
     }
 

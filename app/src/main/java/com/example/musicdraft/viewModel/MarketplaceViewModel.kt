@@ -1,6 +1,7 @@
 package com.example.musicdraft.viewModel
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -8,11 +9,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.artisti.Artisti
+import com.example.musicdraft.data.tables.handleFriends.HandleFriends
 import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.ArtistRepository
 import com.example.musicdraft.model.TracksRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -28,9 +31,10 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     private val trackRepo: TracksRepository = TracksRepository(this, trackDao!!)
 
 
-
+    /////////////////////
+    val artists: List<Artisti>? = null
     // Variabili LiveData per visualizzare tutti gli artisti e tutte le tracce
-    val allArtist: LiveData<List<Artisti>>
+    val allartist: MutableStateFlow<List<Artisti>?> = MutableStateFlow(artists)
     val allTracks: LiveData<List<Track>>
 
     // Variabili MutableLiveData per visualizzare gli artisti e le tracce filtrati
@@ -45,11 +49,14 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
         val initArtisti = artistRepo.init()
         val inittrack = trackRepo.init()
         // Inizializzazione dei LiveData per visualizzare tutti gli artisti e tutte le tracce
-        allArtist = liveData {
-            val tracks = withContext(Dispatchers.IO) {
-                artistDao?.getAllArtisti()
+        this.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val requestsReceived = artistRepo.getAllArtisti()
+                requestsReceived.collect { response ->
+                    allartist.value = response
+                    Log.i("TG", "allartist updated: ${allartist.value}")
+                }
             }
-            emit(tracks ?: emptyList())
         }
 
         allTracks = liveData {
@@ -71,7 +78,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
      */
     fun applyArtistFilter(popThreshold: Int?, nameQuery: String?, genreQuery: String?) {
 
-        val filteredArtisti = allArtist.value?.filter { artist ->
+        val filteredArtisti = allartist.value?.filter { artist ->
             val popFilter = popThreshold?.let { artist.popolarita <= it } ?: true
             val nameFilter = nameQuery?.let { artist.nome.contains(it, ignoreCase = true) } ?: true
             val genreFilter = genreQuery?.let { artist.genere.contains(it, ignoreCase = true) } ?: true
@@ -79,7 +86,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
         }
         _filteredArtisti.value = if (popThreshold == null && nameQuery.isNullOrEmpty() && genreQuery.isNullOrEmpty()) {
             // Se tutti i filtri sono vuoti, visualizza tutti gli artisti senza applicare alcun filtro
-            allArtist.value ?: emptyList()
+            allartist.value ?: emptyList()
         } else {
             // Altrimenti, applica i filtri normalmente
             filteredArtisti ?: emptyList()
@@ -113,7 +120,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
 
             val size = _filteredArtisti.value?.size
             val currentFilteredList = if( size == null){
-                allArtist.value
+                allartist.value
             }else{
                 _filteredArtisti.value
             }
@@ -121,8 +128,9 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
             val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
                 remove(artista)
             }
-                (updatedFilteredList)
-                loginViewModel.userLoggedInfo.value?.let { cardsViewModel.insertArtistToUser(artista, it.email) }
+                allartist.value = (updatedFilteredList)
+            val email = loginViewModel.userLoggedInfo.value!!.email
+            cardsViewModel.insertArtistToUser(artista, email)
 
         }
     }
