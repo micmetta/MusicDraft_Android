@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.musicdraft.sections.Screens
 import com.example.musicdraft.viewModel.LoginViewModel
 
 
@@ -52,7 +51,6 @@ fun ForgotPassword(navController: NavController, loginViewModel: LoginViewModel)
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-
         TextField(
             value = email,
             onValueChange = { email = it },
@@ -76,7 +74,9 @@ fun ForgotPassword(navController: NavController, loginViewModel: LoginViewModel)
         AlertDialog(
             onDismissRequest = {
                 showDialogSentEmail = false
-                navController.navigate(Screens.Login.screen)
+//                navController.navigate(Screens.Login.screen)
+                loginViewModel.logoutFromFirebase(navController) // una volta inviata la mail di reset eseguo il logout dell'utente corrente
+                // in modo tale che la prossima volta che vorrà entrare nell'app dovrà per forza reinserire la password.
             },
             title = { Text(text = "Success") },
             text = { Text(text = "Email sent, check it to reset your password!") },
@@ -84,7 +84,9 @@ fun ForgotPassword(navController: NavController, loginViewModel: LoginViewModel)
                 TextButton(
                     onClick = {
                         showDialogSentEmail = false
-                        navController.navigate(Screens.Login.screen)
+//                        navController.navigate(Screens.Login.screen)
+                        loginViewModel.logoutFromFirebase(navController) // una volta inviata la mail di reset eseguo il logout dell'utente corrente
+                        // in modo tale che la prossima volta che vorrà entrare nell'app dovrà per forza reinserire la password.
                     }
                 ) {
                     Text("OK")

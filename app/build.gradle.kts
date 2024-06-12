@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.play.services.fitness)
+    implementation(libs.androidx.material3.android)
 //    implementation(libs.androidx.room.common)
 //    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)

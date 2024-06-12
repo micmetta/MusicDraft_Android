@@ -7,10 +7,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Divider
@@ -84,9 +86,25 @@ class MainActivity : ComponentActivity() {
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState, launcher: ActivityResultLauncher<IntentSenderRequest>, googleAuthUiClient: GoogleAuthUiClient, context: Context){ // c'era prima
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState){
 fun Navigation(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsViewModel){
+
     val navigationController = rememberNavController()
+
+    // Determina la schermata iniziale in base al fatto se già esiste o meno una sessione attiva:
+    loginViewModel.checkForActiveSessionUser() // il metodo 'loginViewModel.checkForActiveSessionUser()', qualora esistesse una sessione attiva, prende (da Firebase) l'email dell'utente
+    // che fa parte della sessione attiva e aggiorna automaticamente (tramite invocazione del metodo 'getUserByEmail' dell'AuthRepository)
+    // il mutableStateFlow 'userLoggedInfo' (al quale il loginViewModel è sottoscritto) che contiene le info dell'utente.
+    // Grazie a questo aggiornamento, nel momento in cui verrà mostrata la schermata 'Home', verranno mostrati le info dell'utente ancora attivo.
+    val startDestination = if (loginViewModel.isUSerLoggedIn.value == true) {
+        Screens.MusicDraftUI.screen // se c'è ancora una sessione attivo vado alla schermata Screens.MusicDraftUI.screen'
+        // che farà apparire la sezione 'Home' con i dati dell'utente della sessione attiva.
+    } else {
+        Screens.SignUp.screen // altrimenti apparirà la schermata di registrazione.
+    }
+
+
     // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
-    NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){
+//    NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){ // c'era prima..
+    NavHost(navController = navigationController, startDestination = startDestination){
         composable(Screens.SignUp.screen){
             SignUpScreen(navigationController, loginViewModel) // composable che verrà aperto per mostrare la creazione dell'account (c'era prima..)
         }
@@ -258,7 +276,6 @@ fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: Log
                         }
                     })
 
-
                 // Definisco la sezione "Settings":
                 NavigationDrawerItem(label = { Text(text = "Settings", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
@@ -277,6 +294,17 @@ fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: Log
                             // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Settings",
                             // cliccasse su "back" uscirà direttamente dall'app!
                         }
+                    })
+
+                Spacer(modifier = Modifier.height(50.dp))
+
+                // Definisco la sezione "Logout":
+                NavigationDrawerItem(label = { Text(text = "", color = BlueApp)},
+                    selected = false, // determina se un item è selezionato o meno,
+                    icon = { Icon(imageVector = Icons.Default.Logout, contentDescription = "logout", tint = BlueApp)},
+                    onClick = {
+                        // eseguo il logout tramite l'utilizzo di Firebase:
+                        loginViewModel.logoutFromFirebase(navControllerInitialScreens)
                     })
             }
         },

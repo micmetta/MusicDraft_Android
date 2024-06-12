@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.musicdraft.data.LoginUIState
@@ -73,17 +74,18 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         private set
     ///////////////////////////////////////////////////////////////
 
-
     // sottoscrizione alla variabile "userLoggedInfo" sempre del repository, in questo modo
     // non appena "repository.userLoggedInfo" cambierà, automaticamente cambierà anche "userLoggedInfo" del LoginViewModel:
     var userLoggedInfo =  authRepository.userLoggedInfo
     //var userLoggedState = mutableStateOf(UserLoggedState())
 
+    ///////////////////////////////////////////////////////
     // altre sottoscrizioni a variabili del repository:
     var allUsersFriendsOfCurrentUser =  authRepository.allUsersFriendsOfCurrentUser
     var allUsersrReceivedRequestByCurrentUser =  authRepository.allUsersrReceivedRequestByCurrentUser
+    ///////////////////////////////////////////////////////
 
-
+    /////////////////////////////////////////////////////////////////////////////
     // States utili per permettere all'utente di eseguire il reset della password:
     var email by mutableStateOf("")
     var forgotPasswordInProgress by mutableStateOf(false)
@@ -93,8 +95,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var showDialogErrorSentEmail = mutableStateOf(false)
         private set
+    /////////////////////////////////////////////////////////////////////////////
 
-
+    /////////////////////////////////////////////////////////////////////////////
+    // Mutable live data per gestire la sessione attiva dell'utente:
+    val isUSerLoggedIn: MutableLiveData<Boolean> = MutableLiveData()
+    /////////////////////////////////////////////////////////////////////////////
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -468,7 +474,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         Log.d(TAG, "Login completato con successo!")
                         if(it.isSuccessful){
 
-                            // prendo le info principali dell'utente dalla tabella User:
+                            // prendo le info principali dell'utente dalla tabella User per aggiornare automaticamente
+                            // anche il mutableState 'userLoggedInfo' che contiene le info dell'utente
+                            // (come ad esempio l'email) che verranno mostrate automaticamente sull'interfaccia
+                            // grafica (in particolare nella schermata 'Home' e 'Friends'):
                             authRepository.getUserByEmail(email)
 
                             // setto che l'utente è online (in modo tale da avere isOnline=true nel DB in
@@ -507,6 +516,34 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     }
 
+
+
+    /*
+    - Funzione che si preoccuperà di controllare se c'è ancora una sessione attiva dell'utente.
+    */
+    fun checkForActiveSessionUser(){
+        if(FirebaseAuth.getInstance().currentUser != null){
+            // mi prendo l'email dell'utente ancora attivo
+            FirebaseAuth.getInstance().currentUser?.also {
+                it.email?.also {email ->
+                    // se entro qui vuol dire che c'è ancora una sessione attiva
+                    Log.d(TAG, "C'è ancora una sessione attiva!")
+                    isUSerLoggedIn.value = true // aggiorno il mutableLiveData che memorizza lo stato della sessione
+                    // adesso invoco il metodo 'authRepository.getUserByEmail(email)' passandogli l'email dell'utente attivo,
+                    // in modo tale da
+                    // aggiornare automaticamente anche la var 'userLoggedInfo' che conterrà i dati
+                    // dell'utente che verranno mostrati sull'interfaccia grafica (in particolare nella
+                    // schermata 'Home' e 'Friends'):
+                    authRepository.getUserByEmail(email)
+                }
+            }
+        }else{
+            Log.d(TAG, "NON c'è una sessione attiva!")
+            isUSerLoggedIn.value = false
+        }
+    }
+
+
     /*
      - Questa funzione permette all'utente di eseguire il logout.
     */
@@ -518,7 +555,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 // se entro qui vuol dire che il logout è andato a buon fine.
                 userLoggedInfo.value?.let { it1 -> authRepository.LogoutUserLoggedInfo(it1.email) }
                 Log.d(TAG, "Logout eseguito con successo!")
-                navController.navigate(Screens.Login.screen)
+                navController.navigate(Screens.Login.screen){
+                    popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
+//                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Settings",
+//                            // cliccasse su "back" uscirà direttamente dall'app!
+                }
             }else{
                 Log.d(TAG, "Logout fallito.")
             }
