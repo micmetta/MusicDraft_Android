@@ -12,5 +12,6 @@ data class User_Cards_Track(
     val immagine: String,
     var nome: String,
     val popolarita: Int,
-    val email: String
+    val email: String,
+    val onMarket: Boolean
 ) {}

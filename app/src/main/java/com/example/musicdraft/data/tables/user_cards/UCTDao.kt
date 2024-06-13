@@ -14,7 +14,7 @@ interface UCTDao {
     @Delete
     suspend fun deleteUserCardArt(card_user: User_Cards_Track)
 
-    @Query("SELECT * From USER_CARDS_TRACK WHERE email= :email")
+    @Query("SELECT * From USER_CARDS_TRACK WHERE email= :email & onMarket=false")
     fun getAllCardTrackForUser(email: String): Flow<List<User_Cards_Track>>
 
     @Query("SELECT * FROM User_Cards_Track")

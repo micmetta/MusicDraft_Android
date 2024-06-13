@@ -69,5 +69,29 @@ class UserArtistCardRepo(
         }
     }
 
+    fun getArtistCardbyId(id_carta:String,email:String): List<User_Cards_Artisti>? {
+        cardsViewModel.viewModelScope.launch {
+            val allcardsforusers = dao.getCardbyId(id_carta,email)
+            allcardsforusers.collect{ response->
+                allCardsforUserA.value = response
+            }
+        }
+        return allCardsforUserA.value
+    }
 
+    fun getOnMarketCards(): List<User_Cards_Artisti>? {
+        cardsViewModel.viewModelScope.launch {
+            val allcardsforusers = dao.getCardsOnMarket()
+            allcardsforusers.collect{ response->
+                allCardsforUserA.value = response
+            }
+        }
+        return allCardsforUserA.value
+    }
+
+     fun updateMarketStateA(email:String){
+        cardsViewModel.viewModelScope.launch {
+            dao.updateOnMarkeState(email)
+        }
+    }
 }

@@ -18,9 +18,18 @@ interface UCADao {
     @Delete
     suspend fun deleteUserCardArt(card_user: User_Cards_Artisti)
 
-    @Query("SELECT * From USER_CARDS_ARTISTI WHERE email= :email")
+    @Query("SELECT * From USER_CARDS_ARTISTI WHERE email= :email & onMarket=false" )
     fun getAllCardArtForUser(email: String): Flow<List<User_Cards_Artisti>>
 
     @Query("SELECT * FROM user_cards_artisti")
     fun getallcards(): Flow<List<User_Cards_Artisti>>
+
+    @Query("SELECT * FROM user_cards_artisti WHERE id_carta=:id_carta & email=:email")
+    fun getCardbyId(id_carta:String,email:String):Flow<List<User_Cards_Artisti>>
+
+    @Query("SELECT * FROM user_cards_artisti WHERE onMarket=true")
+    fun getCardsOnMarket():Flow<List<User_Cards_Artisti>>
+
+    @Query("UPDATE user_cards_artisti SET onMarket = true WHERE email =:email")
+    suspend fun updateOnMarkeState(email:String)
 }

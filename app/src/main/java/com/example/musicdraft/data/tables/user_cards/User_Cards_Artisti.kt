@@ -11,5 +11,6 @@ data class User_Cards_Artisti(
     val immagine: String,
     val nome: String,
     val popolarita: Int,
-    val email: String
+    val email: String,
+    val onMarket: Boolean
  ){}

@@ -34,4 +34,8 @@ interface ArtistiDao {
 
     @Query("SELECT * FROM Artisti WHERE popolarita <= :maxPopolarita ORDER BY popolarita ASC")
     fun getArtistiWithMaxPop(maxPopolarita: Int): Flow<List<Artisti>>
+
+    @Query("SELECT * FROM Artisti WHERE id=:id")
+    fun getallArtistbyId(id:String):Flow<List<Artisti>>
+
 }

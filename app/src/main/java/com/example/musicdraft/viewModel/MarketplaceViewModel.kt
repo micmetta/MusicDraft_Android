@@ -14,8 +14,10 @@ import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.ArtistRepository
 import com.example.musicdraft.model.TracksRepository
+import com.example.musicdraft.model.UserArtistCardRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -27,9 +29,12 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     private val database = MusicDraftDatabase.getDatabase(application)
     val artistDao = database.artistDao()
     val trackDao = database.trackDao()
+    val ucaDao = database.ownArtCardsDao()
+    val uctDao =database.ownTrackCardsDao()
+    val authDao = database.userDao()
     private val artistRepo: ArtistRepository = ArtistRepository(this, artistDao!!)
     private val trackRepo: TracksRepository = TracksRepository(this, trackDao!!)
-
+    private val ownRepo: UserArtistCardRepo = UserArtistCardRepo(ucaDao!!,authDao!!,uctDao!!,cardsViewModel)
 
     /////////////////////
     val artists: List<Artisti>? = null
@@ -57,6 +62,21 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                 requestsReceived.collect { response ->
                     allartist.value = response
                     Log.i("TG", "allartist updated: ${allartist.value}")
+                val marketCards =ownRepo.getOnMarketCards()
+                marketCards?.forEach{elem->
+                    val a = Artisti(0,elem.id_carta,elem.genere,elem.immagine,elem.nome,elem.popolarita)
+                    if((artistRepo.getArtistbyId(elem.id_carta)?.size==0)){
+                        val temp =allartist.onEach { list->
+                            if (list != null) {
+                                list+a
+                            }
+                        }
+                        temp.collect{res->
+                            allartist.value=res
+
+                        }
+                    }
+                }
                 }
             }
         }
@@ -125,7 +145,9 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
 
             val size = _filteredBrani.value?.size
             if( size == null){
+
                 val currentFilteredList = alltrack.value
+
                 // Aggiorna le liste di artisti filtrati e le carte acquistate
                 val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
                     remove(track)
@@ -186,6 +208,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
 
         }
     }
+
 
 
 
