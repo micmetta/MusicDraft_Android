@@ -5,7 +5,12 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class User_Cards_Track(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true) val identifire:Int,
     val id_carta: String,
+    val anno_pubblicazione: String,
+    val durata: String,
+    val immagine: String,
+    var nome: String,
+    val popolarita: Int,
     val email: String
 ) {}

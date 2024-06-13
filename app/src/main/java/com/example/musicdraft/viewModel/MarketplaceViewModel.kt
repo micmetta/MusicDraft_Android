@@ -35,18 +35,21 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     val artists: List<Artisti>? = null
     // Variabili LiveData per visualizzare tutti gli artisti e tutte le tracce
     val allartist: MutableStateFlow<List<Artisti>?> = MutableStateFlow(artists)
-    val allTracks: LiveData<List<Track>>
+
+    val tracks:List<Track>?=null
+    val alltrack: MutableStateFlow<List<Track>?> = MutableStateFlow(tracks)
+
 
     // Variabili MutableLiveData per visualizzare gli artisti e le tracce filtrati
     val _filteredArtisti = MutableStateFlow<List<Artisti>?>(artists)
-    private val _filteredBrani = MutableLiveData<List<Track>>()
-    val filteredBrani: LiveData<List<Track>> get() = _filteredBrani
+    val _filteredBrani = MutableStateFlow<List<Track>?>(tracks)
+
 
 
     init {
         // Inizializzazione delle tabelle artisti e brani
-        val initArtisti = artistRepo.init()
-        val inittrack = trackRepo.init()
+        //val initArtisti = artistRepo.init()
+        //val inittrack = trackRepo.init()
         // Inizializzazione dei LiveData per visualizzare tutti gli artisti e tutte le tracce
         this.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -58,11 +61,14 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
             }
         }
 
-        allTracks = liveData {
-            val tracks = withContext(Dispatchers.IO) {
-                trackDao?.getAllTracks()
+        this.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val requestsReceived = trackRepo.getAllTracks()
+                requestsReceived.collect{ response ->
+                    alltrack.value = response
+                    Log.i("TG", "alltrack updated: ${alltrack.value}")
+                }
             }
-            emit(tracks ?: emptyList())
         }
 
     }
@@ -97,19 +103,55 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
      * @param popThreshold La popolarità massima delle tracce da visualizzare.
      */
     fun applyBraniFilter(popThreshold: Int?) {
-        val filteredBrani = allTracks.value?.filter { brano ->
+        val filteredBrani = alltrack.value?.filter { brano ->
             val popFilter = popThreshold?.let { brano.popolarita <= it } ?: true
             popFilter
         }
         _filteredBrani.value = if (popThreshold == null) {
-            allTracks.value ?: emptyList()
+            alltrack.value ?: emptyList()
         } else {
             filteredBrani ?: emptyList()
         }
         println("Filter applied with popThreshold: $popThreshold, result count: ${_filteredBrani.value?.size}")
     }
+
+    fun compra_track(track:Track){
+        viewModelScope.launch {
+
+            // Logica sospesa, ad esempio una chiamata al database
+            // Aggiorna il database, se necessario
+
+            // Aggiorna le liste di artisti filtrati e le carte acquistate
+
+            val size = _filteredBrani.value?.size
+            if( size == null){
+                val currentFilteredList = alltrack.value
+                // Aggiorna le liste di artisti filtrati e le carte acquistate
+                val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                    remove(track)
+                }
+                alltrack.value = (updatedFilteredList)
+                trackRepo.delete_track(track)
+                val email = loginViewModel.userLoggedInfo.value!!.email
+                cardsViewModel.insertTrackToUser(track, email)
+            }else{
+                val currentFilteredList =_filteredBrani.value
+                val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                    remove(track)
+                }
+                _filteredBrani.value = (updatedFilteredList)
+
+                val email = loginViewModel.userLoggedInfo.value!!.email
+                cardsViewModel.insertTrackToUser(track, email)
+                trackRepo.delete_track(track)
+            }
+
+
+
+        }
+    }
     // Funzione per comprare un artista
-    fun compra(artista: Artisti) {
+    fun compra_artisti(artista: Artisti) {
         viewModelScope.launch {
 
                 // Logica sospesa, ad esempio una chiamata al database
@@ -125,6 +167,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                     remove(artista)
                 }
                 allartist.value = (updatedFilteredList)
+                artistRepo.delete_artista(artista)
                 val email = loginViewModel.userLoggedInfo.value!!.email
                 cardsViewModel.insertArtistToUser(artista, email)
             }else{
@@ -133,8 +176,10 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                     remove(artista)
                 }
                 _filteredArtisti.value = (updatedFilteredList)
+
                 val email = loginViewModel.userLoggedInfo.value!!.email
                 cardsViewModel.insertArtistToUser(artista, email)
+                artistRepo.delete_artista(artista)
             }
 
 

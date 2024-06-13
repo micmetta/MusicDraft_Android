@@ -15,7 +15,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,9 +46,9 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
     }
 
     val brani by if (!(popThreshold.isNullOrEmpty())) {
-        viewModel.filteredBrani.observeAsState(emptyList())
+        viewModel._filteredBrani.collectAsState(emptyList())
     } else {
-        viewModel.allTracks.observeAsState(emptyList())
+        viewModel.alltrack.collectAsState(emptyList())
     }
     // Composable principale per la schermata del Marketplace
     Column(modifier = Modifier.padding(top = 65.dp)) {
@@ -93,7 +92,7 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
         // Visualizza la lista degli artisti o delle tracce in base alla scheda selezionata
         when (selectedTab) {
             0 -> artisti?.let { ArtistiScreen(it,viewModel) }
-            1 -> BraniScreen(brani)
+            1 -> brani?.let { BraniScreen(it,viewModel) }
         }
     }
 }
@@ -192,12 +191,12 @@ fun ArtistiScreen(artisti: List<Artisti>, viewModel: MarketplaceViewModel) {
  * @param brani Elenco dei brani da visualizzare.
  */
 @Composable
-fun BraniScreen(brani: List<Track>) {
+fun BraniScreen(brani: List<Track>, viewModel: MarketplaceViewModel) {
     // Visualizza una griglia di carte per i brani
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso i brani e visualizza una carta per ciascuno
         items(brani.size) { index ->
-            BranoCard(brani[index], Modifier.height(8.dp))
+            BranoCard(brani[index], Modifier.height(8.dp),viewModel)
         }
     }
 }
@@ -208,7 +207,7 @@ fun BraniScreen(brani: List<Track>) {
  * @param height Modificatore per la altezza della carta.
  */
 @Composable
-fun BranoCard(brano: Track, height: Modifier) {
+fun BranoCard(brano: Track, height: Modifier, viewModel: MarketplaceViewModel) {
     // Carta contenente le informazioni del brano
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -225,7 +224,7 @@ fun BranoCard(brano: Track, height: Modifier) {
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Button(onClick = { /* da impl */ }) {
+            Button(onClick = { viewModel.compra_track(brano)}) {
                 Text("Compra")
             }
         }
@@ -254,7 +253,7 @@ fun ArtistaCard(artista: Artisti, height: Modifier, viewModel: MarketplaceViewMo
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Button(onClick = { viewModel.compra(artista) }) {
+            Button(onClick = { viewModel.compra_artisti(artista) }) {
                 Text("Compra")
             }
         }
