@@ -46,6 +46,10 @@ import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
 import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
 import com.example.musicdraft.sections.Cards
 import com.example.musicdraft.sections.Decks
+import Marketplace
+import androidx.lifecycle.ViewModelProvider
+import com.example.musicdraft.factory.CardsViewModelFactory
+import com.example.musicdraft.factory.MarketplaceViewModelFactory
 import com.example.musicdraft.sections.Friends
 import com.example.musicdraft.sections.Home
 import com.example.musicdraft.sections.Marketplace
@@ -55,9 +59,12 @@ import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
 import com.example.musicdraft.utility.UpdateNickname
+import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.HandleFriendsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 import kotlinx.coroutines.launch
+import com.example.musicdraft.viewModel.MarketplaceViewModel
+import com.example.musicdraft.viewModel.LoginViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -71,11 +78,18 @@ class MainActivity : ComponentActivity() {
             val loginViewModel: LoginViewModel by viewModels()
             val handleFriendsViewModel: HandleFriendsViewModel by viewModels()
 
+            val cardsViewModelFactory = CardsViewModelFactory(application, loginViewModel)
+            val cardsViewModel: CardsViewModel = ViewModelProvider(this, cardsViewModelFactory).get(CardsViewModel::class.java)
+
+            val marketplaceViewModelFactory = MarketplaceViewModelFactory(application, cardsViewModel, loginViewModel)
+            val marketplaceViewModel: MarketplaceViewModel = ViewModelProvider(this, marketplaceViewModelFactory).get(MarketplaceViewModel::class.java)
+
+
             MusicDraftTheme {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    Navigation(loginViewModel, handleFriendsViewModel)
+                    Navigation(loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewModel)
                 }
             }
         }
@@ -86,8 +100,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState, launcher: ActivityResultLauncher<IntentSenderRequest>, googleAuthUiClient: GoogleAuthUiClient, context: Context){ // c'era prima
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState){
-fun Navigation(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsViewModel){
-
+fun Navigation(
+    loginViewModel: LoginViewModel,
+    handleFriendsViewModel: HandleFriendsViewModel,
+    cardsViewModel: CardsViewModel,
+    marketplaceViewmodel: MarketplaceViewModel
+){
     val navigationController = rememberNavController()
 
     // Determina la schermata iniziale in base al fatto se già esiste o meno una sessione attiva:
@@ -123,7 +141,7 @@ fun Navigation(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFri
             UpdateNickname(navigationController, loginViewModel)
         }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -133,7 +151,14 @@ fun Navigation(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFri
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsViewModel){
+fun MusicDraftUI(
+    navControllerInitialScreens: NavController,
+    loginViewModel: LoginViewModel,
+
+    handleFriendsViewModel: HandleFriendsViewModel,
+    cardsViewModel: CardsViewModel,
+    marketplaceViewmodel: MarketplaceViewModel
+){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -280,6 +305,7 @@ fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: Log
                         }
                     })
 
+
                 // Definisco la sezione "Settings":
                 NavigationDrawerItem(label = { Text(text = "Settings", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
@@ -361,13 +387,13 @@ fun MusicDraftUI(navControllerInitialScreens: NavController, loginViewModel: Log
                     Friends(handleFriendsViewModel, loginViewModel)
                 }
                 composable(Screens.Cards.screen){
-                    Cards() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
+                    Cards(cardsViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
                 }
                 composable(Screens.Decks.screen){
                     Decks() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"
                 }
                 composable(Screens.Marketplace.screen){
-                    Marketplace() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Marketplace"
+                    Marketplace(marketplaceViewmodel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Marketplace"
                 }
                 composable(Screens.Matchmaking.screen){
                     Matchmaking() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Matchmaking"

@@ -110,4 +110,9 @@ dependencies {
 
     // Per avere più icone disponibili:
     implementation("androidx.compose.material:material-icons-extended-android:1.6.7")
+
+    implementation("com.google.code.gson:gson:2.7")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.4.0")
+
+
 }
