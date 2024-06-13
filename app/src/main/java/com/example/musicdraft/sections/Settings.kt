@@ -52,7 +52,7 @@ fun Settings(navController: NavController, loginViewModel: LoginViewModel) {
                 Spacer(modifier = Modifier.height(80.dp))
 
                 Text(
-                    text = "In this section you can update email, nickname and password:",
+                    text = "In this section you can update nickname or password:",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -76,18 +76,19 @@ fun Settings(navController: NavController, loginViewModel: LoginViewModel) {
                         )
                     }
                 }
-                Button(
-                    onClick = {
-                        // Logica per cambiare l'email
-                    },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text(
-                        text = "Change email",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+//                Button(
+//                    onClick = {
+//                        // Logica per cambiare l'email
+//                        loginViewModel.onEvent(UIEventSignIn.updateEmail, navController)
+//                    },
+//                    modifier = Modifier.align(Alignment.CenterHorizontally)
+//                ) {
+//                    Text(
+//                        text = "Change email",
+//                        fontSize = 15.sp,
+//                        fontWeight = FontWeight.Bold
+//                    )
+//                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -110,6 +111,7 @@ fun Settings(navController: NavController, loginViewModel: LoginViewModel) {
                 Button(
                     onClick = {
                         // Logica per cambiare il nickname
+                        loginViewModel.onEvent(UIEventSignIn.updateNickname, navController)
                     },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {

@@ -53,6 +53,14 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
+    fun updateNicknameUser(currentEmail: String, currentNickname: String, newNickname: String){
+        viewModel.viewModelScope.launch {
+            dao.updateNicknameUser(currentNickname, newNickname)
+            // adesso riaggiorno le info dell'utente:
+            dao.getUserByEmail(currentEmail)
+        }
+    }
+
     fun setisOnlineUser(email: String, isOnline: Boolean){
         viewModel.viewModelScope.launch {
             dao.updateIsOnlineUser(email, isOnline)

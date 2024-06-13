@@ -21,7 +21,7 @@ sealed class Screens (val screen: String) {
     data object Matchmaking: Screens("matchmaking")
     data object Settings: Screens("settings")
     data object ErrorDialog: Screens("errorDialog")
-
     data object ForgotPassword: Screens("forgotPassword")
+    data object UpdateNickname: Screens("updateEmail")
 
 }

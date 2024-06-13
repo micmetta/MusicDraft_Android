@@ -21,6 +21,7 @@ import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.login.GoogleSignInState
 import com.example.musicdraft.model.AuthRepository
 import com.example.musicdraft.sections.Screens
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 import kotlinx.coroutines.Dispatchers
@@ -96,6 +97,17 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     var showDialogErrorSentEmail = mutableStateOf(false)
         private set
     /////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////
+    // States utili per permettere all'utente di eseguire il reset del nickname:
+    var showDialogUpdateNickname = mutableStateOf(false)
+        private set
+    var showDialogErrorUpdateNickname = mutableStateOf(false)
+        private set
+    var messageDialogErrorUpdateNickname = mutableStateOf("")
+    /////////////////////////////////////////////////////////////////////////////
+
+
 
     /////////////////////////////////////////////////////////////////////////////
     // Mutable live data per gestire la sessione attiva dell'utente:
@@ -203,6 +215,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             // evento che viene generato nel momento in cui l'utente vuole aggiornare la password
             is UIEventSignIn.forgotPassword -> {
                 navController.navigate(Screens.ForgotPassword.screen)
+            }
+
+            is UIEventSignIn.updateNickname -> {
+                navController.navigate(Screens.UpdateNickname.screen)
             }
         }
 
@@ -574,7 +590,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
         checkUserExistenceWithEmail(email) { exists ->
             if (exists) {
-                // L'utente esiste, fai qualcosa
+                // L'utente esiste:
                 Log.d(TAG, "L'email: ${email} esiste nel DB e quindi avvio il processo di reset della password.")
                 FirebaseAuth
                     .getInstance()
@@ -598,6 +614,121 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
 
         }
+    }
+
+
+    fun reauthenticateUser(email: String, password: String, onComplete: (Boolean, String?) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val credential = EmailAuthProvider.getCredential(email, password)
+            user.reauthenticate(credential)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d(TAG, "User re-authenticated.")
+                        onComplete(true, null)
+                    } else {
+                        Log.e(TAG, "User re-authentication failed: ${task.exception?.message}")
+                        onComplete(false, task.exception?.message)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.e(TAG, "User re-authentication failed: ${exception.message}")
+                    onComplete(false, exception.message)
+                }
+        } else {
+            onComplete(false, "No active user found.")
+        }
+    }
+
+//    fun sendVerificationEmail(user: FirebaseUser, newEmail: String, onComplete: (Boolean, String?) -> Unit) {
+//        user.verifyBeforeUpdateEmail(newEmail)
+//            .addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    Log.d(TAG, "Verification email sent to $newEmail.")
+//                    onComplete(true, null) // notifico il chiamante facendogli capire che l'operazione è stata completata con successo.
+//                } else {
+//                    Log.e(TAG, "Failed to send verification email: ${task.exception?.message}")
+//                    onComplete(false, task.exception?.message) // notifico il chiamante facendogli capire che l'operazione è stata completata con INsuccesso.
+//                }
+//            }
+//            .addOnFailureListener { exception ->
+//                Log.e(TAG, "Failed to send verification email: ${exception.message}")
+//                onComplete(false, exception.message) // notifico il chiamante facendogli capire che l'operazione è stata completata con INsuccesso.
+//            }
+//    }
+//    fun updateEmail(currentEmail: String, password: String, newEmail: String) {
+//
+//        checkUserExistenceWithEmail(newEmail) { exists ->
+//            if (!exists) {
+//                Log.d(TAG, "L'email: $newEmail NON esiste ancora nel DB e quindi posso avviare il processo di update dell'email.")
+//
+//                val user = FirebaseAuth.getInstance().currentUser
+//                if (user != null) {
+//                    // Prima ri-autentica l'utente
+//                    reauthenticateUser(currentEmail, password) { reauthSuccess, reauthError ->
+//                        if (reauthSuccess) {
+//                            // Procedi con l'aggiornamento dell'email
+//                            sendVerificationEmail(user, newEmail) { success, errorMessage ->
+//                                if (success) {
+//                                    Log.d(TAG, "Email di verifica inviata all'email corrente!")
+//                                    showDialogSentEmail.value = true
+//                                } else {
+//                                    Log.e(TAG, "Errore durante l'invio dell'email di verifica: $errorMessage")
+//                                    showDialogErrorSentEmail.value = true
+//                                }
+//                            }
+//                        } else {
+//                            Log.e(TAG, "Ri-autenticazione fallita: $reauthError")
+//                            showDialogErrorSentEmail.value = true
+//                        }
+//                    }
+//                } else {
+//                    Log.e(TAG, "Non c'è nessuna sessione attiva e quindi non posso eseguire l'update dell'email..")
+//                    showDialogErrorSentEmail.value = true
+//                }
+//            } else {
+//                Log.d(TAG, "L'email: $newEmail esiste già nel DB e quindi NON POSSO AVVIARE IL processo di update dell'email.")
+//                showDialogErrorSentEmail.value = true
+//            }
+//        }
+//    }
+
+    fun updateNickname(currentEmail: String, password: String, currentNickname: String, newNickname: String){
+        checkUserExistenceWithNickname(newNickname) { exists ->
+            if (!exists) {
+                Log.d(TAG, "Il nickname: $newNickname NON esiste ancora nel DB e quindi posso avviare il processo di update del nickname.")
+
+                val user = FirebaseAuth.getInstance().currentUser
+                if (user != null) {
+                    // Prima ri-autentica l'utente
+                    reauthenticateUser(currentEmail, password) { reauthSuccess, reauthError ->
+                        if (reauthSuccess) {
+                            // Procedi con l'aggiornamento dell'email
+                            authRepository.updateNicknameUser(currentEmail, currentNickname, newNickname)
+                            showDialogUpdateNickname.value = true
+                        } else {
+                            Log.e(TAG, "Ri-autenticazione fallita: $reauthError")
+                            if (reauthError != null) {
+                                messageDialogErrorUpdateNickname.value = reauthError
+                            }
+                            showDialogErrorUpdateNickname.value = true
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "Non c'è nessuna sessione attiva e quindi non posso eseguire l'update dell'email..")
+                    messageDialogErrorUpdateNickname.value = "There isn't an active session and so it is impossible update nickname.."
+                    showDialogErrorUpdateNickname.value = true
+                }
+            } else {
+                Log.d(TAG, "Il nickname: $newNickname esiste già nel DB e quindi NON POSSO AVVIARE IL processo di update del nickname.")
+                messageDialogErrorUpdateNickname.value = "The new nickname already exists into DB so it is impossible update nickname.."
+                showDialogErrorUpdateNickname.value = true
+            }
+        }
+    }
+
+    fun backToScreenSettings(navController: NavController){
+        navController.navigate(Screens.Settings.screen)
     }
 
 

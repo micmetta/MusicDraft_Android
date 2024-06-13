@@ -6,4 +6,5 @@ sealed class UIEventSignIn {
     object LoginButtonClick : UIEventSignIn()
     object InvalidateDataSignIn : UIEventSignIn()
     object forgotPassword: UIEventSignIn()
+    object updateNickname: UIEventSignIn()
 }

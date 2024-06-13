@@ -23,6 +23,8 @@ interface UserDao {
     @Insert
     suspend fun insertUser(user: User)
 
+    @Query("UPDATE User SET nickname = :newNickname WHERE nickname = :currentNickname")
+    suspend fun updateNicknameUser(currentNickname: String, newNickname: String)
 
     /*
     - Query per aggiornare il campo 'isOnline' in base ai parametro 'email' e 'isOnline' (true o false) passati in input.
