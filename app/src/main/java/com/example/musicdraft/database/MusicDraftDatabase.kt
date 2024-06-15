@@ -1,15 +1,18 @@
 package com.example.musicdraft.database
 
 import android.content.Context
-import androidx.lifecycle.viewModelScope
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.musicdraft.data.tables.handleFriends.HandleFriends
-import com.example.musicdraft.data.tables.handleFriends.HandleFriendsDao
 import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.artisti.ArtistiDao
+import com.example.musicdraft.data.tables.exchange_management_cards.ConvertersExchangeManagementCards
+import com.example.musicdraft.data.tables.exchange_management_cards.ExchangeManagementCards
+import com.example.musicdraft.data.tables.exchange_management_cards.ExchangeManagementCardsDao
+import com.example.musicdraft.data.tables.handleFriends.HandleFriends
+import com.example.musicdraft.data.tables.handleFriends.HandleFriendsDao
 import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.data.tables.track.TrackDao
 import com.example.musicdraft.data.tables.user.User
@@ -18,26 +21,25 @@ import com.example.musicdraft.data.tables.user_cards.UCADao
 import com.example.musicdraft.data.tables.user_cards.UCTDao
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
-import com.example.musicdraft.model.ArtistRepository
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @Database(
-    entities = [User::class,Artisti::class,Track::class, User_Cards_Artisti::class,User_Cards_Track::class, HandleFriends::class],
+    entities = [User::class,Artisti::class,Track::class, User_Cards_Artisti::class,User_Cards_Track::class, HandleFriends::class, ExchangeManagementCards:: class],
     version = 1
 )
+@TypeConverters(ConvertersExchangeManagementCards::class) // per poter usare i convertitori per la tabella 'ExchangeManagementCards'
 abstract class MusicDraftDatabase: RoomDatabase() {
-//    //    abstract val dao: UserDao
-//    //abstract fun dao(): UserDao?
+
     abstract fun userDao(): UserDao?
     abstract fun artistDao(): ArtistiDao?
     abstract fun trackDao():TrackDao?
     abstract fun ownArtCardsDao():UCADao?
     abstract fun ownTrackCardsDao():UCTDao?
     abstract fun handleFriendsDao(): HandleFriendsDao?
+    abstract fun ExchangeManagementCardsDao(): ExchangeManagementCardsDao?
 
     companion object {
         // marking the instance as volatile to ensure atomic access to the variable

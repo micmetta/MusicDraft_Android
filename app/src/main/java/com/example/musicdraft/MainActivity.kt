@@ -1,5 +1,7 @@
 package com.example.musicdraft
 
+//import com.example.musicdraft.utility.ExchangeCards
+import Marketplace
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -36,35 +38,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.musicdraft.factory.CardsViewModelFactory
+import com.example.musicdraft.factory.MarketplaceViewModelFactory
 import com.example.musicdraft.screens_to_signUp_signIn.ForgotPassword
 import com.example.musicdraft.screens_to_signUp_signIn.LoginScreen
 import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
 import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
 import com.example.musicdraft.sections.Cards
 import com.example.musicdraft.sections.Decks
-import Marketplace
-import androidx.lifecycle.ViewModelProvider
-import com.example.musicdraft.factory.CardsViewModelFactory
-import com.example.musicdraft.factory.MarketplaceViewModelFactory
+import com.example.musicdraft.sections.ExchangeCards
 import com.example.musicdraft.sections.Friends
 import com.example.musicdraft.sections.Home
-import com.example.musicdraft.sections.Marketplace
 import com.example.musicdraft.sections.Matchmaking
 import com.example.musicdraft.sections.Screens
 import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
+//import com.example.musicdraft.utility.ExchangeCards
 import com.example.musicdraft.utility.UpdateNickname
 import com.example.musicdraft.viewModel.CardsViewModel
+import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
 import com.example.musicdraft.viewModel.HandleFriendsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
-import kotlinx.coroutines.launch
 import com.example.musicdraft.viewModel.MarketplaceViewModel
-import com.example.musicdraft.viewModel.LoginViewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -77,6 +79,7 @@ class MainActivity : ComponentActivity() {
 
             val loginViewModel: LoginViewModel by viewModels()
             val handleFriendsViewModel: HandleFriendsViewModel by viewModels()
+            val exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel by viewModels()
 
             val cardsViewModelFactory = CardsViewModelFactory(application, loginViewModel)
             val cardsViewModel: CardsViewModel = ViewModelProvider(this, cardsViewModelFactory).get(CardsViewModel::class.java)
@@ -89,7 +92,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    Navigation(loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewModel)
+                    Navigation(loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewModel)
                 }
             }
         }
@@ -103,6 +106,7 @@ class MainActivity : ComponentActivity() {
 fun Navigation(
     loginViewModel: LoginViewModel,
     handleFriendsViewModel: HandleFriendsViewModel,
+    exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel,
     cardsViewModel: CardsViewModel,
     marketplaceViewmodel: MarketplaceViewModel
 ){
@@ -140,8 +144,11 @@ fun Navigation(
         composable(Screens.UpdateNickname.screen){
             UpdateNickname(navigationController, loginViewModel)
         }
+        composable(Screens.ExchangeCards.screen){
+            ExchangeCards(navigationController, loginViewModel, exchangeManagementCardsViewModel, cardsViewModel)
+        }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel,marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -154,8 +161,8 @@ fun Navigation(
 fun MusicDraftUI(
     navControllerInitialScreens: NavController,
     loginViewModel: LoginViewModel,
-
     handleFriendsViewModel: HandleFriendsViewModel,
+    exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel,
     cardsViewModel: CardsViewModel,
     marketplaceViewmodel: MarketplaceViewModel
 ){
@@ -384,7 +391,7 @@ fun MusicDraftUI(
                 }
                 composable(Screens.Friends.screen){
 //                    Friends(navigationController) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
-                    Friends(handleFriendsViewModel, loginViewModel)
+                    Friends(navControllerInitialScreens, handleFriendsViewModel, loginViewModel, cardsViewModel, exchangeManagementCardsViewModel)
                 }
                 composable(Screens.Cards.screen){
                     Cards(cardsViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"

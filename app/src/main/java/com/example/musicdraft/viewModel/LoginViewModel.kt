@@ -78,7 +78,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     // sottoscrizione alla variabile "userLoggedInfo" sempre del repository, in questo modo
     // non appena "repository.userLoggedInfo" cambierà, automaticamente cambierà anche "userLoggedInfo" del LoginViewModel:
     var userLoggedInfo =  authRepository.userLoggedInfo
-    //var userLoggedState = mutableStateOf(UserLoggedState())
+
+    // altra sottoscrizione:
+    var friendRequestCard = authRepository.friendRequestCard
 
     ///////////////////////////////////////////////////////
     // altre sottoscrizioni a variabili del repository:
@@ -786,4 +788,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             authRepository.getallUsersrReceivedRequestByCurrentUser(email2List)
         }
     }
+
+
+    fun getUserByNickname(nickname: String){
+        authRepository.getUserByNickname(nickname)
+    }
+
 }

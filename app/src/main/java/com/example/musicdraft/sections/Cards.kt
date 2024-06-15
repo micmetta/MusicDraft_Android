@@ -39,11 +39,11 @@ fun Cards(viewModel: CardsViewModel) {
     var popThreshold by remember { mutableStateOf("") }
     var nameQuery by remember { mutableStateOf("") }
     var genreQuery by remember { mutableStateOf("") }
-    viewModel.getallcards()
+    viewModel.getallcards() // richiesta aggiornamento carte dell'utente
     viewModel
     // Ottieni la lista degli artisti e delle tracce in base alla scheda selezionata e ai filtri applicati
-    val artisti by viewModel.acquiredCardsA.collectAsState(emptyList())
-    val brani by viewModel.acquiredCardsT.collectAsState(emptyList())
+    val artisti by viewModel.acquiredCardsA.collectAsState(emptyList()) // lista artisti dell'utente corrente (Flow<List<User_Cards_Track>>)
+    val brani by viewModel.acquiredCardsT.collectAsState(emptyList()) // lista brani dell'utente corrente (Flow<List<User_Cards_Track>>)
 
     // Composable principale per la schermata del Marketplace
     Column(modifier = Modifier.padding(top = 65.dp)) {

@@ -29,6 +29,7 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
     //var users = dao.getAllUser()
     val users: List<User>? = null
     val userLoggedInfo: MutableStateFlow<User?> = MutableStateFlow(null)
+    val friendRequestCard: MutableStateFlow<User?> = MutableStateFlow(null)
     val allUsersFriendsOfCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
     val allUsersrReceivedRequestByCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
 
@@ -75,12 +76,30 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
                 val userFlow = dao.getUserByEmail(email)
                 userFlow.collect { user ->
                     userLoggedInfo.value = user
-                    Log.i("TG", "info utente prese dal DB updated: ${userLoggedInfo.value}")
+                    Log.i("AuthRepository", "info utente prese dal DB updated: ${userLoggedInfo.value}")
                 }
 
             }
         }
     }
+
+
+    fun getUserByNickname(nickname: String){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                // mi faccio restituire dalla funzione "getUserByEmail(email)" del DAO
+                // il flow:
+                val userFlow = dao.getUserByNickname(nickname)
+                userFlow.collect { user ->
+                    friendRequestCard.value = user
+                    Log.i("AuthRepository", "info friend al quale verrà fatta l'offerta: ${friendRequestCard.value}")
+                }
+
+            }
+        }
+    }
+
+
 
     /*
     - Resetto i dati dell'utente corrente.
@@ -97,7 +116,7 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO){
                 dao.updateIsOnlineUser(email, false)
-                Log.i("TG", "Ho settato a false lo stato isOnline dell'utente con questa email: ${email}")
+                Log.i("AuthRepository", "Ho settato a false lo stato isOnline dell'utente con questa email: ${email}")
             }
         }
     }
@@ -108,7 +127,7 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
                 val friends = dao.getNicknamesByEmails(emails)
                 friends.collect { response ->
                     allUsersFriendsOfCurrentUser.value = response
-                    Log.i("TG", "Tutti gli amici dell'utente corrente (tutte le loro info): ${allUsersFriendsOfCurrentUser.value}")
+                    Log.i("AuthRepository", "Tutti gli amici dell'utente corrente (tutte le loro info): ${allUsersFriendsOfCurrentUser.value}")
                 }
             }
         }
@@ -120,7 +139,7 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
                 val friends = dao.getNicknamesByEmails(emails)
                 friends.collect { response ->
                     allUsersrReceivedRequestByCurrentUser.value = response
-                    Log.i("TG", "Tutti gli utenti che hanno ricevuto la richiesta dall'utente corrente (tutte le loro info): ${allUsersrReceivedRequestByCurrentUser.value}")
+                    Log.i("AuthRepository", "Tutti gli utenti che hanno ricevuto la richiesta dall'utente corrente (tutte le loro info): ${allUsersrReceivedRequestByCurrentUser.value}")
                 }
             }
         }
