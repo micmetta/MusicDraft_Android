@@ -62,24 +62,11 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                 requestsReceived.collect { response ->
                     allartist.value = response
                     Log.i("TG", "allartist updated: ${allartist.value}")
-                val marketCards =ownRepo.getOnMarketCards()
-                marketCards?.forEach{elem->
-                    val a = Artisti(0,elem.id_carta,elem.genere,elem.immagine,elem.nome,elem.popolarita)
-                    if((artistRepo.getArtistbyId(elem.id_carta)?.size==0)){
-                        val temp =allartist.onEach { list->
-                            if (list != null) {
-                                list+a
-                            }
-                        }
-                        temp.collect{res->
-                            allartist.value=res
 
-                        }
-                    }
                 }
                 }
             }
-        }
+
 
         this.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -93,7 +80,36 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
 
     }
 
+    fun getOnmarketCards() {
+        this.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
 
+                val marketCards = ownRepo.getOnMarketCards()
+                marketCards?.forEach { elem ->
+                    val a =
+                        Artisti(
+                            0,
+                            elem.id_carta,
+                            elem.genere,
+                            elem.immagine,
+                            elem.nome,
+                            elem.popolarita
+                        )
+                    if ((artistRepo.getArtistbyId(elem.id_carta)?.size == 0)) {
+                        val temp = allartist.onEach { list ->
+                            if (list != null) {
+                                list + a
+                            }
+                        }
+                        temp.collect { res ->
+                            allartist.value = res
+
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Applica i filtri agli artisti e aggiorna la lista visualizzata.

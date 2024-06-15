@@ -37,7 +37,7 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
     var popThreshold by remember { mutableStateOf("") }
     var nameQuery by remember { mutableStateOf("") }
     var genreQuery by remember { mutableStateOf("") }
-
+    viewModel.getOnmarketCards()
     // Ottieni la lista degli artisti e delle tracce in base alla scheda selezionata e ai filtri applicati
     val artisti by if (!(popThreshold.isNullOrEmpty())) {
         viewModel._filteredArtisti.collectAsState(emptyList())

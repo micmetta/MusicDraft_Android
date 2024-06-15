@@ -30,6 +30,9 @@ interface UCADao {
     @Query("SELECT * FROM user_cards_artisti WHERE onMarket=true")
     fun getCardsOnMarket():Flow<List<User_Cards_Artisti>>
 
-    @Query("UPDATE user_cards_artisti SET onMarket = true WHERE email =:email")
-    suspend fun updateOnMarkeState(email:String)
+    @Query("UPDATE user_cards_artisti SET onMarket = true WHERE email =:email & id_carta=:id_carta")
+    suspend fun updateOnMarkeState(email:String, id_carta: String)
+
+    @Query("UPDATE user_cards_artisti SET onMarket = false WHERE email =:email & id_carta=:id_carta")
+    suspend fun updateNotOnMarkeState(email:String,id_carta: String)
 }

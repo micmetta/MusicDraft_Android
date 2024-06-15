@@ -89,9 +89,14 @@ class UserArtistCardRepo(
         return allCardsforUserA.value
     }
 
-     fun updateMarketStateA(email:String){
+     fun updateMarketStateA(email:String,id_carta: String){
         cardsViewModel.viewModelScope.launch {
-            dao.updateOnMarkeState(email)
+            dao.updateOnMarkeState(email,id_carta)
+        }
+    }
+    fun updateMarketNotStateA(email:String,id_carta: String){
+        cardsViewModel.viewModelScope.launch {
+            dao.updateNotOnMarkeState(email,id_carta)
         }
     }
 }

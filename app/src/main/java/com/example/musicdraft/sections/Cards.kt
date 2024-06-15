@@ -55,7 +55,7 @@ fun Cards(viewModel: CardsViewModel) {
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
                 Text("Brani")
             }
-            Tab(selected = selectedTab == 2, onClick = { selectedTab = 1 }) {
+            Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
                 Text("In Vendita")
             }
         }
@@ -79,19 +79,23 @@ fun CarteinVendita(
     // Visualizza una griglia di carte per i brani
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso i brani e visualizza una carta per ciascuno
-        items(brani.size) { index ->
-            if(brani[index].onMarket==true) {
-                BranoCard(brani[index], Modifier.height(8.dp),viewModel)
-            }
-        }
         items(artisti.size){index->
             if(artisti[index].onMarket==true){
                 ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel)
             }
 
         }
+        items(brani.size) { index ->
+            if(brani[index].onMarket==true) {
+                BranoCard(brani[index], Modifier.height(8.dp),viewModel)
+            }
+        }
+
     }
 }
+
+
+
 
 /**
  * Composable per i filtri degli artisti.

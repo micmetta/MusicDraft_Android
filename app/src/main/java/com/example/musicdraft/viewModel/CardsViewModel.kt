@@ -23,6 +23,8 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
     private val dao = database.ownArtCardsDao()
     private val daoLog =database.userDao()
     private val daoTrack =database.ownTrackCardsDao()
+    private val artistDao =database.artistDao()
+    private val trackDao = database.trackDao()
 
     private val _acquiredCardsArtist : List<User_Cards_Artisti>? = null
     val acquiredCardsA: MutableStateFlow<List<User_Cards_Artisti>?> = MutableStateFlow(_acquiredCardsArtist)
@@ -58,11 +60,13 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
                          val gain = loginViewModel.userLoggedInfo.value?.points?.plus((elem.popolarita))
                          if (gain != null) {
                              ownArtistRepo.updatePoints(gain,elem.email)
+                             ownArtistRepo.updateMarketNotStateA(email,elem.id_carta)
                          }
                      }
 
                  }
 
+                updateAcquiredAddA(card)
              }
          }
     }
@@ -78,17 +82,51 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
         }
     }
 
+    fun updateAcquiredRemoveA(artista:User_Cards_Artisti){
+        val updatedAcquired = acquiredCardsA.value?.toMutableList()?.apply {
+            remove(artista)
+        }
+        acquiredCardsA.value = (updatedAcquired)
+    }
+    fun updateAcquiredAddA(artista:User_Cards_Artisti){
+        val updatedAcquired = acquiredCardsA.value?.toMutableList()?.apply {
+            add(artista)
+        }
+        acquiredCardsA.value = (updatedAcquired)
+    }
+    fun updateOnMarketRemoveA(artista:User_Cards_Artisti){
+        val updatedonMarket = MarketArtist?.value?.toMutableList()?.apply {
+            remove(artista)
+        }
+        MarketArtist.value = (updatedonMarket)
+    }
+    fun updateOnMarketAddA(artista:User_Cards_Artisti){
+        val updatedonMarket = MarketArtist?.value?.toMutableList()?.apply {
+            add(artista)
+        }
+        MarketArtist.value = (updatedonMarket)
+    }
+
+
+
     fun vendi_artista(artista:User_Cards_Artisti){
         this.viewModelScope.launch {
-
             val email = loginViewModel.userLoggedInfo.value!!.email
             val cards_on_market = ownArtistRepo.getArtistCardbyId(artista.id_carta, email)
             MarketArtist.value = cards_on_market
-            ownArtistRepo.updateMarketStateA(email)
+            ownArtistRepo.updateMarketStateA(email,artista.id_carta)
+            updateAcquiredRemoveA(artista)
+            updateOnMarketAddA(artista)
+            val a = Artisti(0,artista.id_carta,artista.genere,artista.immagine,artista.nome,artista.popolarita)
+            artistDao?.insertArtist(a)
+
+
+
         }
     }
 
 }
+
 
 
 
