@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.handleFriends.HandleFriends
 import com.example.musicdraft.data.tables.track.Track
+import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.ArtistRepository
 import com.example.musicdraft.model.TracksRepository
@@ -84,7 +85,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
         this.viewModelScope.launch {
             withContext(Dispatchers.IO) {
 
-                val marketCards = ownRepo.getOnMarketCards()
+                val marketCards = ownRepo.getAllOnMarketCardsA()
                 marketCards?.forEach { elem ->
                     val a =
                         Artisti(
@@ -191,39 +192,62 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     // Funzione per comprare un artista
     fun compra_artisti(artista: Artisti) {
         viewModelScope.launch {
+            val email = loginViewModel.userLoggedInfo.value!!.email
 
-                // Logica sospesa, ad esempio una chiamata al database
-                // Aggiorna il database, se necessario
+            // Logica sospesa, ad esempio una chiamata al database
+            // Aggiorna il database, se necessario
 
-                // Aggiorna le liste di artisti filtrati e le carte acquistate
+            // Aggiorna le liste di artisti filtrati e le carte acquistate
 
             val size = _filteredArtisti.value?.size
-            if( size == null){
-                val currentFilteredList = allartist.value
-                // Aggiorna le liste di artisti filtrati e le carte acquistate
-                val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                    remove(artista)
-                }
-                allartist.value = (updatedFilteredList)
-                artistRepo.delete_artista(artista)
-                val email = loginViewModel.userLoggedInfo.value!!.email
-                cardsViewModel.insertArtistToUser(artista, email)
-            }else{
-                val currentFilteredList =_filteredArtisti.value
-                val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                    remove(artista)
-                }
-                _filteredArtisti.value = (updatedFilteredList)
 
-                val email = loginViewModel.userLoggedInfo.value!!.email
-                cardsViewModel.insertArtistToUser(artista, email)
-                artistRepo.delete_artista(artista)
+
+
+            ownRepo.getArtCardsforUser(email)
+            val allArtisti = ownRepo.allCardsforUserA.value
+            val isYours = allArtisti?.filter { elem ->
+                elem.onMarket
+            }
+
+            var c = 0
+            Log.i("compra", "$isYours")
+            if (isYours != null) {
+                isYours.forEach { elem ->
+                    if (elem.id_carta == artista.id) {
+                        c += 1
+                    }
+                }
+            }
+            //do nothing//
+            if (c == 0) {
+                if (size == null) {
+                    val currentFilteredList = allartist.value
+                    // Aggiorna le liste di artisti filtrati e le carte acquistate
+                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                        remove(artista)
+                    }
+                    allartist.value = (updatedFilteredList)
+                    artistRepo.delete_artista(artista)
+                    val email = loginViewModel.userLoggedInfo.value!!.email
+                    cardsViewModel.insertArtistToUser(artista, email)
+                } else {
+                    val currentFilteredList = _filteredArtisti.value
+                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                        remove(artista)
+                    }
+                    _filteredArtisti.value = (updatedFilteredList)
+
+                    cardsViewModel.insertArtistToUser(artista, email)
+                    artistRepo.delete_artista(artista)
+                }
+            }
+        }
             }
 
 
 
-        }
-    }
+
+
 
 
 

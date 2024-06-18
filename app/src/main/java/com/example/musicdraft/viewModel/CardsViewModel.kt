@@ -41,9 +41,25 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
 
 
     fun getallcards() {
-        val email = loginViewModel.userLoggedInfo.value!!.email
-        acquiredCardsA.value = ownArtistRepo.getArtCardsforUser(email)
-        acquiredCardsT.value =ownArtistRepo.getTrackCardsforUser(email)
+
+            val email = loginViewModel.userLoggedInfo.value!!.email
+            ownArtistRepo.getArtCardsforUser(email)
+
+            val allArtisti = ownArtistRepo.allCardsforUserA.value
+
+            val ownCards = allArtisti?.filter{elem->
+                !elem.onMarket
+            }
+            val marketCards =allArtisti?.filter{elem->
+                elem.onMarket
+            }
+
+            acquiredCardsA.value = ownCards
+            MarketArtist.value = marketCards
+
+            acquiredCardsT.value = ownArtistRepo.getTrackCardsforUser(email)
+
+
 
     }
 
@@ -54,7 +70,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
                  val card = User_Cards_Artisti(0,artista.id,artista.genere,artista.immagine,artista.nome,artista.popolarita,email,false)
                  ownArtistRepo.insertUserCardArtista(card)
                  ownArtistRepo.updatePoints(totalPoint,email)
-                 val market = ownArtistRepo.getOnMarketCards()
+                 val market = ownArtistRepo.getAllOnMarketCardsA()
                  market?.forEach { elem->
                      if(elem.id_carta == artista.id){
                          val gain = loginViewModel.userLoggedInfo.value?.points?.plus((elem.popolarita))

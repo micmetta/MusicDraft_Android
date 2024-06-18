@@ -1,6 +1,7 @@
 package com.example.musicdraft.sections
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -63,9 +64,9 @@ fun Cards(viewModel: CardsViewModel) {
 
         // Visualizza la lista degli artisti o delle tracce in base alla scheda selezionata
         when (selectedTab) {
-            0 -> artisti?.let { ArtistiScreen(it,viewModel) }
+            0 -> artisti?.let { ArtistiScreen(it,viewModel,true) }
             1 -> brani?.let { BraniScreen(it,viewModel) }
-            2 -> mercatoA?.let { brani?.let { it1 -> CarteinVendita(it1, it,viewModel) } }
+            2 -> mercatoA?.let { brani?.let { it1 -> CarteinVendita(it1, it,viewModel,false) } }
         }
     }
 }
@@ -74,14 +75,15 @@ fun Cards(viewModel: CardsViewModel) {
 fun CarteinVendita(
     brani: List<User_Cards_Track>,
     artisti: List<User_Cards_Artisti>,
-    viewModel: CardsViewModel
+    viewModel: CardsViewModel,
+    m:Boolean
 ) {
     // Visualizza una griglia di carte per i brani
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso i brani e visualizza una carta per ciascuno
         items(artisti.size){index->
             if(artisti[index].onMarket==true){
-                ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel)
+                ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel,m)
             }
 
         }
@@ -178,12 +180,12 @@ fun BraniFilter(
  * @param artisti Elenco degli artisti da visualizzare.
  */
 @Composable
-fun ArtistiScreen(artisti: List<User_Cards_Artisti>, viewModel: CardsViewModel) {
+fun ArtistiScreen(artisti: List<User_Cards_Artisti>, viewModel: CardsViewModel,m:Boolean) {
     // Visualizza una griglia di carte per gli artisti
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso gli artisti e visualizza una carta per ciascuno
         items(artisti.size) { index ->
-            ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel)
+            ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel,m)
         }
     }
 }
@@ -239,7 +241,7 @@ fun BranoCard(brano: User_Cards_Track, height: Modifier,viewModel: CardsViewMode
  * @param height Modificatore per la altezza della carta.
  */
 @Composable
-fun ArtistaCard(artista: User_Cards_Artisti, height: Modifier,viewModel: CardsViewModel) {
+fun ArtistaCard(artista: User_Cards_Artisti, height: Modifier,viewModel: CardsViewModel,m:Boolean) {
     // Carta contenente le informazioni dell'artista
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -256,7 +258,7 @@ fun ArtistaCard(artista: User_Cards_Artisti, height: Modifier,viewModel: CardsVi
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Button(onClick = { viewModel.vendi_artista(artista) }) {
+            Button(onClick = { viewModel.vendi_artista(artista)}, enabled = m) {
                 Text("Vendi")
             }
         }

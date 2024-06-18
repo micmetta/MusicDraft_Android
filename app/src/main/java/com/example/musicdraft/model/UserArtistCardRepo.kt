@@ -23,23 +23,21 @@ class UserArtistCardRepo(
 
 
 ) {
-    val CardsForUsersA:List<User_Cards_Artisti>? = null
-    val CardsForUsersT:List<User_Cards_Track>? = null
 
-    val allCardsforUserA: MutableStateFlow<List<User_Cards_Artisti>?> = MutableStateFlow(CardsForUsersA)
-    val allCardsforUserT: MutableStateFlow<List<User_Cards_Track>?> = MutableStateFlow(CardsForUsersT)
-
+    val artCard: List<User_Cards_Artisti>? = null
+    val allCardsforUserA: MutableStateFlow<List<User_Cards_Artisti>?> = MutableStateFlow(artCard)
+    val allCardsforUserT: MutableStateFlow<List<User_Cards_Track>?> = MutableStateFlow(emptyList())
 
 
 
-    fun getArtCardsforUser(email:String): List<User_Cards_Artisti>? {
-         cardsViewModel.viewModelScope.launch {
-             val allcardsforusers = dao.getAllCardArtForUser(email)
-             allcardsforusers.collect{ response->
-                 allCardsforUserA.value = response
-             }
-         }
-         return allCardsforUserA.value
+    fun getArtCardsforUser(email:String) {
+            cardsViewModel.viewModelScope.launch {
+                val allcardsforusers = dao.getAllCardArtForUser(email)
+                allcardsforusers.collect { response ->
+                    allCardsforUserA.value = response
+                }
+            }
+
     }
     fun getTrackCardsforUser(email:String): List<User_Cards_Track>? {
         cardsViewModel.viewModelScope.launch {
@@ -79,7 +77,8 @@ class UserArtistCardRepo(
         return allCardsforUserA.value
     }
 
-    fun getOnMarketCards(): List<User_Cards_Artisti>? {
+
+    fun getAllOnMarketCardsA(): List<User_Cards_Artisti>? {
         cardsViewModel.viewModelScope.launch {
             val allcardsforusers = dao.getCardsOnMarket()
             allcardsforusers.collect{ response->
