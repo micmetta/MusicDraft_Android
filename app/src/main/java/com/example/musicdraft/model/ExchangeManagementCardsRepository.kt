@@ -1,14 +1,21 @@
 package com.example.musicdraft.model
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.exchange_management_cards.ExchangeManagementCards
 import com.example.musicdraft.data.tables.exchange_management_cards.ExchangeManagementCardsDao
 import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ExchangeManagementCardsRepository(val viewModel: ExchangeManagementCardsViewModel, val exchangeManagementCardsDao: ExchangeManagementCardsDao) {
+
+    val exchangeManagementCards: List<ExchangeManagementCards>? = null
+    val allOffersReceivedByCurrentUser: MutableStateFlow<List<ExchangeManagementCards>?> = MutableStateFlow(exchangeManagementCards)
+
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Questa INSERT  viene invocata dopo che l'utente (con "nicknameU1") ha selezionato nell'interfaccia la carta per la quale
@@ -30,4 +37,22 @@ class ExchangeManagementCardsRepository(val viewModel: ExchangeManagementCardsVi
         }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /*
+    - Aggiorna tutte le richieste di scambi ricevute dall'utente loggato:
+    */
+    fun getOffersReceveidByCurrentUser(nicknameUserCurrent: String){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO){
+                val offersReceived = exchangeManagementCardsDao.getOffersReceveidByCurrentUser(nicknameUserCurrent)
+                offersReceived.collect { response ->
+                    allOffersReceivedByCurrentUser.value = response
+                    Log.i("ExchangeManagementCardsRepository", "Tutti le offerte ricevute dall'utente corrente: ${allOffersReceivedByCurrentUser.value}")
+                }
+            }
+        }
+    }
+
+
 }

@@ -13,4 +13,5 @@ data class User_Cards_Track(
     var nome: String,
     val popolarita: Int,
     val email: String
-) {}
+) {
+}

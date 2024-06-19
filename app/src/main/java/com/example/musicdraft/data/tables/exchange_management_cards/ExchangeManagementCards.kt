@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class ExchangeManagementCards(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    var id: Int = 0,
     var nicknameU1: String, // utente che ha mandato l'offerta di scambio
     var nicknameU2: String, // utente che ha ricevuto l'offerta di scambio
     var idRequiredCard: String, // campo che conterrà l'id UNIVOCO della carta richiesta da nicknameU1 che è presente nelle carte possedute da nicknameU2.

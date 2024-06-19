@@ -57,6 +57,7 @@ import com.example.musicdraft.sections.Home
 import com.example.musicdraft.sections.Matchmaking
 import com.example.musicdraft.sections.Screens
 import com.example.musicdraft.sections.Settings
+import com.example.musicdraft.sections.ShowOfferReceived
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
 //import com.example.musicdraft.utility.ExchangeCards
@@ -147,8 +148,11 @@ fun Navigation(
         composable(Screens.ExchangeCards.screen){
             ExchangeCards(navigationController, loginViewModel, exchangeManagementCardsViewModel, cardsViewModel)
         }
+        composable(Screens.ShowOfferReceived.screen){
+            ShowOfferReceived(navigationController, exchangeManagementCardsViewModel)
+        }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel,marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }

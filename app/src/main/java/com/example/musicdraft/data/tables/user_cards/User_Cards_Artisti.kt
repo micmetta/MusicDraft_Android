@@ -12,4 +12,5 @@ data class User_Cards_Artisti(
     val nome: String,
     val popolarita: Int,
     val email: String
- ){}
+ ){
+}

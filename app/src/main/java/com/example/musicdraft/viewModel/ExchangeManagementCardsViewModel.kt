@@ -21,6 +21,20 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
     var nicknameUserCurrent = mutableStateOf("")
     var nicknameUserRequestCard = mutableStateOf("")
     var infoCardRequest = mutableStateOf(-1)
+    var allOffersReceivedByCurrentUser =  exchangeManagementCardsRepository.allOffersReceivedByCurrentUser
+    var selectedShowReceivedOffer = mutableStateOf(ExchangeManagementCards(
+        id = -1,
+        "",
+        "",
+        "",
+        "",
+        listOf<String>(),
+        listOf<String>(),
+        0,
+        "",
+        0,
+        0
+    ))
 
 
     fun onEvent(event: UIEventExchangeCards, navController: NavController) {
@@ -33,7 +47,8 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
         }
     }
 
-    fun insertNewOffer(nicknameU1: String, nicknameU2: String,
+    fun insertNewOffer(nicknameU1: String,
+                       nicknameU2: String,
                        idRequiredCard: String,
                        typeRequiredCard: String,
                        listOfferedCards: List<String>,
@@ -53,6 +68,14 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
             numberCounterOffer = 0
         )
         exchangeManagementCardsRepository.insertNewOffer(exchangeManagementCards)
+    }
+
+    fun getOffersReceveidByCurrentUser(nicknameUserCurrent: String){
+        exchangeManagementCardsRepository.getOffersReceveidByCurrentUser(nicknameUserCurrent)
+    }
+
+    fun updateSelectedShowReceivedOffer(obj: ExchangeManagementCards){
+        selectedShowReceivedOffer.value = obj
     }
 
 }
