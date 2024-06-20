@@ -2,20 +2,16 @@ package com.example.musicdraft.viewModel
 
 import android.app.Application
 import android.util.Log
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.artisti.Artisti
-import com.example.musicdraft.data.tables.handleFriends.HandleFriends
 import com.example.musicdraft.data.tables.track.Track
-import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.ArtistRepository
 import com.example.musicdraft.model.TracksRepository
-import com.example.musicdraft.model.UserArtistCardRepo
+import com.example.musicdraft.model.UserCardsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onEach
@@ -35,7 +31,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     val authDao = database.userDao()
     private val artistRepo: ArtistRepository = ArtistRepository(this, artistDao!!)
     private val trackRepo: TracksRepository = TracksRepository(this, trackDao!!)
-    private val ownRepo: UserArtistCardRepo = UserArtistCardRepo(ucaDao!!,authDao!!,uctDao!!,cardsViewModel)
+    private val ownRepo: UserCardsRepo = UserCardsRepo(ucaDao!!,authDao!!,uctDao!!,cardsViewModel)
 
     /////////////////////
     val artists: List<Artisti>? = null
@@ -50,7 +46,8 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     val _filteredArtisti = MutableStateFlow<List<Artisti>?>(artists)
     val _filteredBrani = MutableStateFlow<List<Track>?>(tracks)
 
-
+    private val _showDialog = MutableLiveData(false)
+    val showDialog: LiveData<Boolean> get() = _showDialog
 
     init {
         // Inizializzazione delle tabelle artisti e brani
@@ -154,6 +151,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
 
     fun compra_track(track:Track){
         viewModelScope.launch {
+            val email = loginViewModel.userLoggedInfo.value!!.email
 
             // Logica sospesa, ad esempio una chiamata al database
             // Aggiorna il database, se necessario
@@ -161,28 +159,48 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
             // Aggiorna le liste di artisti filtrati e le carte acquistate
 
             val size = _filteredBrani.value?.size
-            if( size == null){
 
-                val currentFilteredList = alltrack.value
+            ownRepo.getArtCardsforUser(email)
+            val allTrack = ownRepo.allCardsforUserT.value
+            val isYours = allTrack?.filter { elem ->
+                elem.onMarket
+            }
 
-                // Aggiorna le liste di artisti filtrati e le carte acquistate
-                val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                    remove(track)
+            var c = 0
+            Log.i("compra", "$isYours")
+            if (isYours != null) {
+                isYours.forEach { elem ->
+                    if (elem.id_carta == track.id) {
+                        c += 1
+                    }
                 }
-                alltrack.value = (updatedFilteredList)
-                trackRepo.delete_track(track)
-                val email = loginViewModel.userLoggedInfo.value!!.email
-                cardsViewModel.insertTrackToUser(track, email)
+            }
+            if(c==0) {
+                if (size == null) {
+
+                    val currentFilteredList = alltrack.value
+
+                    // Aggiorna le liste di artisti filtrati e le carte acquistate
+                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                        remove(track)
+                    }
+                    alltrack.value = (updatedFilteredList)
+                    trackRepo.delete_track(track)
+                    val email = loginViewModel.userLoggedInfo.value!!.email
+                    cardsViewModel.insertTrackToUser(track, email)
+                } else {
+                    val currentFilteredList = _filteredBrani.value
+                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                        remove(track)
+                    }
+                    _filteredBrani.value = (updatedFilteredList)
+
+                    cardsViewModel.insertTrackToUser(track, email)
+                    trackRepo.delete_track(track)
+                }
             }else{
-                val currentFilteredList =_filteredBrani.value
-                val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                    remove(track)
-                }
-                _filteredBrani.value = (updatedFilteredList)
+                _showDialog.value = true // Show dialog
 
-                val email = loginViewModel.userLoggedInfo.value!!.email
-                cardsViewModel.insertTrackToUser(track, email)
-                trackRepo.delete_track(track)
             }
 
 
@@ -240,11 +258,16 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                     cardsViewModel.insertArtistToUser(artista, email)
                     artistRepo.delete_artista(artista)
                 }
+            }else{
+                _showDialog.value = true // Show dialog
+
             }
         }
             }
 
-
+    fun onDialogDismiss() {
+        _showDialog.value = false
+    }
 
 
 

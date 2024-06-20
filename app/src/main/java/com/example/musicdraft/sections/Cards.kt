@@ -46,6 +46,8 @@ fun Cards(viewModel: CardsViewModel) {
     val brani by viewModel.acquiredCardsT.collectAsState(emptyList())
     val mercatoA by viewModel.MarketArtist.collectAsState(emptyList())
 
+
+
     // Composable principale per la schermata del Marketplace
     Column(modifier = Modifier.padding(top = 65.dp)) {
         // TabRow per la navigazione tra Artisti e Brani
