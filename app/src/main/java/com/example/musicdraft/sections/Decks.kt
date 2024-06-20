@@ -1,40 +1,195 @@
-package com.example.musicdraft.sections
-
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
-import com.example.musicdraft.ui.theme.BlueApp
-import com.example.musicdraft.ui.theme.MusicDraftTheme
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberImagePainter
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Decks() {
+fun Decks(viewModel: DeckViewModel) {
+    val isEditing by viewModel.isEditing
+    val selectedDeck by viewModel.selectedDeck
+    val decks by viewModel.decks
+    val availableCards by viewModel.availableCards
+    val selectedCards by viewModel.selectedCards
 
-    // definisco una box
-    Box(modifier = Modifier.fillMaxSize()){
-        // all'interno del box ci sarà una colonna
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .align(Alignment.Center), // colonna allineata centralmente
-            verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            // inserisco un text all'interno della colonna
-            Text(text = "Decks", fontSize = 30.sp, color = BlueApp) // GreenJC colore definito in "Color.kt"
+    Column(modifier = Modifier.padding(vertical = 60.dp)) {
+        Text("I miei mazzi di Carte", style = MaterialTheme.typography.titleLarge)
+
+        if (!isEditing) {
+            Button(onClick = { viewModel.creaNuovoMazzo() }) {
+                Text("Crea Nuovo Mazzo")
+            }
+            LazyColumn {
+                items(decks) { deck ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        onClick = { /* Implementa l'azione desiderata */ }
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(deck.nomemazzo, style = MaterialTheme.typography.bodyLarge)
+                            deck.carteassociate.forEach { card ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Image(
+                                        painter = rememberImagePainter(data = card.immagine),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(50.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("${card.nome} (Popolarità: ${card.popolarita})")
+                                }
+                            }
+                            Row(
+                                horizontalArrangement = Arrangement.End,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Button(onClick = { viewModel.modificaMazzo(deck) }) {
+                                    Text("Modifica")
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Button(onClick = { viewModel.eliminaMazzo(deck) }) {
+                                    Text("Elimina")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (selectedDeck != null) {
+            Text(
+                text = if (selectedDeck != null) "Modifica Mazzo" else "Crea un Nuovo Mazzo",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            Column {
+                OutlinedTextField(
+                    value = selectedDeck?.nomemazzo ?: "",
+                    onValueChange = { /* viewModel.updateDeckName(it) */ },
+                    label = { Text("Nome del Mazzo") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                LazyColumn {
+                    items(selectedDeck?.carteassociate ?: emptyList()) { card ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            onClick = { /* Implementa l'azione desiderata */ }
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Image(
+                                        painter = rememberImagePainter(data = card.immagine),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(50.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("${card.nome} (Popolarità: ${card.popolarita})")
+                                }
+                                Row(
+                                    horizontalArrangement = Arrangement.End,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Button(onClick = { /* Implementa l'azione desiderata */ }) {
+                                        Text("Rimuovi")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Text("Aggiungi Carta:", style = MaterialTheme.typography.titleLarge)
+                LazyColumn {
+                    items(availableCards) { card ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            onClick = { viewModel.toggleCardSelection(card) }
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Image(
+                                    painter = rememberImagePainter(data = card.immagine),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(50.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(card.nome)
+                            }
+                        }
+                    }
+                }
+
+                // Aggiungi altri tipi di card come necessario
+
+                Text("Carte Selezionate:", style = MaterialTheme.typography.titleLarge)
+                LazyColumn {
+                    items(selectedCards) { card ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            onClick = { /* Implementa l'azione desiderata */ }
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Image(
+                                        painter = rememberImagePainter(data = card.immagine),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(50.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("${card.nome} (Popolarità: ${card.popolarita})")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(onClick = { viewModel.salvaMazzo() }) {
+                        Text("Salva")
+                    }
+                    Button(onClick = { viewModel.annullaModifica() }) {
+                        Text("Annulla")
+                    }
+                }
+            }
         }
     }
 }
-
-//// per lanciare la preview
-//@Preview
-//@Composable
-//fun SettingsPreview(){
-//    MusicDraftTheme {
-//        Settings()
-//    }
-//}

@@ -1,5 +1,7 @@
 package com.example.musicdraft
 
+import DeckViewModel
+import Decks
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -43,7 +45,6 @@ import com.example.musicdraft.screens_to_signUp_signIn.LoginScreen
 import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
 import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
 import com.example.musicdraft.sections.Cards
-import com.example.musicdraft.sections.Decks
 import Marketplace
 import androidx.lifecycle.ViewModelProvider
 import com.example.musicdraft.factory.CardsViewModelFactory
@@ -81,6 +82,7 @@ class MainActivity : ComponentActivity() {
 //    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        deleteDatabase("MusicDraftDB")
         super.onCreate(savedInstanceState)
         setContent {
 
@@ -93,12 +95,13 @@ class MainActivity : ComponentActivity() {
             val marketplaceViewModelFactory = MarketplaceViewModelFactory(application, cardsViewModel, loginViewModel)
             val marketplaceViewModel: MarketplaceViewModel = ViewModelProvider(this, marketplaceViewModelFactory).get(MarketplaceViewModel::class.java)
 
+            val decksViewModel: DeckViewModel by viewModels()
 
             MusicDraftTheme {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    Navigation(loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewModel)
+                    Navigation(loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewModel,decksViewModel)
                 }
             }
         }
@@ -113,7 +116,8 @@ fun Navigation(
     loginViewModel: LoginViewModel,
     handleFriendsViewModel: HandleFriendsViewModel,
     cardsViewModel: CardsViewModel,
-    marketplaceViewmodel: MarketplaceViewModel
+    marketplaceViewmodel: MarketplaceViewModel,
+    decksViewModel: DeckViewModel
 ){
     val navigationController = rememberNavController()
     // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
@@ -132,7 +136,7 @@ fun Navigation(
             ForgotPassword(navigationController, loginViewModel)
         }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewmodel,decksViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -148,7 +152,8 @@ fun MusicDraftUI(
 
     handleFriendsViewModel: HandleFriendsViewModel,
     cardsViewModel: CardsViewModel,
-    marketplaceViewmodel: MarketplaceViewModel
+    marketplaceViewmodel: MarketplaceViewModel,
+    decksViewModel: DeckViewModel
 ){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()
@@ -370,7 +375,7 @@ fun MusicDraftUI(
                     Cards(cardsViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
                 }
                 composable(Screens.Decks.screen){
-                    Decks() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"
+                    Decks(decksViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"
                 }
                 composable(Screens.Marketplace.screen){
                     Marketplace(marketplaceViewmodel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Marketplace"
@@ -381,6 +386,7 @@ fun MusicDraftUI(
                 composable(Screens.Settings.screen){
                     Settings(navControllerInitialScreens, loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Settings"
                 }
+
 
             }
         }
