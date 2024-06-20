@@ -21,7 +21,10 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
     var nicknameUserCurrent = mutableStateOf("")
     var nicknameUserRequestCard = mutableStateOf("")
     var infoCardRequest = mutableStateOf(-1)
+
     var allOffersReceivedByCurrentUser =  exchangeManagementCardsRepository.allOffersReceivedByCurrentUser
+    var allOffersSentByCurrentUser = exchangeManagementCardsRepository.allOffersSentByCurrentUser
+
     var selectedShowReceivedOffer = mutableStateOf(ExchangeManagementCards(
         id = -1,
         "",
@@ -70,12 +73,26 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
         exchangeManagementCardsRepository.insertNewOffer(exchangeManagementCards)
     }
 
-    fun getOffersReceveidByCurrentUser(nicknameUserCurrent: String){
+    fun getOffersReceveidByCurrentUser(nicknameUserCurrent: String) {
         exchangeManagementCardsRepository.getOffersReceveidByCurrentUser(nicknameUserCurrent)
+//        return allOffersReceivedByCurrentUser
+//        allOffersReceivedByCurrentUser.value = exchangeManagementCardsRepository.getOffersReceveidByCurrentUser(nicknameUserCurrent).value
+//
+//        Log.i("ExchangeManagementCardsViewModel", "exchangeManagementCardsRepository.getOffersReceveidByCurrentUser(nicknameUserCurrent).value prima del return: ${exchangeManagementCardsRepository.getOffersReceveidByCurrentUser(nicknameUserCurrent).value}")
+//        return exchangeManagementCardsRepository.getOffersReceveidByCurrentUser(nicknameUserCurrent).value
     }
+
+    fun getOffersSentByCurrentUser(nicknameUserCurrent: String){
+        exchangeManagementCardsRepository.getOffersSentByCurrentUser(nicknameUserCurrent)
+    }
+
 
     fun updateSelectedShowReceivedOffer(obj: ExchangeManagementCards){
         selectedShowReceivedOffer.value = obj
+    }
+
+    fun deleteOffer(id: Int){
+        exchangeManagementCardsRepository.deleteOffer(id)
     }
 
 }

@@ -37,7 +37,17 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
 
     private val ownArtistRepo: UserArtistCardRepo = UserArtistCardRepo(dao!!,daoLog!!,daoTrack!!,this)
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // sottoscrizione alle variabili "infoCardArtistRequest" e "infoCardTrackRequest" sempre del repository
+    // "UserArtistCardRepo":
+    var infoCardArtistRequest =  ownArtistRepo.infoCardArtistRequest
+    var infoCardTrackRequest =  ownArtistRepo.infoCardTrackRequest
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    var listAllInfoAboutCardsArtistOffered =  ownArtistRepo.listAllInfoAboutCardsArtistOffered
+    var listAllInfoAboutCardsTracksOffered =  ownArtistRepo.listAllInfoAboutCardsTracksOffered
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     fun getallcards() {
         val email = loginViewModel.userLoggedInfo.value!!.email
@@ -57,7 +67,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
              if(totalPoint >= 0) {
                  val card = User_Cards_Artisti(0,artista.id,artista.genere,artista.immagine,artista.nome,artista.popolarita,email)
                  ownArtistRepo.insertUserCardArtista(card)
-                 ownArtistRepo.updatePoints(totalPoint,email)
+                 ownArtistRepo.updatePoints(totalPoint, email)
 
              }
          }
@@ -68,11 +78,43 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
             if(totalPoint >= 0) {
                 val card = User_Cards_Track(0,track.id,track.anno_pubblicazione,track.durata,track.immagine,track.nome,track.popolarita,email)
                 ownArtistRepo.insertUserCardTrack(card)
-                ownArtistRepo.updatePoints(totalPoint,email)
+                ownArtistRepo.updatePoints(totalPoint, email)
 
             }
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // prende le info della carta 'artista' che ha email= :email_user e id==idCard
+    fun getInfoCardArtistByEmailAndId(email_user: String, idCard: String) {
+        ownArtistRepo.getInfoCardArtistByEmailAndId(email_user, idCard)
+    }
+    // prende le info della carta 'brano' che ha email= :email_user e id==idCard
+    fun getInfoCardTrackByEmailAndId(email_user: String, idCard: String) {
+        ownArtistRepo.getInfoCardTrackByEmailAndId(email_user, idCard)
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // prende tutte le info di tutte le carte offerte all'utente corrente:
+    fun getInfoCardsOfferedByEmailAndIdsAndTypes(email_user_offer: String, listIdsCardsOffered: List<String>, listTypesCardsOffered: List<String>) {
+        ownArtistRepo.getInfoCardsOfferedByEmailAndIdsAndTypes(email_user_offer, listIdsCardsOffered, listTypesCardsOffered)
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    fun updateCardArtistOwner(newEmailOwner: String, idCard: String){
+        ownArtistRepo.updateCardArtistOwner(newEmailOwner, idCard)
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    fun updateCardTrackOwner(newEmailOwner: String, idCard: String){
+        ownArtistRepo.updateCardTrackOwner(newEmailOwner, idCard)
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 }
 

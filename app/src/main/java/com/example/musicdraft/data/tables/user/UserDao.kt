@@ -35,6 +35,13 @@ interface UserDao {
     @Query("UPDATE User SET points = :points WHERE email =:email")
     suspend fun updatePoints(points:Int, email:String)
 
+
+    @Query("UPDATE User SET points = points + :addPoints WHERE email = :email")
+    suspend fun addPoints(addPoints: Int, email: String)
+
+    @Query("UPDATE User SET points = points - :subtractPoints WHERE email = :email")
+    suspend fun subtractPoints(subtractPoints: Int, email: String)
+
     @Query("SELECT * FROM User WHERE email = :email")
     fun getUserByEmail(email: String): Flow<User?>
 

@@ -110,11 +110,15 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     /////////////////////////////////////////////////////////////////////////////
 
 
-
     /////////////////////////////////////////////////////////////////////////////
     // Mutable live data per gestire la sessione attiva dell'utente:
     val isUSerLoggedIn: MutableLiveData<Boolean> = MutableLiveData()
     /////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////
+    var utilityFriendInfo = authRepository.utilityFriendInfo
+    /////////////////////////////////////////////////////////////////////////////
+
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -792,6 +796,19 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getUserByNickname(nickname: String){
         authRepository.getUserByNickname(nickname)
+    }
+
+    fun getFriendByNickname(nickname: String){
+        authRepository.getFriendByNickname(nickname)
+    }
+
+
+    fun addPoints(addPoints: Int, email: String) {
+        authRepository.addPoints(addPoints, email)
+    }
+
+    fun subtractPoints(subtractPoints: Int, email: String) {
+        authRepository.subtractPoints(subtractPoints, email)
     }
 
 }

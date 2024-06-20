@@ -12,8 +12,10 @@ import kotlinx.coroutines.withContext
 
 class ExchangeManagementCardsRepository(val viewModel: ExchangeManagementCardsViewModel, val exchangeManagementCardsDao: ExchangeManagementCardsDao) {
 
-    val exchangeManagementCards: List<ExchangeManagementCards>? = null
-    val allOffersReceivedByCurrentUser: MutableStateFlow<List<ExchangeManagementCards>?> = MutableStateFlow(exchangeManagementCards)
+    val exchangeManagementCards_1: List<ExchangeManagementCards>? = null
+    val exchangeManagementCards_2: List<ExchangeManagementCards>? = null
+    val allOffersReceivedByCurrentUser: MutableStateFlow<List<ExchangeManagementCards>?> = MutableStateFlow(exchangeManagementCards_1)
+    val allOffersSentByCurrentUser: MutableStateFlow<List<ExchangeManagementCards>?> = MutableStateFlow(exchangeManagementCards_2)
 
 
 
@@ -48,8 +50,34 @@ class ExchangeManagementCardsRepository(val viewModel: ExchangeManagementCardsVi
                 val offersReceived = exchangeManagementCardsDao.getOffersReceveidByCurrentUser(nicknameUserCurrent)
                 offersReceived.collect { response ->
                     allOffersReceivedByCurrentUser.value = response
-                    Log.i("ExchangeManagementCardsRepository", "Tutti le offerte ricevute dall'utente corrente: ${allOffersReceivedByCurrentUser.value}")
+                    Log.i("ExchangeManagementCardsRepository", "nicknameUserCurrent in getOffersReceveidByCurrentUser: ${nicknameUserCurrent}")
+                    Log.i("ExchangeManagementCardsRepository", "allOffersReceivedByCurrentUser in getOffersReceveidByCurrentUser: ${allOffersReceivedByCurrentUser.value}")
+
                 }
+            }
+        }
+    }
+
+    /*
+    - Aggiorna tutte le richieste di scambi inviate dall'utente loggato:
+    */
+    fun getOffersSentByCurrentUser(nicknameUserCurrent: String){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO){
+                val offersSent = exchangeManagementCardsDao.getOffersSentByCurrentUser(nicknameUserCurrent)
+                offersSent.collect { response ->
+                    allOffersSentByCurrentUser.value = response
+                    Log.i("ExchangeManagementCardsRepository", "Tutti le offerte inviate dall'utente corrente: ${allOffersSentByCurrentUser.value}")
+                }
+            }
+        }
+    }
+
+
+    fun deleteOffer(id: Int){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO){
+                exchangeManagementCardsDao.deleteOffer(id)
             }
         }
     }

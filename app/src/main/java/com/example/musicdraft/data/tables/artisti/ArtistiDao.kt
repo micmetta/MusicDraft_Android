@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.example.musicdraft.data.tables.user.User
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,7 +16,6 @@ interface ArtistiDao {
 
     @Insert
     suspend fun insertAllArtist(artisti : Array<Artisti>)
-
 
     @Delete
     suspend fun deleteArtist(artista: Artisti)

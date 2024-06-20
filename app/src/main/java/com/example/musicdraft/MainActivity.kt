@@ -149,7 +149,7 @@ fun Navigation(
             ExchangeCards(navigationController, loginViewModel, exchangeManagementCardsViewModel, cardsViewModel)
         }
         composable(Screens.ShowOfferReceived.screen){
-            ShowOfferReceived(navigationController, exchangeManagementCardsViewModel)
+            ShowOfferReceived(navigationController, exchangeManagementCardsViewModel, cardsViewModel, loginViewModel)
         }
         composable(Screens.MusicDraftUI.screen){
             MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
