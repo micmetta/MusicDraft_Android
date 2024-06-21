@@ -58,6 +58,7 @@ import com.example.musicdraft.sections.Matchmaking
 import com.example.musicdraft.sections.Screens
 import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.sections.ShowOfferReceived
+import com.example.musicdraft.sections.ShowOfferSent
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
 //import com.example.musicdraft.utility.ExchangeCards
@@ -150,6 +151,9 @@ fun Navigation(
         }
         composable(Screens.ShowOfferReceived.screen){
             ShowOfferReceived(navigationController, exchangeManagementCardsViewModel, cardsViewModel, loginViewModel)
+        }
+        composable(Screens.ShowOfferSent.screen){
+            ShowOfferSent(navigationController, exchangeManagementCardsViewModel, cardsViewModel, loginViewModel)
         }
         composable(Screens.MusicDraftUI.screen){
             MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app

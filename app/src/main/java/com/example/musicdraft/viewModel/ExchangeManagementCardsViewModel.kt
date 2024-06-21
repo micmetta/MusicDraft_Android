@@ -39,6 +39,20 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
         0
     ))
 
+    var selectedShowSentOffer = mutableStateOf(ExchangeManagementCards(
+        id = -1,
+        "",
+        "",
+        "",
+        "",
+        listOf<String>(),
+        listOf<String>(),
+        0,
+        "",
+        0,
+        0
+    ))
+
 
     fun onEvent(event: UIEventExchangeCards, navController: NavController) {
         // gestione dei diversi eventi possibili:
@@ -89,6 +103,10 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
 
     fun updateSelectedShowReceivedOffer(obj: ExchangeManagementCards){
         selectedShowReceivedOffer.value = obj
+    }
+
+    fun updateSelectedShowSentOffer(obj: ExchangeManagementCards){
+        selectedShowSentOffer.value = obj
     }
 
     fun deleteOffer(id: Int){

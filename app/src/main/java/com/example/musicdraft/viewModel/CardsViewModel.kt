@@ -96,7 +96,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
     ////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////
-    // prende tutte le info di tutte le carte offerte all'utente corrente:
+    // prende tutte le info di tutte le carte offerte all'utente con 'email_user_offer':
     fun getInfoCardsOfferedByEmailAndIdsAndTypes(email_user_offer: String, listIdsCardsOffered: List<String>, listTypesCardsOffered: List<String>) {
         ownArtistRepo.getInfoCardsOfferedByEmailAndIdsAndTypes(email_user_offer, listIdsCardsOffered, listTypesCardsOffered)
     }
