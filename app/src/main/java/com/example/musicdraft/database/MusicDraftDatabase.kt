@@ -10,6 +10,8 @@ import com.example.musicdraft.data.tables.handleFriends.HandleFriends
 import com.example.musicdraft.data.tables.handleFriends.HandleFriendsDao
 import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.artisti.ArtistiDao
+import com.example.musicdraft.data.tables.deck.DaoDeck
+import com.example.musicdraft.data.tables.deck.Deck
 import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.data.tables.track.TrackDao
 import com.example.musicdraft.data.tables.user.User
@@ -26,7 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Database(
-    entities = [User::class,Artisti::class,Track::class, User_Cards_Artisti::class,User_Cards_Track::class, HandleFriends::class],
+    entities = [User::class,Artisti::class,Track::class, User_Cards_Artisti::class,User_Cards_Track::class, HandleFriends::class, Deck::class],
     version = 1
 )
 abstract class MusicDraftDatabase: RoomDatabase() {
@@ -38,6 +40,7 @@ abstract class MusicDraftDatabase: RoomDatabase() {
     abstract fun ownArtCardsDao():UCADao?
     abstract fun ownTrackCardsDao():UCTDao?
     abstract fun handleFriendsDao(): HandleFriendsDao?
+    abstract fun deckDao(): DaoDeck?
 
     companion object {
         // marking the instance as volatile to ensure atomic access to the variable

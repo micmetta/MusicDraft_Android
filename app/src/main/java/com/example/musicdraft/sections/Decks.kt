@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,10 +16,13 @@ import coil.compose.rememberImagePainter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Decks(viewModel: DeckViewModel) {
+
+    viewModel.init()
+
     val isEditing by viewModel.isEditing
-    val selectedDeck by viewModel.selectedDeck
-    val decks by viewModel.decks
-    val availableCards by viewModel.availableCards
+    val selectedDeck by viewModel.selectedDeck.collectAsState(emptyList())
+    val decks by viewModel.ownDeck.collectAsState(emptyList())
+    val availableCards by viewModel.cards.collectAsState(emptyList())
     val selectedCards by viewModel.selectedCards
 
     Column(modifier = Modifier.padding(vertical = 60.dp)) {
@@ -29,7 +33,7 @@ fun Decks(viewModel: DeckViewModel) {
                 Text("Crea Nuovo Mazzo")
             }
             LazyColumn {
-                items(decks) { deck ->
+                items(decks!!) { deck ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -40,19 +44,20 @@ fun Decks(viewModel: DeckViewModel) {
                             modifier = Modifier.padding(8.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text(deck.nomemazzo, style = MaterialTheme.typography.bodyLarge)
-                            deck.carteassociate.forEach { card ->
+                            Text(deck.nome_mazzo, style = MaterialTheme.typography.bodyLarge)
+
+                                val card = viewModel.getCardById(deck.carte_associate)
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Image(
-                                        painter = rememberImagePainter(data = card.immagine),
+                                        painter = rememberImagePainter(data = card?.immagine),
                                         contentDescription = null,
                                         modifier = Modifier.size(50.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("${card.nome} (Popolarità: ${card.popolarita})")
+                                    Text("${card?.nome_carta} (Popolarità: ${card?.popolarita})")
                                 }
                             }
                             Row(
@@ -70,7 +75,7 @@ fun Decks(viewModel: DeckViewModel) {
                         }
                     }
                 }
-            }
+
         } else if (selectedDeck != null) {
             Text(
                 text = if (selectedDeck != null) "Modifica Mazzo" else "Crea un Nuovo Mazzo",
@@ -86,7 +91,7 @@ fun Decks(viewModel: DeckViewModel) {
                 )
 
                 LazyColumn {
-                    items(selectedDeck?.carteassociate ?: emptyList()) { card ->
+                    items(selectedDeck?: emptyList()) { card ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
