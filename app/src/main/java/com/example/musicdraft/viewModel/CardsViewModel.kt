@@ -56,8 +56,8 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
     }
 
     fun getAllCardFriend(email_friend: String){
-        acquiredCardsAFriend.value = ownArtistRepo.getArtCardsforUser(email_friend)
-        acquiredCardsTFriend.value =ownArtistRepo.getTrackCardsforUser(email_friend)
+        acquiredCardsAFriend.value = ownArtistRepo.getArtCardsforFriend(email_friend)
+        acquiredCardsTFriend.value =ownArtistRepo.getTrackCardsforFriend(email_friend)
     }
 
 

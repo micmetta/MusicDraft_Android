@@ -61,8 +61,6 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
     val context = LocalContext.current
     val googleSignInState = loginViewModel.googleState.value // collego il composable allo stato 'googleState' presente in 'loginViewModel'
     val scope = rememberCoroutineScope()
-//    var errorDialogActivated = loginViewModel.errorDialogActivated.value
-//    var stringToShowErrorDialog = loginViewModel.stringToShowErrorDialog.value
     val errorDialogActivated by loginViewModel.errorDialogActivated // mi lego allo state del loginViewModel
     val stringToShowErrorDialog by loginViewModel.stringToShowErrorDialog // mi lego allo state del loginViewModel
 

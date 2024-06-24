@@ -119,6 +119,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     var utilityFriendInfo = authRepository.utilityFriendInfo
     /////////////////////////////////////////////////////////////////////////////
 
+    var emailUserLog = mutableStateOf("") // conterrà l'email dell'utente loggato attraverso o
+    // la registrazione o attraverso il login.
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -364,7 +366,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         Log.d(TAG, "emailResult= $emailResult")
         Log.d(TAG, "passwordResult= $passwordResult")
 
-        // aggiornamenti dello stato 'registrationUIState' in base ai risultati di validazione per ogni campo:
+        // aggiornamenti dello stato 'loginUIState' in base ai risultati di validazione per ogni campo:
         loginUIState.value = loginUIState.value.copy(
             emailError = emailResult.status,
             passwordError = passwordResult.status,
@@ -430,7 +432,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                             Log.d(TAG, "Il nuovo utente è stato REGISTRATO NEL DB DI FIREBASE!")
 
                             // prendo le info principali dell'utente dalla tabella User:
-                            authRepository.getUserByEmail(email)
+                            //authRepository.getUserByEmail(email)
+                            emailUserLog.value = email // mi memorizzo l'email dell'utente che si è appena registrato
 
                             // resetto tutti i campi di "registrationUIState":
                             registrationUIState.value = registrationUIState.value.copy(
@@ -471,11 +474,20 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     */
     private fun login(navController: NavController){
 
+        //checkForActiveSessionUser()
+        //securityLogoutFromFirebase()
+
         // attivo l'indicatore di caricamento:
         signInInProgress.value = true
 
+        ////////////////////////////////////////////////////////
+//        val firebaseAuth = FirebaseAuth.getInstance()
+//        firebaseAuth.signOut()
+        ////////////////////////////////////////////////////////
+
         val email = loginUIState.value.email
         val password = loginUIState.value.password
+        emailUserLog.value = email // mi memorizzo l'email dell'utente che vuole loggare
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Qui controllo se nel DB esiste tale utente prima di richiamare il servizio di FirebaseAuth in modo tale da
@@ -489,18 +501,21 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     .signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener{
                         // lamda function che verrà eseguita qualora il login avesse successo
-                        Log.d(TAG, "Sono dentro addOnCompleteListener di LOGIN!")
-                        Log.d(TAG, "l'utente vuole loggare con questa mail: ${email}")
+                        Log.d(TAG, "login: Sono dentro addOnCompleteListener di LOGIN!")
+                        Log.d(TAG, "login: l'utente vuole loggare con questa mail: ${email}")
 
-                        Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
-                        Log.d(TAG, "Login completato con successo!")
+                        Log.d(TAG, "login: isSuccesful = ${it.isSuccessful}")
+                        Log.d(TAG, "login: Login completato con successo!")
+
                         if(it.isSuccessful){
+
+                            Log.d(TAG, "login: it.isSuccessful")
 
                             // prendo le info principali dell'utente dalla tabella User per aggiornare automaticamente
                             // anche il mutableState 'userLoggedInfo' che contiene le info dell'utente
                             // (come ad esempio l'email) che verranno mostrate automaticamente sull'interfaccia
                             // grafica (in particolare nella schermata 'Home' e 'Friends'):
-                            authRepository.getUserByEmail(email)
+                            //authRepository.getUserByEmail(email)
 
                             // setto che l'utente è online (in modo tale da avere isOnline=true nel DB in
                             // corrispondenza dell'utente corrente):
@@ -511,15 +526,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                                 email = "",
                                 password = ""
                             )
+
                             navController.navigate(Screens.MusicDraftUI.screen)
                         }
                     }
                     .addOnFailureListener{
                         // lamda function che verrà eseguita qualora il login fallisse
-                        Log.d(TAG, "Sono dentro addOnFailureListener di LOGIN!")
-                        Log.d(TAG, "Si è verificato un errore durante il login dell'utente su FIREBASE.")
-                        Log.d(TAG, " message = ${it.message}")
-                        Log.d(TAG, " Exception = ${it.localizedMessage}")
+                        Log.d(TAG, "login: Sono dentro addOnFailureListener di LOGIN!")
+                        Log.d(TAG, "login: Si è verificato un errore durante il login dell'utente su FIREBASE.")
+                        Log.d(TAG, "login: message = ${it.message}")
+                        Log.d(TAG, "login: Exception = ${it.localizedMessage}")
 
                         // Attivo il Popup di errore che verrà mostrato all'utente:
                         stringToShowErrorDialog.value = it.message.toString()
@@ -539,6 +555,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
+    fun getUserByEmail(){
+        authRepository.getUserByEmail(emailUserLog.value)
+    }
+
 
     /*
     - Funzione che si preoccuperà di controllare se c'è ancora una sessione attiva dell'utente.
@@ -549,7 +569,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             FirebaseAuth.getInstance().currentUser?.also {
                 it.email?.also {email ->
                     // se entro qui vuol dire che c'è ancora una sessione attiva
-                    Log.d(TAG, "C'è ancora una sessione attiva!")
+                    Log.d(TAG, "checkForActiveSessionUser: C'è ancora una sessione attiva!")
                     isUSerLoggedIn.value = true // aggiorno il mutableLiveData che memorizza lo stato della sessione
                     // adesso invoco il metodo 'authRepository.getUserByEmail(email)' passandogli l'email dell'utente attivo,
                     // in modo tale da
@@ -560,7 +580,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }else{
-            Log.d(TAG, "NON c'è una sessione attiva!")
+            Log.d(TAG, "checkForActiveSessionUser: NON c'è una sessione attiva!")
             isUSerLoggedIn.value = false
         }
     }
@@ -569,25 +589,110 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     /*
      - Questa funzione permette all'utente di eseguire il logout.
     */
-    fun logoutFromFirebase(navController: NavController){
+    fun logoutFromFirebase(navController: NavController) {
+
         val firebaseAuth = FirebaseAuth.getInstance()
-        firebaseAuth.signOut()
+        val emailUserLogged = firebaseAuth.currentUser?.email
+        firebaseAuth.signOut() // eseguo il logout
+
         val authStateListener = AuthStateListener {
-            if(it.currentUser == null){
-                // se entro qui vuol dire che il logout è andato a buon fine.
-                userLoggedInfo.value?.let { it1 -> authRepository.LogoutUserLoggedInfo(it1.email) }
-                Log.d(TAG, "Logout eseguito con successo!")
-                navController.navigate(Screens.Login.screen){
-                    popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
-//                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Settings",
-//                            // cliccasse su "back" uscirà direttamente dall'app!
+                if (firebaseAuth.currentUser == null) {
+
+                    // Logout successful
+                    if (emailUserLogged != null) {
+                        Log.d(TAG, "logoutFromFirebase, valore di 'emailUserLogged' prima di 'authRepository.LogoutUserLoggedInfo(emailUserLogged)': $emailUserLogged")
+                        authRepository.LogoutUserLoggedInfo(emailUserLogged)
+                    }
+
+                    // Reset loginUIState
+                    loginUIState.value = loginUIState.value.copy(
+                        email = "",
+                        password = ""
+                    )
+
+                    // Reset registrationUIState
+                    registrationUIState.value = registrationUIState.value.copy(
+                        nickName = "",
+                        email = "",
+                        password = "",
+                        privacyPolicyAccepted = false
+                    )
+
+                    // Update login status
+                    isUSerLoggedIn.value = false
+
+                    Log.d(TAG, "logoutFromFirebase: Logout eseguito con successo!")
+                    navController.navigate(Screens.Login.screen) {
+                        popUpTo(0) // Clear the back stack
+                    }
+
+                    //authRepository.getUserByEmail("")
+
+                    // Remove the listener
+                    //firebaseAuth.removeAuthStateListener(this)
+                } else {
+                    Log.d(TAG, "logoutFromFirebase: Logout fallito.")
+                    // Remove the listener
+                    //firebaseAuth.removeAuthStateListener(this)
                 }
-            }else{
-                Log.d(TAG, "Logout fallito.")
-            }
         }
         firebaseAuth.addAuthStateListener(authStateListener)
+        //firebaseAuth.addAuthStateListener(authStateListener)
+        //firebaseAuth.signOut() // Perform logout
+        //firebaseAuth.removeAuthStateListener(authStateListener)
     }
+
+
+    fun securityLogoutFromFirebase(){
+
+        if(FirebaseAuth.getInstance().currentUser != null) {
+
+            val firebaseAuth = FirebaseAuth.getInstance()
+            firebaseAuth.signOut()
+
+            val authStateListener = AuthStateListener {
+                if (it.currentUser == null) {
+
+                    // se entro qui vuol dire che il logout è andato a buon fine.
+                    userLoggedInfo.value?.let {
+                        it1 -> authRepository.LogoutUserLoggedInfo(it1.email)
+                    }
+
+                    // resetto tutti i campi di "loginUIState":
+                    loginUIState.value = loginUIState.value.copy(
+                        email = "",
+                        password = ""
+                    )
+
+                    // resetto tutti i campi di "registrationUIState":
+                    registrationUIState.value = registrationUIState.value.copy(
+                        nickName = "",
+                        email = "",
+                        password = "",
+                        privacyPolicyAccepted = false
+                    )
+
+                    // specifico che non c'è un utente loggato:
+                    isUSerLoggedIn.value = false
+
+                    Log.d(
+                        TAG,
+                        "securityLogoutFromFirebase: Logout di SICUREZZA eseguito con successo!"
+                    )
+
+                } else {
+                    Log.d(TAG, "securityLogoutFromFirebase: Logout di SICUREZZA fallito.")
+                }
+            }
+            firebaseAuth.addAuthStateListener(authStateListener)
+
+        }else{
+            Log.d(TAG, "securityLogoutFromFirebase: Logout di SICUREZZA non necessario.")
+        }
+    }
+
+
+
 
     fun forgotPassword(email: String) {
         forgotPasswordInProgress = true

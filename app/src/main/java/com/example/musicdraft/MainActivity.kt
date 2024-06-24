@@ -1,9 +1,11 @@
 package com.example.musicdraft
 
 //import com.example.musicdraft.utility.ExchangeCards
+//import com.example.musicdraft.utility.ExchangeCards
 import Marketplace
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -61,7 +63,6 @@ import com.example.musicdraft.sections.ShowOfferReceived
 import com.example.musicdraft.sections.ShowOfferSent
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
-//import com.example.musicdraft.utility.ExchangeCards
 import com.example.musicdraft.utility.UpdateNickname
 import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
@@ -119,16 +120,19 @@ fun Navigation(
     // che fa parte della sessione attiva e aggiorna automaticamente (tramite invocazione del metodo 'getUserByEmail' dell'AuthRepository)
     // il mutableStateFlow 'userLoggedInfo' (al quale il loginViewModel è sottoscritto) che contiene le info dell'utente.
     // Grazie a questo aggiornamento, nel momento in cui verrà mostrata la schermata 'Home', verranno mostrati le info dell'utente ancora attivo.
+
     val startDestination = if (loginViewModel.isUSerLoggedIn.value == true) {
+        Log.d("Navigation", "Esiste già un utente loggato e quindi vado direttamente alla schermata Home!")
         Screens.MusicDraftUI.screen // se c'è ancora una sessione attivo vado alla schermata Screens.MusicDraftUI.screen'
         // che farà apparire la sezione 'Home' con i dati dell'utente della sessione attiva.
     } else {
+        Log.d("Navigation", "NON esiste già un utente loggato e quindi vado alla schermata di SignUp.")
         Screens.SignUp.screen // altrimenti apparirà la schermata di registrazione.
     }
 
 
     // - La Schermata iniziale sarà "SignUp" ovvero quella di registrazione dell'utente
-//    NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){ // c'era prima..
+    //NavHost(navController = navigationController, startDestination = Screens.SignUp.screen){ // c'era prima..
     NavHost(navController = navigationController, startDestination = startDestination){
         composable(Screens.SignUp.screen){
             SignUpScreen(navigationController, loginViewModel) // composable che verrà aperto per mostrare la creazione dell'account (c'era prima..)

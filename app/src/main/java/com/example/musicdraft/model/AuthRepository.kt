@@ -69,6 +69,9 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
     }
 
     fun getUserByEmail(email: String) {
+
+        Log.i("AuthRepository", "email: ${email}")
+
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 // mi faccio restituire dalla funzione "getUserByEmail(email)" del DAO
@@ -76,11 +79,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
                 val userFlow = dao.getUserByEmail(email)
                 userFlow.collect { user ->
                     userLoggedInfo.value = user
-                    Log.i("AuthRepository", "info utente prese dal DB updated: ${userLoggedInfo.value}")
                 }
-
             }
+            Log.i("AuthRepository", "info utente prese dal DB updated: ${userLoggedInfo.value}")
         }
+
     }
 
 
@@ -122,8 +125,8 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
       (Questo metodo verrà invocato quando l'utente eseguirà il logout dall'applicazione.
     */
     fun LogoutUserLoggedInfo(email: String){
-        userLoggedInfo.value?.email = ""
-        userLoggedInfo.value?.nickname = ""
+        userLoggedInfo.value?.email = null.toString()
+        userLoggedInfo.value?.nickname = null.toString()
         //userLoggedInfo.value?.password = ""
         userLoggedInfo.value?.isOnline = false
         userLoggedInfo.value?.points = 0

@@ -1056,7 +1056,6 @@ fun ExchangeCards(
     // - lista di carte offerte dall'utente corrente:
     val listOfCardsArtistsOfferedByCurrentUser = remember { mutableStateListOf<User_Cards_Artisti>() }
     val listOfCardsTracksOfferedByCurrentUser = remember { mutableStateListOf<User_Cards_Track>() }
-
     //////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////
@@ -1167,7 +1166,6 @@ fun ExchangeCards(
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-
 
                 // Adesso l'utente corrente può selezionare le proprie carte da inserire nella richiesta oppure
                 // può selezionare anche solo i points da inviare al suo amico:
@@ -1319,7 +1317,6 @@ fun ExchangeCards(
         } else {
             Text("Select here to select the card to request from user $nicknameUserRequestCard:")
             Spacer(modifier = Modifier.width(16.dp))
-
             Spacer(modifier = Modifier.height(8.dp))
 
             // Adesso eseguo la ricerca in base quale sezione l'utente ha selezionato:

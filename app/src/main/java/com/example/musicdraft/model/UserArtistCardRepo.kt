@@ -27,6 +27,14 @@ class UserArtistCardRepo(
     val allCardsforUserA: MutableStateFlow<List<User_Cards_Artisti>?> = MutableStateFlow(CardsForUsersA)
     val allCardsforUserT: MutableStateFlow<List<User_Cards_Track>?> = MutableStateFlow(CardsForUsersT)
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    // per essere certo di aggiornare solamente le carte dell'utente amico al quale l'utente corrente
+    // vuole inviare una richiesta e che quindi partendo dalla sezione 'Mates' ha cliccato sul button "Exchange Cards"
+    // e adesso si trova nella schermata dove deve visualizzare le carte artisti/brani del suo amico:
+    val allCardsforFriendA: MutableStateFlow<List<User_Cards_Artisti>?> = MutableStateFlow(CardsForUsersA)
+    val allCardsforFriendT: MutableStateFlow<List<User_Cards_Track>?> = MutableStateFlow(CardsForUsersT)
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // per aggiornare la carta richiesta (potrà essere artista o brano) all'utente loggato da parte di un suo amico:
@@ -53,6 +61,19 @@ class UserArtistCardRepo(
          return allCardsforUserA.value
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    fun getArtCardsforFriend(email:String): List<User_Cards_Artisti>? {
+        cardsViewModel.viewModelScope.launch {
+            val allcardsforusers = dao.getAllCardArtForUser(email)
+            allcardsforusers.collect{ response->
+                allCardsforFriendA.value = response
+            }
+        }
+        return allCardsforFriendA.value
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     fun getTrackCardsforUser(email:String): List<User_Cards_Track>? {
         cardsViewModel.viewModelScope.launch {
             val allcardsforusers = daoTrack.getAllCardTrackForUser(email)
@@ -62,6 +83,20 @@ class UserArtistCardRepo(
         }
         return allCardsforUserT.value
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    fun getTrackCardsforFriend(email:String): List<User_Cards_Track>? {
+        cardsViewModel.viewModelScope.launch {
+            val allcardsforusers = daoTrack.getAllCardTrackForUser(email)
+            allcardsforusers.collect{ response->
+                allCardsforFriendT.value = response
+            }
+        }
+        return allCardsforFriendT.value
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     fun insertUserCardTrack(obj : User_Cards_Track) {
         cardsViewModel.viewModelScope.launch {

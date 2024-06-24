@@ -50,6 +50,15 @@ fun Home(loginViewModel: LoginViewModel) {
 
     val infoUserCurrent by loginViewModel.userLoggedInfo.collectAsState(initial = null)
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Se non c'è nessun utente attivo allora
+    // richiedo l'update di 'userLoggedInfo' e quindi automaticamente anche 'infoUserCurrent' sarà aggiornato.
+    // Se invece dovesse esserci già un utente attivo allora 'infoUserCurrent' già conterrà i dati dell'utente attivo.
+    if (loginViewModel.isUSerLoggedIn.value == false){
+        loginViewModel.getUserByEmail()
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     infoUserCurrent?.let{
         Log.d("Home", "Sono dentro la schermata Home() e..:")
         Log.d("Home", "Sono dentro la schermata Home() e l'email dell'utente è il seguente: " + infoUserCurrent!!.email)
