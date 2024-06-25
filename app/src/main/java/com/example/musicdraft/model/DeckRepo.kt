@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
 
     val allDecks: MutableStateFlow<List<Deck>?> = MutableStateFlow(emptyList())
+    val namesDecks: MutableStateFlow<List<String>>? =  MutableStateFlow(emptyList())
+    val carteAssociate: MutableStateFlow<List<String>>? =  MutableStateFlow(emptyList())
 
     fun getallDecksByEmail(email:String){
         viewModel.viewModelScope.launch {
@@ -22,6 +24,29 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
             }
         }
     }
+
+    fun getNomedeck(email:String){
+        viewModel.viewModelScope.launch {
+            val N = daoDeck.getDistinctDeckNames(email)
+            N.collect{it->
+                namesDecks?.value=it
+
+            }
+
+        }
+    }
+    fun getCarteAss(email: String,nomeMazzo:String){
+        viewModel.viewModelScope.launch {
+            val c = daoDeck.getDecksByNomeMazzoAndEmail(email,nomeMazzo)
+            c.collect{it->
+                carteAssociate?.value=it
+
+            }
+        }
+    }
+
+
+
 
 
 }

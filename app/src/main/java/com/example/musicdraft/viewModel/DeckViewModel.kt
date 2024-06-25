@@ -1,20 +1,16 @@
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.Cards
 import com.example.musicdraft.data.tables.deck.Deck
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
 import com.example.musicdraft.database.MusicDraftDatabase
-import com.example.musicdraft.model.AuthRepository
 import com.example.musicdraft.model.DeckRepo
-import com.example.musicdraft.model.UserCardsRepo
 import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.StateFlow
 
 
 class DeckViewModel(application: Application,private val loginViewModel: LoginViewModel,private val cardsViewModel: CardsViewModel): AndroidViewModel(application) {
@@ -26,7 +22,9 @@ class DeckViewModel(application: Application,private val loginViewModel: LoginVi
     private val deckRepository: DeckRepo = DeckRepo(this,daoDeck!!)
 
     var isEditing = mutableStateOf(false)
-    var selectedDeck = MutableStateFlow<Deck?>(null)
+
+    private val _selectedDeck : Mazzo? =null
+    val selectedDeck: MutableStateFlow<Mazzo?> = MutableStateFlow(_selectedDeck)
 
     private val _ownDeck : List<Deck>? = null
     val ownDeck: MutableStateFlow<List<Deck>?> = MutableStateFlow(_ownDeck)
@@ -40,13 +38,21 @@ class DeckViewModel(application: Application,private val loginViewModel: LoginVi
     private val _cards:List<Cards>?=null
     val cards: MutableStateFlow<List<Cards>?> = MutableStateFlow(_cards)
 
+    private val _selectedCards = MutableStateFlow<List<Cards>>(emptyList())
+    val selectedCards: StateFlow<List<Cards>> = _selectedCards
 
+    var mazzi : MutableList<Mazzo>? = null
+    val cardList: MutableList<Cards>? = null
+
+    // Funzione per selezionare/deselezionare una carta
+
+
+    inner class Mazzo(
+        val id_mazzo:String,
+        val carte: List<Cards>
+    )
 
     fun init(){
-            val email = loginViewModel.userLoggedInfo.value?.email
-            deckRepository.getallDecksByEmail(email!!)
-            ownDeck.value = deckRepository.allDecks.value
-
             ownCardA.value = cardsViewModel.acquiredCardsA.value
             ownCardT.value = cardsViewModel.acquiredCardsT.value
 
@@ -61,30 +67,76 @@ class DeckViewModel(application: Application,private val loginViewModel: LoginVi
 
             cards.value = listofCards
 
+            val email = loginViewModel.userLoggedInfo.value?.email
+            deckRepository.getallDecksByEmail(email!!)
+            ownDeck.value = deckRepository.allDecks.value
+            deckRepository.getNomedeck(email)
+            val n = deckRepository.namesDecks?.value
+            if (n != null) {
+                for(i in n){
+                    deckRepository.getCarteAss(email,i)
+                    val c = deckRepository.carteAssociate?.value
+                    if (c != null) {
+                        for(j in c){
+                            cards.value?.forEach { card->
+                                if (card.id_carta == j) {
+                                    cardList?.add(card)
+                                }
+                            }
+
+                        }
+                        cardList?.let { Mazzo(i, it) }?.let { mazzi?.add(it) }
+                    }
+                }
+            }
+
+
+
+
+
+
+
+
 
     }
+
+    fun toggleCardSelection(card: Cards) {
+        val currentList = _selectedCards.value.toMutableList()
+        if (currentList.contains(card)) {
+            currentList.remove(card)
+        } else {
+            currentList.add(card)
+        }
+        _selectedCards.value = currentList
+    }
+
     fun getCardById(id: String): Cards? {
         return cards.value?.find { it.id_carta == id }
     }
 
     fun creaNuovoMazzo() {
+        selectedDeck.value = Mazzo("", emptyList())
+        isEditing.value = true
+    }
+
+
+
+    fun modificaMazzo(deck: Mazzo) {
+
+    }
+
+    fun eliminaMazzo(deck: Mazzo) {
+
+    }
+
+    fun salvaMazzo() {
         TODO("Not yet implemented")
     }
 
-    fun modificaMazzo(deck: Deck) {
-
+    fun annullaModifica() {
+        TODO("Not yet implemented")
     }
 
-    fun eliminaMazzo(deck: Deck) {
-
-    }
-    fun toggleCardSelection(card: Cards) {
-        selectedCards.value = if (selectedCards.value.contains(card)) {
-            selectedCards.value - card
-        } else {
-            selectedCards.value + card
-        }
-    }
     /*
 
 
