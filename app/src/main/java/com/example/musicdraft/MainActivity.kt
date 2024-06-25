@@ -48,6 +48,7 @@ import com.example.musicdraft.sections.Cards
 import Marketplace
 import androidx.lifecycle.ViewModelProvider
 import com.example.musicdraft.factory.CardsViewModelFactory
+import com.example.musicdraft.factory.DeckViewModelFactory
 import com.example.musicdraft.factory.MarketplaceViewModelFactory
 import com.example.musicdraft.sections.Friends
 import com.example.musicdraft.sections.Home
@@ -82,7 +83,6 @@ class MainActivity : ComponentActivity() {
 //    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        deleteDatabase("MusicDraftDB")
         super.onCreate(savedInstanceState)
         setContent {
 
@@ -95,7 +95,9 @@ class MainActivity : ComponentActivity() {
             val marketplaceViewModelFactory = MarketplaceViewModelFactory(application, cardsViewModel, loginViewModel)
             val marketplaceViewModel: MarketplaceViewModel = ViewModelProvider(this, marketplaceViewModelFactory).get(MarketplaceViewModel::class.java)
 
-            val decksViewModel: DeckViewModel by viewModels()
+            val deckfactory = DeckViewModelFactory(application, loginViewModel, cardsViewModel)
+            val decksViewModel = ViewModelProvider(this, deckfactory).get(DeckViewModel::class.java)
+
 
             MusicDraftTheme {
                 Surface(

@@ -230,7 +230,7 @@ fun BranoCard(brano: User_Cards_Track, height: Modifier,viewModel: CardsViewMode
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Button(onClick = { }) {
+            Button(onClick = {viewModel.vendi_track(brano) }) {
                 Text("Vendi")
             }
         }

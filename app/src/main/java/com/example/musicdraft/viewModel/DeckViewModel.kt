@@ -1,25 +1,37 @@
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import com.example.musicdraft.data.tables.deck.Cards
+import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.Deck
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.DeckRepo
+import com.example.musicdraft.model.UserCardsRepo
 import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 
-class DeckViewModel(application: Application,private val loginViewModel: LoginViewModel,private val cardsViewModel: CardsViewModel): AndroidViewModel(application) {
+class DeckViewModel(
+    application: Application,
+    private val loginViewModel: LoginViewModel,
+    private val cardsViewModel: CardsViewModel
+) : AndroidViewModel(application) {
+
     private val database = MusicDraftDatabase.getDatabase(application)
     private val daoOwnCards = database.ownArtCardsDao()
     private val daoDeck = database.deckDao()
     private val loginDao = database.userDao()
+    private val dao = database.ownArtCardsDao()
+    private val daoLog = database.userDao()
+    private val daoTrack = database.ownTrackCardsDao()
 
-    private val deckRepository: DeckRepo = DeckRepo(this,daoDeck!!)
+    private val deckRepository: DeckRepo = DeckRepo(this, daoDeck!!)
+    private val ownArtistRepo: UserCardsRepo = UserCardsRepo(dao!!, daoLog!!, daoTrack!!, cardsViewModel)
 
     var isEditing = mutableStateOf(false)
 
@@ -29,36 +41,56 @@ class DeckViewModel(application: Application,private val loginViewModel: LoginVi
     private val _ownDeck : List<Deck>? = null
     val ownDeck: MutableStateFlow<List<Deck>?> = MutableStateFlow(_ownDeck)
 
-    private val _ownCardsA: List<User_Cards_Artisti>? = null
-    val ownCardA: MutableStateFlow<List<User_Cards_Artisti>?> = MutableStateFlow(_ownCardsA)
+    private val _ownCardsA = MutableStateFlow<List<User_Cards_Artisti>?>(null)
+    val ownCardA: StateFlow<List<User_Cards_Artisti>?> get() = _ownCardsA
 
-    private val _ownCardsT: List<User_Cards_Track>? = null
-    val ownCardT: MutableStateFlow<List<User_Cards_Track>?> = MutableStateFlow(_ownCardsT)
+    private val _ownCardsT = MutableStateFlow<List<User_Cards_Track>?>(null)
+    val ownCardT: StateFlow<List<User_Cards_Track>?> get() = _ownCardsT
 
     private val _cards:List<Cards>?=null
     val cards: MutableStateFlow<List<Cards>?> = MutableStateFlow(_cards)
 
     private val _selectedCards = MutableStateFlow<List<Cards>>(emptyList())
-    val selectedCards: StateFlow<List<Cards>> = _selectedCards
+    val selectedCards: StateFlow<List<Cards>> get() = _selectedCards
 
-    var mazzi : MutableList<Mazzo>? = null
+    var mazzi: MutableList<Mazzo>? = null
     val cardList: MutableList<Cards>? = null
 
-    // Funzione per selezionare/deselezionare una carta
-
+    // Inner classes
+    inner class Cards(
+        val id_carta: String,
+        val nome_carta: String,
+        val immagine: String,
+        val popolarita: Int
+    )
 
     inner class Mazzo(
-        val id_mazzo:String,
+        val id_mazzo: String,
         val carte: List<Cards>
     )
 
-    fun init(){
-            ownCardA.value = cardsViewModel.acquiredCardsA.value
-            ownCardT.value = cardsViewModel.acquiredCardsT.value
+    fun init() {
+        val email = loginViewModel.userLoggedInfo.value!!.email
+        ownArtistRepo.getArtCardsforUser(email)
 
-            val listofCards:MutableList<Cards>?=null
+        // Launch a coroutine to collect the flow and update the state
+        viewModelScope.launch {
+            ownArtistRepo.allCardsforUserA.collect { allArtisti ->
+                val ownCardsA = allArtisti?.filter { elem ->
+                    !elem.onMarket
+                }
+                _ownCardsA.value = ownCardsA
+            }
+        }
+            //ownCardT.value = cardsViewModel.acquiredCardsT.value
+
+            val listofCards:MutableList<Cards>?= mutableListOf()
             ownCardA.value?.forEach{elem->
-                listofCards?.add(Cards(elem.id_carta,elem.nome,elem.immagine,elem.popolarita))
+
+                val c = Cards(elem.id_carta,elem.nome,elem.immagine,elem.popolarita)
+
+                listofCards?.add(c)
+                Log.i("Carta","${listofCards}")
             }
             ownCardT.value?.forEach { elem->
                 listofCards?.add(Cards(elem.id_carta,elem.nome,elem.immagine,elem.popolarita))
@@ -67,7 +99,6 @@ class DeckViewModel(application: Application,private val loginViewModel: LoginVi
 
             cards.value = listofCards
 
-            val email = loginViewModel.userLoggedInfo.value?.email
             deckRepository.getallDecksByEmail(email!!)
             ownDeck.value = deckRepository.allDecks.value
             deckRepository.getNomedeck(email)
@@ -89,6 +120,7 @@ class DeckViewModel(application: Application,private val loginViewModel: LoginVi
                     }
                 }
             }
+
 
 
 

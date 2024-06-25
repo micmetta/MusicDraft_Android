@@ -7,8 +7,10 @@ import com.example.musicdraft.data.tables.deck.Deck
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
 import com.example.musicdraft.database.MusicDraftDatabase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
 
@@ -18,29 +20,38 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
 
     fun getallDecksByEmail(email:String){
         viewModel.viewModelScope.launch {
-            val deck = daoDeck.getAllDeckbyEmail(email)
-            deck.collect{it->
-                allDecks.value=it
+            withContext(Dispatchers.IO) {
+
+                val deck = daoDeck.getAllDeckbyEmail(email)
+                deck.collect { it ->
+                    allDecks.value = it
+                }
             }
         }
     }
 
     fun getNomedeck(email:String){
         viewModel.viewModelScope.launch {
-            val N = daoDeck.getDistinctDeckNames(email)
-            N.collect{it->
-                namesDecks?.value=it
+            withContext(Dispatchers.IO) {
+
+                val N = daoDeck.getDistinctDeckNames(email)
+                N.collect { it ->
+                    namesDecks?.value = it
+
+                }
 
             }
-
         }
     }
     fun getCarteAss(email: String,nomeMazzo:String){
         viewModel.viewModelScope.launch {
-            val c = daoDeck.getDecksByNomeMazzoAndEmail(email,nomeMazzo)
-            c.collect{it->
-                carteAssociate?.value=it
+            withContext(Dispatchers.IO) {
 
+                    val c = daoDeck.getDecksByNomeMazzoAndEmail(email, nomeMazzo)
+                    c.collect { it ->
+                        carteAssociate?.value = it
+
+                }
             }
         }
     }

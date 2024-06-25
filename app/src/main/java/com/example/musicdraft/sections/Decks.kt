@@ -31,50 +31,60 @@ fun Decks(viewModel: DeckViewModel) {
             Button(onClick = { viewModel.creaNuovoMazzo() }) {
                 Text("Crea Nuovo Mazzo")
             }
-            LazyColumn {
-                items(decks!!) { deck ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        onClick = { /* Implementa l'azione desiderata */ }
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(deck.id_mazzo, style = MaterialTheme.typography.bodyLarge)
-                            deck.carte.forEach {card->
+
+            if (decks != null) {
+                if (decks.isEmpty()) {
+                    Text(
+                        "Non hai ancora creato nessun mazzo",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    LazyColumn {
+                        items(decks) { deck ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                onClick = { /* Implementa l'azione desiderata */ }
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(deck.id_mazzo, style = MaterialTheme.typography.bodyLarge)
+                                    deck.carte.forEach { card ->
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Image(
+                                                painter = rememberImagePainter(data = card?.immagine),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(50.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text("${card?.nome_carta} (Popolarità: ${card?.popolarita})")
+                                        }
+                                    }
+                                }
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.End,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Image(
-                                        painter = rememberImagePainter(data = card?.immagine),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(50.dp)
-                                    )
+                                    Button(onClick = { viewModel.modificaMazzo(deck) }) {
+                                        Text("Modifica")
+                                    }
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("${card?.nome_carta} (Popolarità: ${card?.popolarita})")
-                                }
-                            }
-                        }
-                            Row(
-                                horizontalArrangement = Arrangement.End,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Button(onClick = { viewModel.modificaMazzo(deck) }) {
-                                    Text("Modifica")
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Button(onClick = { viewModel.eliminaMazzo(deck) }) {
-                                    Text("Elimina")
+                                    Button(onClick = { viewModel.eliminaMazzo(deck) }) {
+                                        Text("Elimina")
+                                    }
                                 }
                             }
                         }
                     }
                 }
-
+            }
         } else if (selectedDeck != null) {
             Text(
                 text = if (selectedDeck != null) "Modifica Mazzo" else "Crea un Nuovo Mazzo",
@@ -90,8 +100,8 @@ fun Decks(viewModel: DeckViewModel) {
                 )
 
                 LazyColumn {
-                    (selectedDeck?: null)?.let {it->
-                        items(selectedDeck!!.carte) { card ->
+                    selectedDeck?.let {
+                        items(it.carte) { card ->
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -129,31 +139,38 @@ fun Decks(viewModel: DeckViewModel) {
                 }
 
                 Text("Aggiungi Carta:", style = MaterialTheme.typography.titleLarge)
-                LazyColumn {
-                    items(availableCards!!) { card ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            onClick = { viewModel.toggleCardSelection(card) }
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth()
+
+                if (availableCards == null) {
+                    Text(
+                        "Nessuna carta disponibile",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    LazyColumn {
+                        items(availableCards!!) { card ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                onClick = { viewModel.toggleCardSelection(card) }
                             ) {
-                                Image(
-                                    painter = rememberImagePainter(data = card.immagine),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(50.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(card.id_carta)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Image(
+                                        painter = rememberImagePainter(data = card.immagine),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(50.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(card.id_carta)
+                                }
                             }
                         }
                     }
                 }
-
-                // Aggiungi altri tipi di card come necessario
 
                 Text("Carte Selezionate:", style = MaterialTheme.typography.titleLarge)
                 LazyColumn {

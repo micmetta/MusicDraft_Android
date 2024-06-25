@@ -7,8 +7,11 @@ import com.example.musicdraft.data.tables.user_cards.UCTDao
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
 import com.example.musicdraft.viewModel.CardsViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UserCardsRepo(
     val dao: UCADao,
@@ -20,25 +23,33 @@ class UserCardsRepo(
 ) {
 
     val artCard: List<User_Cards_Artisti>? = null
-    val allCardsforUserA: MutableStateFlow<List<User_Cards_Artisti>?> = MutableStateFlow(artCard)
+    private val _allCardsforUserA = MutableStateFlow<List<User_Cards_Artisti>>(emptyList())
+    val allCardsforUserA: StateFlow<List<User_Cards_Artisti>> get() = _allCardsforUserA
+
     val allCardsforUserT: MutableStateFlow<List<User_Cards_Track>?> = MutableStateFlow(emptyList())
 
 
 
     fun getArtCardsforUser(email:String) {
             cardsViewModel.viewModelScope.launch {
-                val allcardsforusers = dao.getAllCardArtForUser(email)
-                allcardsforusers.collect { response ->
-                    allCardsforUserA.value = response
+                withContext(Dispatchers.IO) {
+
+                    val allcardsforusers = dao.getAllCardArtForUser(email)
+                    allcardsforusers.collect { response ->
+                        _allCardsforUserA.value = response
+                    }
                 }
             }
 
     }
     fun getTrackCardsforUser(email:String) {
         cardsViewModel.viewModelScope.launch {
-            val allcardsforusers = daoTrack.getAllCardTrackForUser(email)
-            allcardsforusers.collect{ response->
-                allCardsforUserT.value = response
+            withContext(Dispatchers.IO) {
+
+                val allcardsforusers = daoTrack.getAllCardTrackForUser(email)
+                allcardsforusers.collect { response ->
+                    allCardsforUserT.value = response
+                }
             }
         }
     }
@@ -65,7 +76,7 @@ class UserCardsRepo(
         cardsViewModel.viewModelScope.launch {
             val allcardsforusers = dao.getCardbyId(id_carta,email)
             allcardsforusers.collect{ response->
-                allCardsforUserA.value = response
+                _allCardsforUserA.value = response
             }
         }
         return allCardsforUserA.value
@@ -85,7 +96,7 @@ class UserCardsRepo(
         cardsViewModel.viewModelScope.launch {
             val allcardsforusers = dao.getCardsOnMarket()
             allcardsforusers.collect{ response->
-                allCardsforUserA.value = response
+                _allCardsforUserA.value = response
             }
         }
         return allCardsforUserA.value
