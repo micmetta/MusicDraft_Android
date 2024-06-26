@@ -35,6 +35,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,6 +64,7 @@ import com.example.musicdraft.sections.ShowOfferReceived
 import com.example.musicdraft.sections.ShowOfferSent
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
+import com.example.musicdraft.utility.NavigationManager
 import com.example.musicdraft.utility.UpdateNickname
 import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
@@ -183,6 +185,8 @@ fun MusicDraftUI(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val context = LocalContext.current.applicationContext
 
+    val navigationManager = remember { NavigationManager() } // istanzio il navigationManager
+
 
     // Il "ModalNavigationDrawer" sarà proprio il menù laterale sulla sinistra in verticale tramite il quale
     // l'utente potrà navigare all'interno delle diverse sezioni dell'app:
@@ -202,6 +206,7 @@ fun MusicDraftUI(
                 }
                 Divider() // inserisco una linea sotto l'header del ModalNavigationDrawer
 
+
                 // Definisco la sezione "Home":
                 NavigationDrawerItem(label = { Text(text = "Home", color = BlueApp)},
                     selected = false, // determina se un item è selezionato o meno,
@@ -214,12 +219,41 @@ fun MusicDraftUI(
                             // si chiuderà automaticamente in modo tale da mostrare sullo schermo solo la schermata "Home" selezionata dall'utente
                         }
 
+                        // c'era prima:
                         // vado alla schermata "Home" che ho definito in "Screen.kt"
-                        navigationController.navigate(Screens.Home.screen){
-                            popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
-                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Home",
-                            // cliccasse su "back" uscirà direttamente dall'app!
+//                        navigationController.navigate(Screens.Home.screen){
+//                            popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
+//                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Home",
+//                            // cliccasse su "back" uscirà direttamente dall'app!
+//                        }
+
+                        // Passo alla schermata 'Home', Mantenendo però gli ultimi 5 screens:
+                        val recentScreens = navigationManager.getRecentScreens() // mi prendo le ultime 5 schermate sulle quali l'utente ha navigato
+
+                        // La riga qui sotto cerca di ottenere la schermata più vecchia tra le ultime 5 schermate recenti.
+                        // - Se ci sono meno di 5 schermate recenti, imposta il punto di pop-up alla schermata "Home".
+
+                        // - recentScreens.getOrNull(recentScreens.size - 5):
+                        //      Cerca di ottenere la schermata che è la quinta più vecchia nella lista.
+                        //      Se la lista ha meno di 5 elementi, ritorna null e praticamente riparte dalla schermata corrente e se si continua
+                        //      ad andare indietro con il 'back' si potrà tornare alle schermate precedenti.
+
+                        // - ?: Screens.Home.screen: Se la schermata ottenuta è null (cioè, ci sono meno di 5 schermata precedenti),
+                        //      allora come schermata da conservare viene scelta la 'Home' e tutte le altre schermate sulle quali l'utente è stato verranno
+                        //      tolte dallo stack.
+                        val popUpToRoute = recentScreens.getOrNull(recentScreens.size - 5) ?: Screens.Home.screen
+                        navigationController.navigate(Screens.Home.screen) {
+                            // 'popUpTo(popUpToRoute)' specifica che tutte le schermate fino alla schermata identificata da 'popUpToRoute'
+                            // devono essere rimosse dallo stack di navigazione.
+                            popUpTo(popUpToRoute) {
+                                inclusive = false // questo indica che la schermata 'popUpToRoute' stessa non deve essere rimossa.
+                            // Se 'inclusive' fosse impostato a true, anche 'popUpToRoute' verrebbe rimossa.
+                            }
+                            navigationManager.addScreen(Screens.Home.screen)
                         }
+
+                        //navigationManager.navigateTo(navigationController, Screens.Home.screen)
+                        //Log.d("MusicDraftUI", "recentScreens.size: ${recentScreens.size}")
                     })
 
                 // Definisco la sezione "Friends":
@@ -234,12 +268,20 @@ fun MusicDraftUI(
                             // si chiuderà automaticamente in modo tale da mostrare sullo schermo solo la schermata "Friends" selezionata dall'utente
                         }
 
-                        // vado alla schermata "Friends" che ho definito in "Screen.kt"
-                        navigationController.navigate(Screens.Friends.screen){
-                            popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
-                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Friends",
-                            // cliccasse su "back" uscirà direttamente dall'app!
+
+                        // Passo alla schermata 'Friends', Mantenendo però gli ultimi 5 screens:
+                        val recentScreens = navigationManager.getRecentScreens() // mi prendo le ultime 5 schermate sulle quali l'utente ha navigato
+                        val popUpToRoute = recentScreens.getOrNull(recentScreens.size - 5) ?: Screens.Friends.screen
+                        navigationController.navigate(Screens.Friends.screen) {
+                            // 'popUpTo(popUpToRoute)' specifica che tutte le schermate fino alla schermata identificata da 'popUpToRoute'
+                            // devono essere rimosse dallo stack di navigazione.
+                            popUpTo(popUpToRoute) {
+                                inclusive = false // questo indica che la schermata 'popUpToRoute' stessa non deve essere rimossa.
+                                // Se 'inclusive' fosse impostato a true, anche 'popUpToRoute' verrebbe rimossa.
+                            }
+                            navigationManager.addScreen(Screens.Friends.screen)
                         }
+                        //Log.d("MusicDraftUI", "recentScreens.size: ${recentScreens.size}")
                     })
 
                 // Definisco la sezione "Cards":
@@ -254,12 +296,19 @@ fun MusicDraftUI(
                             // si chiuderà automaticamente in modo tale da mostrare sullo schermo solo la schermata "Cards" selezionata dall'utente
                         }
 
-                        // vado alla schermata "Cards" che ho definito in "Screen.kt"
-                        navigationController.navigate(Screens.Cards.screen){
-                            popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
-                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Cards",
-                            // cliccasse su "back" uscirà direttamente dall'app!
+                        // Passo alla schermata 'Cards', Mantenendo però gli ultimi 5 screens:
+                        val recentScreens = navigationManager.getRecentScreens() // mi prendo le ultime 5 schermate sulle quali l'utente ha navigato
+                        val popUpToRoute = recentScreens.getOrNull(recentScreens.size - 5) ?: Screens.Cards.screen
+                        navigationController.navigate(Screens.Cards.screen) {
+                            // 'popUpTo(popUpToRoute)' specifica che tutte le schermate fino alla schermata identificata da 'popUpToRoute'
+                            // devono essere rimosse dallo stack di navigazione.
+                            popUpTo(popUpToRoute) {
+                                inclusive = false // questo indica che la schermata 'popUpToRoute' stessa non deve essere rimossa.
+                                // Se 'inclusive' fosse impostato a true, anche 'popUpToRoute' verrebbe rimossa.
+                            }
+                            navigationManager.addScreen(Screens.Cards.screen)
                         }
+                        //Log.d("MusicDraftUI", "recentScreens.size: ${recentScreens.size}")
                     })
 
                 // Definisco la sezione "Decks":
@@ -274,12 +323,19 @@ fun MusicDraftUI(
                             // si chiuderà automaticamente in modo tale da mostrare sullo schermo solo la schermata "Decks" selezionata dall'utente
                         }
 
-                        // vado alla schermata "Decks" che ho definito in "Screen.kt"
-                        navigationController.navigate(Screens.Decks.screen){
-                            popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
-                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Decks",
-                            // cliccasse su "back" uscirà direttamente dall'app!
+                        // Passo alla schermata 'Decks', Mantenendo però gli ultimi 5 screens:
+                        val recentScreens = navigationManager.getRecentScreens() // mi prendo le ultime 5 schermate sulle quali l'utente ha navigato
+                        val popUpToRoute = recentScreens.getOrNull(recentScreens.size - 5) ?: Screens.Decks.screen
+                        navigationController.navigate(Screens.Decks.screen) {
+                            // 'popUpTo(popUpToRoute)' specifica che tutte le schermate fino alla schermata identificata da 'popUpToRoute'
+                            // devono essere rimosse dallo stack di navigazione.
+                            popUpTo(popUpToRoute) {
+                                inclusive = false // questo indica che la schermata 'popUpToRoute' stessa non deve essere rimossa.
+                                // Se 'inclusive' fosse impostato a true, anche 'popUpToRoute' verrebbe rimossa.
+                            }
+                            navigationManager.addScreen(Screens.Decks.screen)
                         }
+                        //Log.d("MusicDraftUI", "recentScreens.size: ${recentScreens.size}")
                     })
 
 
@@ -295,12 +351,19 @@ fun MusicDraftUI(
                             // si chiuderà automaticamente in modo tale da mostrare sullo schermo solo la schermata "Marketplace" selezionata dall'utente
                         }
 
-                        // vado alla schermata "Marketplace" che ho definito in "Screen.kt"
-                        navigationController.navigate(Screens.Marketplace.screen){
-                            popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
-                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Marketplace",
-                            // cliccasse su "back" uscirà direttamente dall'app!
+                        // Passo alla schermata 'Marketplace', Mantenendo però gli ultimi 5 screens:
+                        val recentScreens = navigationManager.getRecentScreens() // mi prendo le ultime 5 schermate sulle quali l'utente ha navigato
+                        val popUpToRoute = recentScreens.getOrNull(recentScreens.size - 5) ?: Screens.Marketplace.screen
+                        navigationController.navigate(Screens.Marketplace.screen) {
+                            // 'popUpTo(popUpToRoute)' specifica che tutte le schermate fino alla schermata identificata da 'popUpToRoute'
+                            // devono essere rimosse dallo stack di navigazione.
+                            popUpTo(popUpToRoute) {
+                                inclusive = false // questo indica che la schermata 'popUpToRoute' stessa non deve essere rimossa.
+                                // Se 'inclusive' fosse impostato a true, anche 'popUpToRoute' verrebbe rimossa.
+                            }
+                            navigationManager.addScreen(Screens.Marketplace.screen)
                         }
+                        //Log.d("MusicDraftUI", "recentScreens.size: ${recentScreens.size}")
                     })
 
 
@@ -315,13 +378,19 @@ fun MusicDraftUI(
                             drawerState.close() // quando cliccherà sulla sezione "Matchmaking", il ModalNavigationDrawer (ovvero il menù sulla sinistra)
                             // si chiuderà automaticamente in modo tale da mostrare sullo schermo solo la schermata "Home" selezionata dall'utente
                         }
-
-                        // vado alla schermata "Matchmaking" che ho definito in "Screen.kt"
-                        navigationController.navigate(Screens.Matchmaking.screen){
-                            popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
-                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Matchmaking",
-                            // cliccasse su "back" uscirà direttamente dall'app!
+                        // Passo alla schermata 'Matchmaking', Mantenendo però gli ultimi 5 screens:
+                        val recentScreens = navigationManager.getRecentScreens() // mi prendo le ultime 5 schermate sulle quali l'utente ha navigato
+                        val popUpToRoute = recentScreens.getOrNull(recentScreens.size - 5) ?: Screens.Matchmaking.screen
+                        navigationController.navigate(Screens.Matchmaking.screen) {
+                            // 'popUpTo(popUpToRoute)' specifica che tutte le schermate fino alla schermata identificata da 'popUpToRoute'
+                            // devono essere rimosse dallo stack di navigazione.
+                            popUpTo(popUpToRoute) {
+                                inclusive = false // questo indica che la schermata 'popUpToRoute' stessa non deve essere rimossa.
+                                // Se 'inclusive' fosse impostato a true, anche 'popUpToRoute' verrebbe rimossa.
+                            }
+                            navigationManager.addScreen(Screens.Matchmaking.screen)
                         }
+                        //Log.d("MusicDraftUI", "recentScreens.size: ${recentScreens.size}")
                     })
 
 
@@ -336,13 +405,19 @@ fun MusicDraftUI(
                             drawerState.close() // quando cliccherà sulla sezione "Settings", il ModalNavigationDrawer (ovvero il menù sulla sinistra)
                             // si chiuderà automaticamente in modo tale da mostrare sullo schermo solo la schermata "Settings" selezionata dall'utente
                         }
-
-                        // vado alla schermata "Settings" che ho definito in "Screen.kt"
-                        navigationController.navigate(Screens.Settings.screen){
-                            popUpTo(0) // in questo modo nello stack non mantengo memorizzato le sezioni precedenti
-                            // nelle quali l'utente è andato precedentemente. Quindi qualora l'utente dopo aver cliccato sulla sezione "Settings",
-                            // cliccasse su "back" uscirà direttamente dall'app!
+                        // Passo alla schermata 'Settings', Mantenendo però gli ultimi 5 screens:
+                        val recentScreens = navigationManager.getRecentScreens() // mi prendo le ultime 5 schermate sulle quali l'utente ha navigato
+                        val popUpToRoute = recentScreens.getOrNull(recentScreens.size - 5) ?: Screens.Settings.screen
+                        navigationController.navigate(Screens.Settings.screen) {
+                            // 'popUpTo(popUpToRoute)' specifica che tutte le schermate fino alla schermata identificata da 'popUpToRoute'
+                            // devono essere rimosse dallo stack di navigazione.
+                            popUpTo(popUpToRoute) {
+                                inclusive = false // questo indica che la schermata 'popUpToRoute' stessa non deve essere rimossa.
+                                // Se 'inclusive' fosse impostato a true, anche 'popUpToRoute' verrebbe rimossa.
+                            }
+                            navigationManager.addScreen(Screens.Settings.screen)
                         }
+
                     })
 
                 Spacer(modifier = Modifier.height(50.dp))

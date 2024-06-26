@@ -1092,6 +1092,7 @@ fun ExchangeCards(
         }
     }
 
+
     ////////////////////////////////////////////////////////////////////////////
     // Questa lambda verrà eseguita quando l'utente preme il pulsante indietro:
     BackHandler {
