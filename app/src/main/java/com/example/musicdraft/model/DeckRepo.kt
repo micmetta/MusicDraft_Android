@@ -4,6 +4,7 @@ import DeckViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.DaoDeck
 import com.example.musicdraft.data.tables.deck.Deck
+import com.example.musicdraft.data.tables.user.User
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
 import com.example.musicdraft.database.MusicDraftDatabase
@@ -55,7 +56,11 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
             }
         }
     }
-
+    fun insertNewDeck(deck: Deck){
+        viewModel.viewModelScope.launch {
+            daoDeck.insertdeck(deck)
+        }
+    }
 
 
 

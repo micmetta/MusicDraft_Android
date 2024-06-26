@@ -102,9 +102,9 @@ fun Decks(viewModel: DeckViewModel) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Column {
-                OutlinedTextField(
+                TextField(
                     value = selectedDeck?.id_mazzo ?: "",
-                    onValueChange = { /* viewModel.updateDeckName(it) */ },
+                    onValueChange = { viewModel.updateDeckName(it)  },
                     label = { Text("Nome del Mazzo") },
                     modifier = Modifier.fillMaxWidth()
                 )

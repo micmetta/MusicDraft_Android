@@ -68,7 +68,7 @@ class DeckViewModel(
     )
 
     inner class Mazzo(
-        val id_mazzo: String,
+        var id_mazzo: String,
         val carte: List<Cards>
     )
 
@@ -179,6 +179,7 @@ class DeckViewModel(
     }
 
     fun salvaMazzo() {
+        val email = loginViewModel.userLoggedInfo.value!!.email
         val names = deckRepository.namesDecks?.value
         val currentDeck = selectedDeck.value
         val currentCards = selectedCards.value
@@ -201,8 +202,18 @@ class DeckViewModel(
                 return
             }
 
-            // Add the deck to the list if checks pass
-            //_decks.value = decks.value + currentDeck.copy(cards = currentCards)
+            var pop = 0
+            for (i in selectedCards.value){
+                pop += i.popolarita
+            }
+            for (i in selectedCards.value){
+               val m = _selectedDeck?.id_mazzo?.let { Deck(0, it,i.id_carta,email,pop) }
+                if (m != null) {
+                    deckRepository.insertNewDeck(m)
+                }
+            }
+
+            _selectedDeck?.id_mazzo?.let { Mazzo(it,_selectedCards.value) }?.let { mazzi?.add(it) }
 
             // Reset the states
             annullaModifica()
@@ -218,6 +229,9 @@ class DeckViewModel(
         isEditing.value = false
         selectedDeck.value = null
         _selectedCards.value = emptyList()
+    }
+    fun updateDeckName(newName: String) {
+        _selectedDeck?.id_mazzo = newName
     }
 
     /*
