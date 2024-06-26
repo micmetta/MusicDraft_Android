@@ -53,6 +53,9 @@ class DeckViewModel(
     private val _selectedCards = MutableStateFlow<List<Cards>>(emptyList())
     val selectedCards: StateFlow<List<Cards>> get() = _selectedCards
 
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> get() = _message
+
     var mazzi: MutableList<Mazzo>? = null
     val cardList: MutableList<Cards>? = null
 
@@ -82,7 +85,16 @@ class DeckViewModel(
                 _ownCardsA.value = ownCardsA
             }
         }
-            //ownCardT.value = cardsViewModel.acquiredCardsT.value
+        ownArtistRepo.getTrackCardsforUser(email)
+
+        viewModelScope.launch {
+            ownArtistRepo.allCardsforUserT.collect { allArtisti ->
+                val ownCardsT = allArtisti?.filter { elem ->
+                    !elem.onMarket
+                }
+                _ownCardsT.value = ownCardsT
+            }
+        }
 
             val listofCards:MutableList<Cards>?= mutableListOf()
             ownCardA.value?.forEach{elem->
@@ -92,10 +104,14 @@ class DeckViewModel(
                 listofCards?.add(c)
                 Log.i("Carta","${listofCards}")
             }
-            ownCardT.value?.forEach { elem->
-                listofCards?.add(Cards(elem.id_carta,elem.nome,elem.immagine,elem.popolarita))
+            ownCardT.value?.forEach{elem->
 
+            val c = Cards(elem.id_carta,elem.nome,elem.immagine,elem.popolarita)
+
+            listofCards?.add(c)
+            Log.i("Carta","${listofCards}")
             }
+
 
             cards.value = listofCards
 
@@ -147,6 +163,7 @@ class DeckViewModel(
     }
 
     fun creaNuovoMazzo() {
+
         selectedDeck.value = Mazzo("", emptyList())
         isEditing.value = true
     }
@@ -162,11 +179,45 @@ class DeckViewModel(
     }
 
     fun salvaMazzo() {
-        TODO("Not yet implemented")
+        val names = deckRepository.namesDecks?.value
+        val currentDeck = selectedDeck.value
+        val currentCards = selectedCards.value
+
+        Log.i("nomi","${names}")
+
+        if (currentDeck != null) {
+            // Check if deck name is unique
+            mazzi?.forEach { elem->
+                if(names?.contains(elem.id_mazzo) == true){
+                    _message.value = "Deck name already exists!"
+                    return
+                }
+
+            }
+
+            // Check if exactly 5 unique cards are selected
+            if (currentCards.distinctBy { it.id_carta }.size != 5) {
+                _message.value="Exactly 5 unique cards must be selected!"
+                return
+            }
+
+            // Add the deck to the list if checks pass
+            //_decks.value = decks.value + currentDeck.copy(cards = currentCards)
+
+            // Reset the states
+            annullaModifica()
+            _message.value= "Deck saved Succefully"
+        }
+    }
+
+    fun clearMessage() {
+        _message.value = null
     }
 
     fun annullaModifica() {
-        TODO("Not yet implemented")
+        isEditing.value = false
+        selectedDeck.value = null
+        _selectedCards.value = emptyList()
     }
 
     /*
