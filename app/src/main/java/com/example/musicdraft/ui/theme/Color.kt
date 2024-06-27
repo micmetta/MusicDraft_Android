@@ -16,7 +16,7 @@ val TextColor = Color(0xFF1D1617)
 val AccentColor = Color(0xFFC58BF2)
 val BlueApp = Color(0xFF42A5F5) // celeste scuro
 val GrayColor = Color(0xFF7B6F72)
-val WhiteColor = Color(0xFFFFFFFF)
+val White = Color(0xFFFFFFFF)
 val BgColor = Color(0xFFF7F8F8)
 
 

@@ -1,5 +1,7 @@
 package com.example.musicdraft.utility
 
+import android.util.Log
+
 
 /*
 - NavigationManager è una classe che serve per gestire le schermate recenti navigate dall'utente.
@@ -13,5 +15,10 @@ class NavigationManager {
     }
     fun addScreen(screen: String){
         recentScreens.add(screen)
+        Log.d("NavigationManager", "Num screen tot: ${getRecentScreens().size}")
+        Log.d("NavigationManager", "recentScreens.get(0): ${recentScreens.get(0)}")
+    }
+    fun removeFirstScreen(){
+        recentScreens.removeAt(0)
     }
 }

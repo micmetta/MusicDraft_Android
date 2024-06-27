@@ -89,7 +89,7 @@ fun HeadingTextComponent(value:String){
             .fillMaxWidth()
             .heightIn(),
         style = TextStyle(
-            fontSize = 30.sp,
+            fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             fontStyle = FontStyle.Normal
         ),
@@ -98,6 +98,21 @@ fun HeadingTextComponent(value:String){
         textAlign = TextAlign.Center
     )
 }
+
+
+/*
+- Per il composable dei Termini e Condizioni.
+*/
+@Composable
+fun BodyTextComponent(value: String) {
+    Text(
+        text = value,
+        fontSize = 16.sp,
+        textAlign = TextAlign.Justify,
+        modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp)
+    )
+}
+
 
 
 // - Questo composable di sotto è utilizzato per tutti i campi
