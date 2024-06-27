@@ -56,8 +56,12 @@ class DeckViewModel(
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> get() = _message
 
-    var mazzi: MutableList<Mazzo>? = null
-    val cardList: MutableList<Cards>? = null
+    private val _deckName = MutableStateFlow("")
+    val deckName: StateFlow<String> get() = _deckName
+
+
+    var mazzi: MutableList<Mazzo> = emptyList<Mazzo>().toMutableList()
+    val cardList: MutableList<Cards> = emptyList<Cards>().toMutableList()
 
     // Inner classes
     inner class Cards(
@@ -102,42 +106,58 @@ class DeckViewModel(
                 val c = Cards(elem.id_carta,elem.nome,elem.immagine,elem.popolarita)
 
                 listofCards?.add(c)
-                Log.i("Carta","${listofCards}")
             }
             ownCardT.value?.forEach{elem->
 
             val c = Cards(elem.id_carta,elem.nome,elem.immagine,elem.popolarita)
 
             listofCards?.add(c)
-            Log.i("Carta","${listofCards}")
             }
 
 
             cards.value = listofCards
+            Log.i("cards","${cards.value}")
+
 
             deckRepository.getallDecksByEmail(email!!)
             ownDeck.value = deckRepository.allDecks.value
+            Log.i("d","${ownDeck.value}")
             deckRepository.getNomedeck(email)
             val n = deckRepository.namesDecks?.value
+            Log.i("n","${n}")
+
             if (n != null) {
                 for(i in n){
+                    Log.i("nome","${i}")
+
                     deckRepository.getCarteAss(email,i)
                     val c = deckRepository.carteAssociate?.value
+                    Log.i("t","${c}")
+
                     if (c != null) {
+                        val exe =cards.value
+
+
                         for(j in c){
-                            cards.value?.forEach { card->
+
+                            exe!!.forEach { card->
+                                Log.i("teramo","${j}")
+
                                 if (card.id_carta == j) {
-                                    cardList?.add(card)
+                                    cardList!!.add(card)
+                                    Log.i("to","${cardList}")
+
                                 }
                             }
 
                         }
-                        cardList?.let { Mazzo(i, it) }?.let { mazzi?.add(it) }
+
                     }
+                    cardList?.let { Mazzo(i, it) }?.let { mazzi?.add(it) }
                 }
             }
 
-
+            Log.i("taggone","${mazzi}")
 
 
 
@@ -202,18 +222,23 @@ class DeckViewModel(
                 return
             }
 
-            var pop = 0
+            var pop:Float = 0F
             for (i in selectedCards.value){
                 pop += i.popolarita
             }
+            val temp: MutableList<Deck> = emptyList<Deck>().toMutableList()
             for (i in selectedCards.value){
-               val m = _selectedDeck?.id_mazzo?.let { Deck(0, it,i.id_carta,email,pop) }
+                Log.i("nome","${_deckName.value}")
+               val m = Deck(0,_deckName.value,i.id_carta,email,pop/5)
+                Log.i("m","${m}")
                 if (m != null) {
-                    deckRepository.insertNewDeck(m)
+                    temp.add(m)
                 }
             }
+            Log.i("temp","${temp}")
+            deckRepository.insertallNewDeck(temp)
 
-            _selectedDeck?.id_mazzo?.let { Mazzo(it,_selectedCards.value) }?.let { mazzi?.add(it) }
+            mazzi?.add(Mazzo(deckName.value,_selectedCards.value))
 
             // Reset the states
             annullaModifica()
@@ -228,11 +253,12 @@ class DeckViewModel(
     fun annullaModifica() {
         isEditing.value = false
         selectedDeck.value = null
-        _selectedCards.value = emptyList()
+        _deckName.value = ""
     }
     fun updateDeckName(newName: String) {
-        _selectedDeck?.id_mazzo = newName
+        _deckName.value = newName
     }
+
 
     /*
 

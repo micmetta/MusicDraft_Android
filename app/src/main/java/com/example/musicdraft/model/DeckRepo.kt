@@ -1,6 +1,7 @@
 package com.example.musicdraft.model
 
 import DeckViewModel
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.DaoDeck
 import com.example.musicdraft.data.tables.deck.Deck
@@ -18,6 +19,8 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
     val allDecks: MutableStateFlow<List<Deck>?> = MutableStateFlow(emptyList())
     val namesDecks: MutableStateFlow<List<String>>? =  MutableStateFlow(emptyList())
     val carteAssociate: MutableStateFlow<List<String>>? =  MutableStateFlow(emptyList())
+    val Pop: MutableStateFlow<Float>? = MutableStateFlow<Float>(0F)
+
 
     fun getallDecksByEmail(email:String){
         viewModel.viewModelScope.launch {
@@ -48,9 +51,23 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
 
-                    val c = daoDeck.getDecksByNomeMazzoAndEmail(email, nomeMazzo)
+                    val c = daoDeck.getDecksByNomeMazzoAndEmail(nomeMazzo,email)
                     c.collect { it ->
                         carteAssociate?.value = it
+
+
+                }
+            }
+        }
+    }
+    fun getDeckPop(email: String,nomeMazzo:String){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+
+                val c = daoDeck.getDecksPop(nomeMazzo,email)
+                c.collect { it ->
+                    Pop?.value = it
+
 
                 }
             }
@@ -59,6 +76,12 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
     fun insertNewDeck(deck: Deck){
         viewModel.viewModelScope.launch {
             daoDeck.insertdeck(deck)
+        }
+    }
+
+    fun insertallNewDeck(decks: List<Deck>){
+        viewModel.viewModelScope.launch {
+            daoDeck.insertAllDecks(decks)
         }
     }
 

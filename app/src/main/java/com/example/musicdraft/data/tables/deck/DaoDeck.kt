@@ -16,7 +16,7 @@ interface DaoDeck {
     suspend fun insertdeck(deck: Deck)
 
     @Insert
-    suspend fun insertAllDecks(decks: Array<Deck>)
+    suspend fun insertAllDecks(decks: List<Deck>)
 
     @Delete
     suspend fun deleteDeck(deck: Deck)
@@ -26,6 +26,9 @@ interface DaoDeck {
 
     @Query("SELECT carte_associate FROM Deck WHERE nome_mazzo = :nomeMazzo AND email = :email")
     fun getDecksByNomeMazzoAndEmail(nomeMazzo: String, email: String): Flow<List<String>>
+
+    @Query("SELECT popolarita FROM Deck WHERE nome_mazzo = :nomeMazzo AND email = :email GROUP BY popolarita")
+    fun getDecksPop(nomeMazzo: String, email: String): Flow<Float>
 
 
 }

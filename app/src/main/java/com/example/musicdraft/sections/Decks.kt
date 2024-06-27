@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 
+
 //
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,6 +25,8 @@ fun Decks(viewModel: DeckViewModel) {
     val availableCards by viewModel.cards.collectAsState(emptyList())
     val selectedCards by viewModel.selectedCards.collectAsState()
     val message by viewModel.message.collectAsState()
+    val deckName by viewModel.deckName.collectAsState()
+
 
     if (message != null) {
         AlertDialog(
@@ -95,17 +98,18 @@ fun Decks(viewModel: DeckViewModel) {
             }
         } else if (selectedDeck != null) {
             Text(
-                text = if (selectedDeck != null) "Modifica Mazzo" else "Crea un Nuovo Mazzo",
+                text = if (selectedDeck!!.carte.size>0) "Modifica Mazzo" else "Crea un Nuovo Mazzo",
                 style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Column {
-                TextField(
-                    value = selectedDeck?.id_mazzo ?: "",
-                    onValueChange = { viewModel.updateDeckName(it)  },
+                OutlinedTextField(
+                    value = deckName,
+                    onValueChange = { viewModel.updateDeckName(it) },
                     label = { Text("Nome del Mazzo") },
+                    placeholder = { Text("Inserisci il nome del mazzo") },
                     modifier = Modifier.fillMaxWidth()
                 )
 

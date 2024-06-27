@@ -10,7 +10,7 @@ data class Deck (
     val nome_mazzo:String,
     val carte_associate: String,
     val email:String,
-    val popolarita: Int
+    val popolarita: Float
 
 
 ){
