@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import co.yml.charts.axis.AxisData
@@ -39,16 +44,17 @@ import co.yml.charts.ui.linechart.model.LineType
 import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
+import com.example.musicdraft.data.tables.user.User
+import com.example.musicdraft.viewModel.HandleFriendsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 
 
-// Adesso creati il viewModel che prenderà i points dell'utente dal DB, calcolerà il suo rank in base alle carte che possiede,
-// i suoi amici.. E CAMBIA IL COLORE DEI COMPONENTI IN MODO DA RENDERLI PIU' VICINI A QUELLI DELL'app
-
 @Composable
-fun Home(loginViewModel: LoginViewModel) {
+fun Home(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsViewModel) {
 
     val infoUserCurrent by loginViewModel.userLoggedInfo.collectAsState(initial = null)
+    val allFriendsCurrentUser by handleFriendsViewModel.allFriendsCurrentUser.collectAsState(null)
+    val allUsersFriendsOfCurrentUser by loginViewModel.allUsersFriendsOfCurrentUser.collectAsState(null)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Se non c'è nessun utente attivo allora
@@ -60,6 +66,30 @@ fun Home(loginViewModel: LoginViewModel) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     infoUserCurrent?.let{
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Chiamata al metodo per aggiornare gli amici dell'utente corrente:
+        handleFriendsViewModel.getAllFriendsByUser(it.email)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Aggiorno tutti i nicknames di tutti gli amici dell'utente corrente:
+        val emailsList: List<String>? = allFriendsCurrentUser?.map { friend ->
+            ////////////////////////////////////////////////////////////////////////////////////////
+            // se friend.email1 è diversa dall'email dell'utente loggato allora vuol dire che
+            // friend.email1 è proprio l'email di un amico dell'utente corrente, altrimenti
+            // sarà friend.email2 l'email di un amico dell'utente corrente:
+            if (friend.email1 != infoUserCurrent?.email) {
+                friend.email1
+            } else {
+                friend.email2
+            }
+            ////////////////////////////////////////////////////////////////////////////////////////
+        }
+        if (emailsList != null) {
+            loginViewModel.getAllNicknameFriendsOfCurrentUser(emailsList)
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
         Log.d("Home", "Sono dentro la schermata Home() e..:")
         Log.d("Home", "Sono dentro la schermata Home() e l'email dell'utente è il seguente: " + infoUserCurrent!!.email)
         Log.d("Home", "Sono dentro la schermata Home() e il nickname dell'utente è il seguente: " + infoUserCurrent!!.nickname)
@@ -74,7 +104,7 @@ fun Home(loginViewModel: LoginViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(50.dp)) // c'era 60
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////
         // Saluto l'utente
@@ -88,7 +118,7 @@ fun Home(loginViewModel: LoginViewModel) {
                     .background(
                         color = MaterialTheme.colorScheme.background
                     )
-                    .padding(16.dp),
+                    .padding(16.dp), // c'era 16
                 textAlign = TextAlign.Start
             )
         }
@@ -103,7 +133,7 @@ fun Home(loginViewModel: LoginViewModel) {
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(8.dp) // c'era 16
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -119,7 +149,7 @@ fun Home(loginViewModel: LoginViewModel) {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp)) // c'era 8
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -157,38 +187,86 @@ fun Home(loginViewModel: LoginViewModel) {
             )
             // creo il grafico:
             //BarChartScreen()
-            LineChartComposable()
+            LineChartComposable(allUsersFriendsOfCurrentUser)
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
         Spacer(modifier = Modifier.height(16.dp))
+        //Spacer(modifier = Modifier.height(8.dp))
 
-//        ////////////////////////////////////////////////////////////////////////////////////////////////////
-//        // Sezione Amici Online
-//        Text(
-//            text = "Online Friends",
-//            style = MaterialTheme.typography.headlineMedium
-//        )
-//
-//        Spacer(modifier = Modifier.height(8.dp))
-//
-//        LazyColumn(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(4.dp),
-//            verticalArrangement = Arrangement.spacedBy(4.dp)
-//        ) {
-//            items(items = listOf("Ada Lovelace", "Mark Hopper", "Margaret Hamilton")) { playerName ->
-//                PlayerCard(playerName = playerName)
-//            }
-//        }
-//        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Sezione Amici Online
+        if (!allUsersFriendsOfCurrentUser.isNullOrEmpty()) { // verifico che l'utente corrente abbia degli amici
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Column(
+                    modifier = Modifier.padding(8.dp),
+                ) {
+                    Text(
+                        text = "Friends online/offline",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(allUsersFriendsOfCurrentUser!!) { friendUser ->
+                                FriendCard(friendUser = friendUser)
+                        }
+                    }
+                }
+            }
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     }
 }
 
 @Composable
-fun LineChartComposable() {
+fun FriendCard(friendUser: User) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+            //.background(MaterialTheme.colorScheme.secondary),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFCCC2DC))
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(text = friendUser.nickname, fontWeight = FontWeight.Bold)
+                //Spacer(modifier = Modifier.height(4.dp))
+                Text(text = friendUser.email)
+            }
+            //Spacer(modifier = Modifier.weight(1f)) // Spazio flessibile per separare dalla stringa di stato
+            Spacer(modifier = Modifier.width(8.dp)) // Spazio fisso tra i dati dell'amico e la scritta di stato
+            Text(
+                text = if (friendUser.isOnline) "is online" else "is offline",
+                color = if (friendUser.isOnline) Color(0xFF006400) else Color.Red,
+                fontStyle = FontStyle.Italic,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+
+
+@Composable
+fun LineChartComposable(allUsersFriendsOfCurrentUser: List<User>?) {
     val steps = 10
     val pointsData = mapOf(
         "01-06-2022" to 40f,
@@ -265,12 +343,22 @@ fun LineChartComposable() {
         gridLines = GridLines(color = MaterialTheme.colorScheme.outlineVariant)
     )
 
-    LineChart(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp),
-        lineChartData = lineChartData
-    )
+    if (!allUsersFriendsOfCurrentUser.isNullOrEmpty()){
+        LineChart(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(230.dp), // se ci sono amici allora il grafico sarà più piccolo
+            lineChartData = lineChartData
+        )
+    }else{
+        LineChart(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp),
+            lineChartData = lineChartData
+        )
+    }
+
 }
 
 
