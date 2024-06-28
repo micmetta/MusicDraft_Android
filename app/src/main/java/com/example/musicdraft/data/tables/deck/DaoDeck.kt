@@ -31,4 +31,15 @@ interface DaoDeck {
     fun getDecksPop(nomeMazzo: String, email: String): Flow<Float>
 
 
+    /**
+     * Verifica se una carta specifica è associata a un mazzo di un utente specifico.
+     *
+     * @param userEmail L'email dell'utente di cui verificare i mazzi.
+     * @param card La carta da verificare.
+     * @return True se la carta è associata a un mazzo dell'utente, altrimenti False.
+     */
+    @Query("SELECT COUNT(*) > 0 FROM Deck WHERE email = :userEmail AND carte_associate LIKE '%' || :card || '%'")
+    fun isCardInDeck(userEmail: String, card: String): Flow<Boolean>
+
+
 }

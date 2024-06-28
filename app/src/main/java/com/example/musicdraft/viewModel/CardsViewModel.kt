@@ -12,32 +12,44 @@ import com.example.musicdraft.model.UserCardsRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel per la gestione delle carte utente nell'applicazione.
+ *
+ * @property loginViewModel Il ViewModel per la gestione del login.
+ */
 class CardsViewModel(application: Application, private val loginViewModel: LoginViewModel): AndroidViewModel(application) {
+
+
 
     private val database = MusicDraftDatabase.getDatabase(application)
     private val dao = database.ownArtCardsDao()
-    private val daoLog =database.userDao()
-    private val daoTrack =database.ownTrackCardsDao()
-    private val artistDao =database.artistDao()
+    private val daoLog = database.userDao()
+    private val daoTrack = database.ownTrackCardsDao()
+    private val artistDao = database.artistDao()
     private val trackDao = database.trackDao()
 
-    private val _acquiredCardsArtist : List<User_Cards_Artisti>? = null
+    /** Flusso che contiene tutte le carte artista acquisite per un utente. */
+    private val _acquiredCardsArtist: List<User_Cards_Artisti>? = null
     val acquiredCardsA: MutableStateFlow<List<User_Cards_Artisti>?> = MutableStateFlow(_acquiredCardsArtist)
 
-    private val _acquiredCardsTrack : List<User_Cards_Track>? = null
+    /** Flusso che contiene tutte le carte traccia acquisite per un utente. */
+    private val _acquiredCardsTrack: List<User_Cards_Track>? = null
     val acquiredCardsT: MutableStateFlow<List<User_Cards_Track>?> = MutableStateFlow(_acquiredCardsTrack)
 
-    private val _MarketArtist : List<User_Cards_Artisti>? = null
+    /** Flusso che contiene tutte le carte artista presenti sul mercato. */
+    private val _MarketArtist: List<User_Cards_Artisti>? = null
     val MarketArtist: MutableStateFlow<List<User_Cards_Artisti>?> = MutableStateFlow(_MarketArtist)
 
-    private val _MarketTrack : List<User_Cards_Track>? = null
+    /** Flusso che contiene tutte le carte traccia presenti sul mercato. */
+    private val _MarketTrack: List<User_Cards_Track>? = null
     val MarketTrack: MutableStateFlow<List<User_Cards_Track>?> = MutableStateFlow(_MarketTrack)
 
-    private val ownArtistRepo: UserCardsRepo = UserCardsRepo(dao!!,daoLog!!,daoTrack!!,this)
+    private val ownArtistRepo: UserCardsRepo = UserCardsRepo(dao!!, daoLog!!, daoTrack!!, this)
 
 
-
-
+    /**
+     * Recupera tutte le carte (artisti e tracce) per l'utente loggato e aggiorna i flussi.
+     */
     fun getallcards() {
 
             val email = loginViewModel.userLoggedInfo.value!!.email
@@ -69,7 +81,12 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
 
 
     }
-
+    /**
+     * Inserisce una carta artista per l'utente e aggiorna i punti.
+     *
+     * @param artista L'artista da aggiungere.
+     * @param email L'email dell'utente.
+     */
      fun insertArtistToUser(artista:Artisti, email:String){
          val totalPoint = loginViewModel.userLoggedInfo.value?.points?.minus((artista.popolarita*10))
          if (totalPoint != null) {
@@ -93,7 +110,12 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
              }
          }
     }
-
+    /**
+     * Inserisce una carta traccia per l'utente e aggiorna i punti.
+     *
+     * @param track La traccia da aggiungere.
+     * @param email L'email dell'utente.
+     */
     fun insertTrackToUser(track:Track, email:String){
         val totalPoint = loginViewModel.userLoggedInfo.value?.points?.minus((track.popolarita*10))
         if (totalPoint != null) {
@@ -119,13 +141,22 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
     }
 
 
-
+    /**
+     * Rimuove una carta artista acquisita dall'utente.
+     *
+     * @param artista La carta artista da rimuovere.
+     */
     fun updateAcquiredRemoveA(artista:User_Cards_Artisti){
         val updatedAcquired = acquiredCardsA.value?.toMutableList()?.apply {
             remove(artista)
         }
         acquiredCardsA.value = (updatedAcquired)
     }
+    /**
+     * Rimuove una carta traccia acquisita dall'utente.
+     *
+     * @param track La carta traccia da rimuovere.
+     */
     fun updateAcquiredRemoveT(track:User_Cards_Track){
         val updatedAcquired = acquiredCardsT.value?.toMutableList()?.apply {
             remove(track)
@@ -133,13 +164,23 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
         acquiredCardsT.value = (updatedAcquired)
     }
 
-
+    /**
+     * Aggiunge una carta traccia acquisita all'utente.
+     *
+     * @param track La carta traccia da aggiungere.
+     */
     fun updateAcquiredAddA(artista:User_Cards_Artisti){
         val updatedAcquired = acquiredCardsA.value?.toMutableList()?.apply {
             add(artista)
         }
         acquiredCardsA.value = (updatedAcquired)
     }
+
+    /**
+     * Rimuove una carta artista dal mercato.
+     *
+     * @param artista La carta artista da rimuovere.
+     */
     fun updateAcquiredAddT(track:User_Cards_Track){
         val updatedAcquired = acquiredCardsT.value?.toMutableList()?.apply {
             add(track)
@@ -147,13 +188,18 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
         acquiredCardsT.value = (updatedAcquired)
     }
 
-
+    /**
+     * Rimuove una carta traccia dal mercato.
+     *
+     * @param track La carta traccia da rimuovere.
+     */
     fun updateOnMarketRemoveA(artista:User_Cards_Artisti){
         val updatedonMarket = MarketArtist?.value?.toMutableList()?.apply {
             remove(artista)
         }
         MarketArtist.value = (updatedonMarket)
     }
+
     fun updateOnMarketRemoveT(track:User_Cards_Track){
         val updatedonMarket = MarketTrack?.value?.toMutableList()?.apply {
             remove(track)
@@ -161,13 +207,23 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
         MarketTrack.value = (updatedonMarket)
     }
 
-
+    /**
+     * Aggiunge una carta artista al mercato.
+     *
+     * @param artista La carta artista da aggiungere.
+     */
     fun updateOnMarketAddA(artista:User_Cards_Artisti){
         val updatedonMarket = MarketArtist?.value?.toMutableList()?.apply {
             add(artista)
         }
         MarketArtist.value = (updatedonMarket)
     }
+    /**
+     * Aggiunge una carta traccia al mercato.
+     *
+     * @param track La carta traccia da aggiungere.
+     */
+
     fun updateOnMarketAddT(track:User_Cards_Track){
         val updatedonMarket = MarketTrack?.value?.toMutableList()?.apply {
             add(track)
@@ -176,11 +232,15 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
     }
 
 
-
+    /**
+     * Vende una carta artista, aggiornando i flussi e inserendo l'artista nel database.
+     *
+     * @param artista La carta artista da vendere.
+     */
     fun vendi_artista(artista:User_Cards_Artisti){
         this.viewModelScope.launch {
             val email = loginViewModel.userLoggedInfo.value!!.email
-            val cards_on_market = ownArtistRepo.getArtistCardbyId(artista.id_carta, email)
+            val cards_on_market = ownArtistRepo.getArtistCardById(artista.id_carta, email)
             MarketArtist.value = cards_on_market
             ownArtistRepo.updateMarketStateA(email,artista.id_carta)
             updateAcquiredRemoveA(artista)
@@ -193,10 +253,15 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
         }
     }
 
+    /**
+     * Vende una carta traccia, aggiornando i flussi e inserendo la traccia nel database.
+     *
+     * @param track La carta traccia da vendere.
+     */
     fun vendi_track(track:User_Cards_Track){
         this.viewModelScope.launch {
             val email = loginViewModel.userLoggedInfo.value!!.email
-            val cards_on_market = ownArtistRepo.getTrackCardbyId(track.id_carta, email)
+            val cards_on_market = ownArtistRepo.getTrackCardById(track.id_carta, email)
             MarketTrack.value = cards_on_market
             ownArtistRepo.updateMarketStateT(email,track.id_carta)
             updateAcquiredRemoveT(track)

@@ -12,23 +12,45 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Repository per la gestione degli artisti nell'applicazione.
+ *
+ * @property viewModel Il ViewModel associato a questo repository.
+ * @property dao Il DAO per l'accesso alla tabella degli artisti nel database.
+ */
 class ArtistRepository(val viewModel: MarketplaceViewModel, val dao: ArtistiDao) {
-
+    /** Lista degli artisti inizializzata a null. */
     val _artisti:List<Artisti>? = null
+
+    /** Flusso che contiene la lista degli artisti. */
     val artisti: MutableStateFlow<List<Artisti>?> = MutableStateFlow(_artisti)
 
-
+    /**
+     * Ottiene tutti gli artisti dal database.
+     *
+     * @return Un flusso contenente la lista degli artisti.
+     */
     suspend fun getAllArtisti(): Flow<List<Artisti>> {
         return dao.getAllArtisti()
     }
 
-
+    /**
+     * Elimina un artista dal database.
+     *
+     * @param artista L'artista da eliminare.
+     */
      fun delete_artista(artista: Artisti){
         viewModel.viewModelScope.launch {
             dao.deleteArtist(artista)
         }
     }
 
+    /**
+     * Ottiene un artista per ID dal database e aggiorna il flusso [artisti].
+     *
+     * @param id L'ID dell'artista.
+     * @return La lista degli artisti con l'ID specificato.
+     */
     suspend fun getArtistbyId(id:String): List<Artisti>? {
         viewModel.viewModelScope.launch {
             val result = dao.getallArtistbyId(id)

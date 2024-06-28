@@ -236,7 +236,7 @@ class DeckViewModel(
                 }
             }
             Log.i("temp","${temp}")
-            deckRepository.insertallNewDeck(temp)
+            deckRepository.insertAllNewDeck(temp)
 
             mazzi?.add(Mazzo(deckName.value,_selectedCards.value))
 
