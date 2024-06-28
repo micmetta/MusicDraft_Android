@@ -150,4 +150,12 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
             }
         }
     }
+    fun deleteDeck(nomemazzo: String, email: String){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO){
+                daoDeck.deleteMazziByNome(nomemazzo, email)
+
+            }
+        }
+    }
 }

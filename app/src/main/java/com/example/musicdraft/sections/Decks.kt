@@ -1,4 +1,6 @@
+import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,17 +18,16 @@ import coil.compose.rememberImagePainter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Decks(viewModel: DeckViewModel) {
-
     viewModel.init()
 
     val isEditing by viewModel.isEditing
+    val isMod by viewModel.isMod
     val selectedDeck by viewModel.selectedDeck.collectAsState()
     val decks = viewModel.mazzi
     val availableCards by viewModel.cards.collectAsState(emptyList())
     val selectedCards by viewModel.selectedCards.collectAsState()
     val message by viewModel.message.collectAsState()
     val deckName by viewModel.deckName.collectAsState()
-
 
     if (message != null) {
         AlertDialog(
@@ -39,20 +40,19 @@ fun Decks(viewModel: DeckViewModel) {
             text = { Text(message ?: "") }
         )
     }
+
     Column(
         modifier = Modifier
             .padding(16.dp)
             .fillMaxSize()
     ) {
         Text("I miei mazzi di Carte", style = MaterialTheme.typography.titleLarge)
-
         Spacer(modifier = Modifier.height(16.dp))
 
         if (!isEditing) {
             Button(onClick = { viewModel.creaNuovoMazzo() }) {
                 Text("Crea Nuovo Mazzo")
             }
-
             Spacer(modifier = Modifier.height(16.dp))
 
             if (decks == null || decks.isEmpty()) {
@@ -69,8 +69,9 @@ fun Decks(viewModel: DeckViewModel) {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(8.dp),
-                            onClick = { /* Implementa l'azione desiderata */ }
+                                .padding(8.dp)
+                                .clickable {  }, // Qui gestisci il click sul mazzo
+                            onClick = { viewModel.updateIsEditing(deck) }
                         ) {
                             Column(
                                 modifier = Modifier.padding(8.dp),
@@ -91,6 +92,22 @@ fun Decks(viewModel: DeckViewModel) {
                                         Text("${card.nome_carta} (Popolarità: ${card.popolarita})")
                                     }
                                 }
+
+                                if (isMod) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(
+                                        horizontalArrangement = Arrangement.End,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Button(onClick = { viewModel.modificaMazzo(deck) }) {
+                                            Text("Modifica")
+                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Button(onClick = { viewModel.eliminaMazzo() }) {
+                                            Text("Elimina")
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -98,7 +115,7 @@ fun Decks(viewModel: DeckViewModel) {
             }
         } else if (selectedDeck != null) {
             Text(
-                text = if (selectedDeck!!.carte.size>0) "Modifica Mazzo" else "Crea un Nuovo Mazzo",
+                text = if (selectedDeck!!.carte.size > 0) "Modifica Mazzo" else "Crea un Nuovo Mazzo",
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -128,7 +145,7 @@ fun Decks(viewModel: DeckViewModel) {
                             Text("Aggiungi Carta:", style = MaterialTheme.typography.titleMedium)
                         }
 
-                        if (availableCards?.isEmpty() == true || availableCards==null) {
+                        if (availableCards?.isEmpty() == true || availableCards == null) {
                             item {
                                 Text(
                                     "Nessuna carta disponibile",
@@ -198,9 +215,7 @@ fun Decks(viewModel: DeckViewModel) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Button(onClick = { viewModel.salvaMazzo() }) {
                         Text("Salva")
@@ -214,6 +229,5 @@ fun Decks(viewModel: DeckViewModel) {
 
         // Pulsanti Salva e Annulla fissi
 
-        }
     }
-
+}
