@@ -1,6 +1,7 @@
 package com.example.musicdraft.viewModel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.artisti.Artisti
@@ -73,6 +74,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
     fun getallcards() {
 
         val email = loginViewModel.userLoggedInfo.value!!.email
+        Log.d("CardsViewModel", "email: ${email}")
 
         //recupera carte Artisti
         ownArtistRepo.getArtCardsforUser(email)

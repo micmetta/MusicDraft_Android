@@ -68,8 +68,8 @@ dependencies {
     implementation(libs.play.services.fitness)
     implementation(libs.androidx.material3.android)
 
-    //implementation(libs.androidx.benchmark.macro)
-    //implementation(libs.androidx.compose.material.core)
+    //implementation(libs.androidx.benchmark.macro) c'era prima..
+    //implementation(libs.androidx.compose.material.core) c'era prima..
 
 //    implementation(libs.androidx.room.common)
 //    implementation(libs.androidx.room.ktx)

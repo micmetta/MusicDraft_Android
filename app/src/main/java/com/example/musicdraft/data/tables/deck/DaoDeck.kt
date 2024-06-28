@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.example.musicdraft.data.tables.track.Track
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -38,8 +37,11 @@ interface DaoDeck {
      * @param card La carta da verificare.
      * @return True se la carta è associata a un mazzo dell'utente, altrimenti False.
      */
-    @Query("SELECT COUNT(*) > 0 FROM Deck WHERE email = :userEmail AND carte_associate LIKE '%' || :card || '%'")
-    fun isCardInDeck(userEmail: String, card: String): Flow<Boolean>
+//    @Query("SELECT COUNT(*) > 0 FROM Deck WHERE email = :userEmail AND carte_associate LIKE '%' || :card || '%'")
+//    fun isCardInDeck(userEmail: String, card: String): Flow<Boolean>
+
+     @Query("SELECT COUNT(*) > 0 FROM Deck WHERE email = :userEmail AND carte_associate LIKE '%' || :card || '%'")
+     suspend fun isCardInDeck(userEmail: String, card: String): Boolean
 
 
 }

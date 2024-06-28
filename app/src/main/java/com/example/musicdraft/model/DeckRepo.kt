@@ -1,14 +1,9 @@
 package com.example.musicdraft.model
 
 import DeckViewModel
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.DaoDeck
 import com.example.musicdraft.data.tables.deck.Deck
-import com.example.musicdraft.data.tables.user.User
-import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
-import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
-import com.example.musicdraft.database.MusicDraftDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -140,14 +135,22 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
      * @param userEmail L'email dell'utente.
      * @param card La carta da verificare.
      */
-    fun isCardInDeck(userEmail: String, card: String) {
-        viewModel.viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val b = daoDeck.isCardInDeck(userEmail, card)
-                b.collect { it ->
-                    isInDeck.value = it
-                }
-            }
+//    fun isCardInDeck(userEmail: String, card: String) {
+//        viewModel.viewModelScope.launch {
+//            withContext(Dispatchers.IO) {
+//                val b = daoDeck.isCardInDeck(userEmail, card)
+//                b.collect { it ->
+//                    isInDeck.value = it
+//                }
+//            }
+//        }
+//    }
+
+    suspend fun isCardInDeck(userEmail: String, card: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            daoDeck.isCardInDeck(userEmail, card)
         }
     }
+
+
 }

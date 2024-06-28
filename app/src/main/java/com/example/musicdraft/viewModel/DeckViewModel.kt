@@ -63,6 +63,13 @@ class DeckViewModel(
     var mazzi: MutableList<Mazzo> = emptyList<Mazzo>().toMutableList()
     val cardList: MutableList<Cards> = emptyList<Cards>().toMutableList()
 
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // mi serve per sapere se una carta si trova in un qualsiasi mazzo dell'utente corrente:
+    var isInDeck = deckRepository.isInDeck
+    ////////////////////////////////////////////////////////////////////////////////////////
+
+
+
     // Inner classes
     inner class Cards(
         val id_carta: String,
@@ -258,6 +265,20 @@ class DeckViewModel(
     fun updateDeckName(newName: String) {
         _deckName.value = newName
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Verifica se una carta specifica è presente in un mazzo dell'utente.
+     *
+     * @param userEmail L'email dell'utente.
+     * @param card La carta da verificare.
+     * @return True se la carta è presente nel mazzo, false altrimenti.
+     */
+    suspend fun checkCardInDeck(userEmail: String, card: String): Boolean {
+        return deckRepository.isCardInDeck(userEmail, card)
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+
 
 
     /*

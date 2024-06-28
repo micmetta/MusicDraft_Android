@@ -160,10 +160,10 @@ fun Navigation(
             UpdateNickname(navigationController, loginViewModel)
         }
         composable(Screens.ExchangeCards.screen){
-            ExchangeCards(navigationController, loginViewModel, exchangeManagementCardsViewModel, cardsViewModel)
+            ExchangeCards(navigationController, loginViewModel, exchangeManagementCardsViewModel, cardsViewModel, decksViewModel)
         }
         composable(Screens.ShowOfferReceived.screen){
-            ShowOfferReceived(navigationController, exchangeManagementCardsViewModel, cardsViewModel, loginViewModel)
+            ShowOfferReceived(navigationController, exchangeManagementCardsViewModel, cardsViewModel, loginViewModel, decksViewModel)
         }
         composable(Screens.ShowOfferSent.screen){
             ShowOfferSent(navigationController, exchangeManagementCardsViewModel, cardsViewModel, loginViewModel)
@@ -479,7 +479,7 @@ fun MusicDraftUI(
                 }
                 composable(Screens.Friends.screen){
 //                    Friends(navigationController) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
-                    Friends(navControllerInitialScreens, handleFriendsViewModel, loginViewModel, cardsViewModel, exchangeManagementCardsViewModel)
+                    Friends(navControllerInitialScreens, handleFriendsViewModel, loginViewModel, cardsViewModel, exchangeManagementCardsViewModel, decksViewModel)
                 }
                 composable(Screens.Cards.screen){
                     Cards(cardsViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
