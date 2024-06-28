@@ -1038,8 +1038,8 @@ fun ExchangeCards(
 
     // per ricordarmi qual è la carta artista/brano che l'utente corrente ha selezionato e che quindi vuole richidere
     // all'amico:
-    var requestCardArtist by remember { mutableStateOf(User_Cards_Artisti(identifier = -1, id_carta = "", genere = "", immagine = "", nome = "", popolarita = -1, email = "")) }
-    var requestCardTrack by remember { mutableStateOf(User_Cards_Track(identifire = -1, id_carta = "", anno_pubblicazione = "", durata = "", immagine = "", nome = "", popolarita = -1, email = "")) }
+    var requestCardArtist by remember { mutableStateOf(User_Cards_Artisti(identifier = -1, id_carta = "", genere = "", immagine = "", nome = "", popolarita = -1, email = "", onMarket = false)) }
+    var requestCardTrack by remember { mutableStateOf(User_Cards_Track(identifire = -1, id_carta = "", anno_pubblicazione = "", durata = "", immagine = "", nome = "", popolarita = -1, email = "", onMarket = false)) }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // caricamento carte dell'amico al quale si vuole fare l'offerta:

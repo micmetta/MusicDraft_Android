@@ -8,6 +8,8 @@ import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.artisti.ArtistiDao
+import com.example.musicdraft.data.tables.deck.DaoDeck
+import com.example.musicdraft.data.tables.deck.Deck
 import com.example.musicdraft.data.tables.exchange_management_cards.ConvertersExchangeManagementCards
 import com.example.musicdraft.data.tables.exchange_management_cards.ExchangeManagementCards
 import com.example.musicdraft.data.tables.exchange_management_cards.ExchangeManagementCardsDao
@@ -27,7 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = [User::class,Artisti::class,Track::class, User_Cards_Artisti::class,User_Cards_Track::class, HandleFriends::class, ExchangeManagementCards:: class],
+    entities = [User::class, Artisti::class, Track::class, User_Cards_Artisti::class, User_Cards_Track::class, HandleFriends::class, ExchangeManagementCards:: class, Deck::class],
     version = 1
 )
 @TypeConverters(ConvertersExchangeManagementCards::class) // per poter usare i convertitori per la tabella 'ExchangeManagementCards'
@@ -40,6 +42,7 @@ abstract class MusicDraftDatabase: RoomDatabase() {
     abstract fun ownTrackCardsDao():UCTDao?
     abstract fun handleFriendsDao(): HandleFriendsDao?
     abstract fun ExchangeManagementCardsDao(): ExchangeManagementCardsDao?
+    abstract fun deckDao(): DaoDeck?
 
     companion object {
         // marking the instance as volatile to ensure atomic access to the variable
@@ -471,9 +474,9 @@ abstract class MusicDraftDatabase: RoomDatabase() {
                                         " {\"id\":\"7xxxjEnWtmZeBT3A4PxnY7\", \"genere\":\"Non disponibile\", \"immagine\":\"https://i.scdn.co/image/ab6761610000e5ebd9fc2b2317f22621d47a3aba\", \"nome\":\"AB001\", \"popolarita\":19},\n" +
                                         " {\"id\":\"7yYWXoHjlbeJwM2NvdjatJ\", \"genere\":\"Non disponibile\", \"immagine\":\"https://i.scdn.co/image/ab6761610000e5eb1d0b2f8dfb20d31fd475a882\", \"nome\":\"BAKUSLAYER\", \"popolarita\":28}]"
 
-                                val artisti = Gson().fromJson(file,Array<Artisti>::class.java)
-                                dao.insertAllArtist(artisti)
-                                print("cc")
+                        val artisti = Gson().fromJson(file,Array<Artisti>::class.java)
+                        dao.insertAllArtist(artisti)
+                        print("cc")
 
 
 
@@ -545,3 +548,5 @@ abstract class MusicDraftDatabase: RoomDatabase() {
 //    }
 
 }
+
+

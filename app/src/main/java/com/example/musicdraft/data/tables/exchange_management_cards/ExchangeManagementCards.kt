@@ -15,9 +15,9 @@ data class ExchangeManagementCards(
     var listTypesOfferedCards: List<String>, // campo che conterrà i tipi della lista delle carte (anche solo una o 0 perchè magari ha offerto solo points)
     var pointsOffered: Int, // conterrà il quantitativo di points offerti (può essere anche 0 perchè magari ha offerto solo
     // delle carte) da "nicknameU1" a "nicknameU2" per la "cartaRichiesta"
-    var statusOffer: String, // "pending", "counteroffer"
-    var idStart: Int, // questo id mi permette di sapere sempre a quale offerta iniziale è legata un'eventuale controfferta.
-    var numberCounterOffer: Int // questo numero mi dice qual è il numero corrente della controfferta. Questo sarà == 0 solo all'inizio
+    //var statusOffer: String, // "pending", "counteroffer"
+    //var idStart: Int, // questo id mi permette di sapere sempre a quale offerta iniziale è legata un'eventuale controfferta.
+    //var numberCounterOffer: Int // questo numero mi dice qual è il numero corrente della controfferta. Questo sarà == 0 solo all'inizio
     // quando viene fatta la prima offerta. Questo campo posso usarlo per ordinare, quando richiesto, tutte le controfferte che ci sono state a
     // partire da una certa offerta iniziale.
 )

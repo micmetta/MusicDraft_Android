@@ -11,6 +11,7 @@ data class Track(
     val durata: String,
     val immagine: String,
     var nome: String,
-    val popolarita: Int
+    val popolarita: Int,
+
 ) {
 }

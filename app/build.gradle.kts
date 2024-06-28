@@ -67,6 +67,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.play.services.fitness)
     implementation(libs.androidx.material3.android)
+
+    //implementation(libs.androidx.benchmark.macro)
+    //implementation(libs.androidx.compose.material.core)
+
 //    implementation(libs.androidx.room.common)
 //    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
@@ -113,4 +117,9 @@ dependencies {
 
     implementation("com.google.code.gson:gson:2.7")
     implementation ("androidx.compose.runtime:runtime-livedata:1.4.0")
+    implementation ("androidx.compose.material3:material3:1.1.0")
+    implementation ("io.coil-kt:coil-compose:2.1.0")
+
+
+
 }

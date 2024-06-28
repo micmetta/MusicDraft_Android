@@ -2,6 +2,7 @@ package com.example.musicdraft
 
 //import com.example.musicdraft.utility.ExchangeCards
 //import com.example.musicdraft.utility.ExchangeCards
+import DeckViewModel
 import Marketplace
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -47,6 +48,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.musicdraft.factory.CardsViewModelFactory
+import com.example.musicdraft.factory.DeckViewModelFactory
 import com.example.musicdraft.factory.MarketplaceViewModelFactory
 import com.example.musicdraft.screens_to_signUp_signIn.ForgotPassword
 import com.example.musicdraft.screens_to_signUp_signIn.LoginScreen
@@ -92,12 +94,16 @@ class MainActivity : ComponentActivity() {
             val marketplaceViewModelFactory = MarketplaceViewModelFactory(application, cardsViewModel, loginViewModel)
             val marketplaceViewModel: MarketplaceViewModel = ViewModelProvider(this, marketplaceViewModelFactory).get(MarketplaceViewModel::class.java)
 
+            val deckfactory = DeckViewModelFactory(application, loginViewModel, cardsViewModel)
+            val decksViewModel = ViewModelProvider(this, deckfactory).get(DeckViewModel::class.java)
+
 
             MusicDraftTheme {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    Navigation(loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewModel)
+                    Navigation(loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewModel, decksViewModel)
+                    //Navigation(loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewModel,decksViewModel)
                 }
             }
         }
@@ -113,7 +119,8 @@ fun Navigation(
     handleFriendsViewModel: HandleFriendsViewModel,
     exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel,
     cardsViewModel: CardsViewModel,
-    marketplaceViewmodel: MarketplaceViewModel
+    marketplaceViewmodel: MarketplaceViewModel,
+    decksViewModel: DeckViewModel
 ){
     val navigationController = rememberNavController()
 
@@ -162,7 +169,7 @@ fun Navigation(
             ShowOfferSent(navigationController, exchangeManagementCardsViewModel, cardsViewModel, loginViewModel)
         }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel, decksViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -178,7 +185,8 @@ fun MusicDraftUI(
     handleFriendsViewModel: HandleFriendsViewModel,
     exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel,
     cardsViewModel: CardsViewModel,
-    marketplaceViewmodel: MarketplaceViewModel
+    marketplaceViewmodel: MarketplaceViewModel,
+    decksViewModel: DeckViewModel
 ){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()
@@ -477,7 +485,7 @@ fun MusicDraftUI(
                     Cards(cardsViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
                 }
                 composable(Screens.Decks.screen){
-                    Decks() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"
+                    Decks(decksViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"
                 }
                 composable(Screens.Marketplace.screen){
                     Marketplace(marketplaceViewmodel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Marketplace"
@@ -488,6 +496,7 @@ fun MusicDraftUI(
                 composable(Screens.Settings.screen){
                     Settings(navControllerInitialScreens, loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Settings"
                 }
+
 
             }
         }

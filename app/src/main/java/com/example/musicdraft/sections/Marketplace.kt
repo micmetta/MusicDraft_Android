@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +16,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,7 +39,7 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
     var popThreshold by remember { mutableStateOf("") }
     var nameQuery by remember { mutableStateOf("") }
     var genreQuery by remember { mutableStateOf("") }
-
+    viewModel.getOnmarketCards()
     // Ottieni la lista degli artisti e delle tracce in base alla scheda selezionata e ai filtri applicati
     val artisti by if (!(popThreshold.isNullOrEmpty())) {
         viewModel._filteredArtisti.collectAsState(emptyList())
@@ -50,6 +52,8 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
     } else {
         viewModel.alltrack.collectAsState(emptyList())
     }
+    val showDialog by viewModel.showDialog.observeAsState(false)
+
     // Composable principale per la schermata del Marketplace
     Column(modifier = Modifier.padding(top = 65.dp)) {
         // TabRow per la navigazione tra Artisti e Brani
@@ -91,8 +95,8 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
         }
         // Visualizza la lista degli artisti o delle tracce in base alla scheda selezionata
         when (selectedTab) {
-            0 -> artisti?.let { ArtistiScreen(it,viewModel) }
-            1 -> brani?.let { BraniScreen(it,viewModel) }
+            0 -> artisti?.let { ArtistiScreen(it,viewModel,showDialog) }
+            1 -> brani?.let { BraniScreen(it,viewModel,showDialog) }
         }
     }
 }
@@ -177,12 +181,12 @@ fun BraniFilter(
  * @param artisti Elenco degli artisti da visualizzare.
  */
 @Composable
-fun ArtistiScreen(artisti: List<Artisti>, viewModel: MarketplaceViewModel) {
+fun ArtistiScreen(artisti: List<Artisti>, viewModel: MarketplaceViewModel, showDialog: Boolean) {
     // Visualizza una griglia di carte per gli artisti
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso gli artisti e visualizza una carta per ciascuno
         items(artisti.size) { index ->
-            ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel)
+            ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel,showDialog)
         }
     }
 }
@@ -191,12 +195,12 @@ fun ArtistiScreen(artisti: List<Artisti>, viewModel: MarketplaceViewModel) {
  * @param brani Elenco dei brani da visualizzare.
  */
 @Composable
-fun BraniScreen(brani: List<Track>, viewModel: MarketplaceViewModel) {
+fun BraniScreen(brani: List<Track>, viewModel: MarketplaceViewModel, showDialog: Boolean) {
     // Visualizza una griglia di carte per i brani
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso i brani e visualizza una carta per ciascuno
         items(brani.size) { index ->
-            BranoCard(brani[index], Modifier.height(8.dp),viewModel)
+            BranoCard(brani[index], Modifier.height(8.dp),viewModel,showDialog)
         }
     }
 }
@@ -207,8 +211,22 @@ fun BraniScreen(brani: List<Track>, viewModel: MarketplaceViewModel) {
  * @param height Modificatore per la altezza della carta.
  */
 @Composable
-fun BranoCard(brano: Track, height: Modifier, viewModel: MarketplaceViewModel) {
+fun BranoCard(brano: Track, height: Modifier, viewModel: MarketplaceViewModel, showDialog: Boolean) {
     // Carta contenente le informazioni del brano
+
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onDialogDismiss() },
+            title = { Text(text = "Attenzione") },
+            text = { Text(text = "Non è possibile acquistare questo brano.") },
+            confirmButton = {
+                Button(onClick = { viewModel.onDialogDismiss() }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = brano.nome, style = MaterialTheme.typography.bodyLarge)
@@ -237,7 +255,24 @@ fun BranoCard(brano: Track, height: Modifier, viewModel: MarketplaceViewModel) {
  * @param height Modificatore per la altezza della carta.
  */
 @Composable
-fun ArtistaCard(artista: Artisti, height: Modifier, viewModel: MarketplaceViewModel) {
+fun ArtistaCard(
+    artista: Artisti,
+    height: Modifier,
+    viewModel: MarketplaceViewModel,
+    showDialog: Boolean
+) {
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onDialogDismiss() },
+            title = { Text(text = "Attenzione") },
+            text = { Text(text = "Non è possibile acquistare questo brano.") },
+            confirmButton = {
+                Button(onClick = { viewModel.onDialogDismiss() }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
     // Carta contenente le informazioni dell'artista
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {

@@ -33,10 +33,10 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
         "",
         listOf<String>(),
         listOf<String>(),
-        0,
-        "",
-        0,
         0
+        //"",
+        //0,
+        //0
     ))
 
     var selectedShowSentOffer = mutableStateOf(ExchangeManagementCards(
@@ -47,10 +47,10 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
         "",
         listOf<String>(),
         listOf<String>(),
-        0,
-        "",
-        0,
         0
+        //"",
+        //0,
+        //0
     ))
 
 
@@ -79,10 +79,10 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
             typeRequiredCard = typeRequiredCard,
             listOfferedCards = listOfferedCards,
             listTypesOfferedCards = listTypesOfferedCards,
-            pointsOffered = pointsOffered,
-            statusOffer = "pending",
-            idStart = 0,
-            numberCounterOffer = 0
+            pointsOffered = pointsOffered
+            //statusOffer = "pending"
+            //idStart = 0,
+            //numberCounterOffer = 0
         )
         exchangeManagementCardsRepository.insertNewOffer(exchangeManagementCards)
     }
