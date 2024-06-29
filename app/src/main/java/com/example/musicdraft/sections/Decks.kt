@@ -115,7 +115,7 @@ fun Decks(viewModel: DeckViewModel) {
                                         Text("Modifica")
                                     }
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Button(onClick = { viewModel.eliminaMazzo() }) {
+                                    Button(onClick = { viewModel.eliminaMazzo(deck)}) {
                                         Text("Elimina")
                                     }
                                 }

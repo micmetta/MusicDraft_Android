@@ -164,12 +164,23 @@ class DeckViewModel(
 
     fun toggleCardSelection(card: Cards) {
         val currentSelectedCards = _selectedCards.value?.toMutableList() ?: mutableListOf()
-        if (currentSelectedCards.contains(card)) {
-            currentSelectedCards.remove(card)
-        } else {
-            currentSelectedCards.add(card)
+
+        // Check if the card is in another deck
+        val cardId = card.id_carta
+        val isCardInAnotherDeck = mazzi.any { deck ->
+            deck.id_mazzo != selectedDeck.value!!.id_mazzo && deck.carte.any { it.id_carta == cardId }
         }
-        _selectedCards.value = currentSelectedCards
+
+        if (isCardInAnotherDeck) {
+            _message.value = "Questa carta è già presente in un altro mazzo"
+        } else {
+            if (currentSelectedCards.contains(card)) {
+                currentSelectedCards.remove(card)
+            } else {
+                currentSelectedCards.add(card)
+            }
+            _selectedCards.value = currentSelectedCards
+        }
     }
 
 
@@ -290,11 +301,12 @@ class DeckViewModel(
 
     }
 
-    fun eliminaMazzo() {
+    fun eliminaMazzo(deck:Mazzo) {
         val email = loginViewModel.userLoggedInfo.value!!.email
-        mazzi.removeIf { it.id_mazzo == selectedDeck.value!!.id_mazzo }
+        mazzi.removeIf { it.id_mazzo == deck.id_mazzo }
 
-        deckRepository.deleteDeck(selectedDeck.value!!.id_mazzo,email)
+
+        deckRepository.deleteDeck(deck.id_mazzo,email)
         Log.i("cardsFiltered", "${cards.value}")
 
         init()
