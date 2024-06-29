@@ -20,6 +20,9 @@ interface DaoDeck {
     @Delete
     suspend fun deleteDeck(deck: Deck)
 
+    @Query("DELETE FROM deck WHERE nome_mazzo = :nomeMazzoDaEliminare AND email =:email")
+    suspend fun deleteMazziByNome(nomeMazzoDaEliminare: String,email: String)
+
     @Query("SELECT DISTINCT nome_mazzo FROM Deck WHERE email= :email")
     fun getDistinctDeckNames(email:String): Flow<List<String>>
 

@@ -2,6 +2,8 @@ import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.Deck
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
@@ -11,9 +13,11 @@ import com.example.musicdraft.model.DeckRepo
 import com.example.musicdraft.model.UserCardsRepo
 import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
+import com.squareup.wire.internal.copyOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.function.Predicate.not
 
 
 class DeckViewModel(
@@ -34,6 +38,8 @@ class DeckViewModel(
     private val ownArtistRepo: UserCardsRepo = UserCardsRepo(dao!!, daoLog!!, daoTrack!!, cardsViewModel)
 
     var isEditing = mutableStateOf(false)
+    var isMod = mutableStateOf(false)
+
 
     private val _selectedDeck : Mazzo? =null
     val selectedDeck: MutableStateFlow<Mazzo?> = MutableStateFlow(_selectedDeck)
@@ -49,6 +55,9 @@ class DeckViewModel(
 
     private val _cards:List<Cards>?=null
     val cards: MutableStateFlow<List<Cards>?> = MutableStateFlow(_cards)
+
+    private val _isCreatingNewDeck = MutableLiveData(false)
+    val isCreatingNewDeck: LiveData<Boolean> get() = _isCreatingNewDeck
 
     private val _selectedCards = MutableStateFlow<List<Cards>>(emptyList())
     val selectedCards: StateFlow<List<Cards>> get() = _selectedCards
@@ -84,6 +93,8 @@ class DeckViewModel(
     )
 
     fun init() {
+        val cardList: MutableList<Cards> = emptyList<Cards>().toMutableList()
+        mazzi.clear()
         val email = loginViewModel.userLoggedInfo.value!!.email
         ownArtistRepo.getArtCardsforUser(email)
 
@@ -107,64 +118,47 @@ class DeckViewModel(
             }
         }
 
-            val listofCards:MutableList<Cards>?= mutableListOf()
-            ownCardA.value?.forEach{elem->
-
-                val c = Cards(elem.id_carta,elem.nome,elem.immagine,elem.popolarita)
-
-                listofCards?.add(c)
-            }
-            ownCardT.value?.forEach{elem->
-
-            val c = Cards(elem.id_carta,elem.nome,elem.immagine,elem.popolarita)
-
+        val listofCards: MutableList<Cards>? = mutableListOf()
+        ownCardA.value?.forEach { elem ->
+            val c = Cards(elem.id_carta, elem.nome, elem.immagine, elem.popolarita)
             listofCards?.add(c)
-            }
+        }
+        ownCardT.value?.forEach { elem ->
+            val c = Cards(elem.id_carta, elem.nome, elem.immagine, elem.popolarita)
+            listofCards?.add(c)
+        }
 
+        cards.value = listofCards
+        Log.i("cards", "${cards.value}")
 
-            cards.value = listofCards
-            Log.i("cards","${cards.value}")
+        deckRepository.getallDecksByEmail(email!!)
+        ownDeck.value = deckRepository.allDecks.value
+        Log.i("d", "${ownDeck.value}")
+        deckRepository.getNomedeck(email)
+        val n = deckRepository.namesDecks?.value
+        Log.i("n", "${n}")
+        var c = 0
+        for(i in ownDeck.value!!){
 
-
-            deckRepository.getallDecksByEmail(email!!)
-            ownDeck.value = deckRepository.allDecks.value
-            Log.i("d","${ownDeck.value}")
-            deckRepository.getNomedeck(email)
-            val n = deckRepository.namesDecks?.value
-            Log.i("n","${n}")
-
-            if (n != null) {
-                for(i in n){
-                    Log.i("nome","${i}")
-
-                    deckRepository.getCarteAss(email,i)
-                    val c = deckRepository.carteAssociate?.value
-                    Log.i("t","${c}")
-
-                    if (c != null) {
-                        val exe =cards.value
-
-
-                        for(j in c){
-
-                            exe!!.forEach { card->
-                                Log.i("teramo","${j}")
-
-                                if (card.id_carta == j) {
-                                    cardList!!.add(card)
-                                    Log.i("to","${cardList}")
-
-                                }
-                            }
-
-                        }
-
-                    }
-                    cardList?.let { Mazzo(i, it) }?.let { mazzi?.add(it) }
+            cards.value!!.forEach { elem ->
+                if (elem.id_carta == i.carte_associate) {
+                    cardList.add(elem)
+                    Log.i("gerry", "${elem.immagine}")
+                    c = c+1
                 }
             }
+            if(c==5) {
+                // Creare una copia profonda di cardList
+                val deepCopyCardList =
+                    cardList.map { Cards(it.id_carta, it.nome_carta, it.immagine, it.popolarita) }
+                        .toMutableList()
+                mazzi.add(Mazzo(i.nome_mazzo, deepCopyCardList))
+                cardList.clear()
+                c = 0
+            }
+            }
 
-            Log.i("taggone","${mazzi}")
+        }
 
 
 
@@ -173,39 +167,69 @@ class DeckViewModel(
 
 
 
-    }
+
+
 
     fun toggleCardSelection(card: Cards) {
-        val currentList = _selectedCards.value.toMutableList()
-        if (currentList.contains(card)) {
-            currentList.remove(card)
-        } else {
-            currentList.add(card)
+        val currentSelectedCards = _selectedCards.value?.toMutableList() ?: mutableListOf()
+
+        // Check if the card is in another deck
+        val cardId = card.id_carta
+        val isCardInAnotherDeck = mazzi.any { deck ->
+            deck.id_mazzo != selectedDeck.value!!.id_mazzo && deck.carte.any { it.id_carta == cardId }
         }
-        _selectedCards.value = currentList
+
+        if (isCardInAnotherDeck) {
+            _message.value = "Questa carta è già presente in un altro mazzo"
+        } else {
+            if (currentSelectedCards.contains(card)) {
+                currentSelectedCards.remove(card)
+            } else {
+                currentSelectedCards.add(card)
+            }
+            _selectedCards.value = currentSelectedCards
+        }
     }
 
-    fun getCardById(id: String): Cards? {
-        return cards.value?.find { it.id_carta == id }
-    }
+
 
     fun creaNuovoMazzo() {
 
         selectedDeck.value = Mazzo("", emptyList())
         isEditing.value = true
+        isMod.value =false
+        _selectedCards.value= emptyList<Cards>().toMutableList()
+        _isCreatingNewDeck.value = true
+
     }
 
+    fun cancelEditing() {
+        isEditing.value = false
+        selectedDeck.value = null
+    }
+    fun startEditingDeck(deck: Mazzo) {
+        selectedDeck.value = deck
+        isEditing.value = true
+        _isCreatingNewDeck.value = false
+        updateAvailableAndSelectedCards()
+    }
 
+    private fun updateAvailableAndSelectedCards() {
+        val allCards = cards.value ?: emptyList()
+        val deckCards = selectedDeck.value?.carte ?: emptyList()
+
+        _selectedCards.value = deckCards
+        cards.value = allCards.filter { card -> !deckCards.contains(card) }
+    }
 
     fun modificaMazzo(deck: Mazzo) {
 
     }
 
-    fun eliminaMazzo(deck: Mazzo) {
 
-    }
 
     fun salvaMazzo() {
+
         val email = loginViewModel.userLoggedInfo.value!!.email
         val names = deckRepository.namesDecks?.value
         val currentDeck = selectedDeck.value
@@ -216,7 +240,7 @@ class DeckViewModel(
         if (currentDeck != null) {
             // Check if deck name is unique
             mazzi?.forEach { elem->
-                if(names?.contains(elem.id_mazzo) == true){
+                if(names?.contains(deckName.value) == true){
                     _message.value = "Deck name already exists!"
                     return
                 }
@@ -249,8 +273,20 @@ class DeckViewModel(
 
             // Reset the states
             annullaModifica()
+            _selectedCards.value = emptyList()
             _message.value= "Deck saved Succefully"
         }
+    }
+
+    fun modificaMazzo() {
+        val email = loginViewModel.userLoggedInfo.value!!.email
+        val SC =_selectedCards.value
+        Log.i("nome_vecchio","${selectedDeck.value!!.id_mazzo}")
+        mazzi.removeIf { it.id_mazzo == selectedDeck.value!!.id_mazzo }
+        deckRepository.deleteDeck(selectedDeck.value!!.id_mazzo,email)
+        salvaMazzo()
+
+
     }
 
     fun clearMessage() {
@@ -278,6 +314,25 @@ class DeckViewModel(
         return deckRepository.isCardInDeck(userEmail, card)
     }
     //////////////////////////////////////////////////////////////////////////////////////////
+
+
+    fun updateIsEditing(deck: Mazzo){
+        selectedDeck.value = deck
+        isMod.value = !(isMod.value)
+        Log.i("Deck","${selectedDeck.value!!.id_mazzo}")
+
+    }
+
+    fun eliminaMazzo(deck:Mazzo) {
+        val email = loginViewModel.userLoggedInfo.value!!.email
+        mazzi.removeIf { it.id_mazzo == deck.id_mazzo }
+
+
+        deckRepository.deleteDeck(deck.id_mazzo,email)
+        Log.i("cardsFiltered", "${cards.value}")
+
+        init()
+    }
 
 
 
