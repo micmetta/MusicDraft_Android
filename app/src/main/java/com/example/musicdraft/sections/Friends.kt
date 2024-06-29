@@ -81,6 +81,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.musicdraft.data.tables.artisti.Artisti
@@ -2594,7 +2595,7 @@ fun OffersReceived(
 
     Log.d("OffersReceived", "reqReceivedCurrentUser: ${reqReceivedCurrentUser}")
 
-    var selectedShowReceivedOffer by exchangeManagementCardsViewModel.selectedShowReceivedOffer
+    val selectedShowReceivedOffer by exchangeManagementCardsViewModel.selectedShowReceivedOffer
 
 
     /////////////////////////////////////////////////////////////////////
@@ -2603,16 +2604,13 @@ fun OffersReceived(
     val confirmRejectRequest = remember { mutableStateOf(false) }
     val requestedCardAlreadyPresentAnotherOfferSent = remember { mutableStateOf(false) }
     val requestedCardAlreadyPresentAnotherOfferReceived = remember { mutableStateOf(false) }
-    var yesAccept = remember { mutableStateOf(false) }
-    var successfullyAccept = remember { mutableStateOf(false) }
+    val yesAccept = remember { mutableStateOf(false) }
+    val successfullyAccept = remember { mutableStateOf(false) }
     val successfullyReject = remember { mutableStateOf(false) }
     /////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // per controllare se ogni carta che l'utente vuole offrire è già presente in un qualche suo mazzo o meno:
-    //val isInDeck by deckViewModel.isInDeck.collectAsState(null)
-    //var isCardInDeck by remember { mutableStateOf<Boolean?>(null) }
-    //val coroutineScope = rememberCoroutineScope()
     var isCardInDeck by remember { mutableStateOf<Boolean?>(null) }
     val theCardIsInADeck = remember { mutableStateOf(false) }
     val startControl_3 = remember { mutableStateOf(false) }
@@ -2686,31 +2684,6 @@ fun OffersReceived(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
 
-//                    if(confirmAcceptRequest.value){
-//                        AlertDialog(
-//                            onDismissRequest = { confirmAcceptRequest.value = false },
-//                            title = { Text(text = "Accept request") },
-//                            text = { Text(text = "Do you really want to accept this offer?") },
-//                            confirmButton = {
-//                                TextButton(
-//                                    onClick = {
-//                                        confirmAcceptRequest.value = false
-//                                        yesAccept.value = true
-//
-//                                        Log.d("OffersReceived", "confirmAcceptRequest.value: ${confirmAcceptRequest.value}")
-//                                        Log.d("OffersReceived", "yesAccept.value: ${yesAccept.value}")
-//                                    }
-//                                ) {
-//                                    Text("Yes")
-//                                }
-//                            },
-//                            dismissButton = {
-//                                TextButton(onClick = { confirmAcceptRequest.value = false }) {
-//                                    Text("No")
-//                                }
-//                            }
-//                        )
-//                    }
 
                     if(yesAccept.value){
 
@@ -2935,13 +2908,12 @@ fun OffersReceived(
                             confirmButton = {
                                 TextButton(
                                     onClick = {
-                                        confirmRejectRequest.value = false
 
-                                        // cancello l'offerta corrente dal DB:
+//                                        // cancello l'offerta corrente dal DB:
                                         exchangeManagementCardsViewModel.deleteOffer(
-                                            selectedShowReceivedOffer.id
+                                            offerReceived.id
                                         )
-
+                                        confirmRejectRequest.value = false
                                         successfullyReject.value = true // feedback all'utente
                                     }
                                 ) {
@@ -3069,9 +3041,6 @@ fun OffersReceived(
                     }
 
 
-
-
-
                 }
             }
         }
@@ -3111,6 +3080,10 @@ fun ShowOfferReceived(
     val showSuccessRejectExchangeCards = remember { mutableStateOf(false) }
     val requestedCardAlreadyPresentAnotherOfferSent = remember { mutableStateOf(false) }
     val requestedCardAlreadyPresentAnotherOfferReceived = remember { mutableStateOf(false) }
+    val confirmAcceptRequest = remember { mutableStateOf(false) }
+    val confirmRejectRequest = remember { mutableStateOf(false) }
+    val yesAccept = remember { mutableStateOf(false) }
+    val yesReject = remember { mutableStateOf(false) }
     //////////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3288,206 +3261,316 @@ fun ShowOfferReceived(
                     // Button "Accept offer" sempre visibile:
                     Button(
                         onClick = {
+                            confirmAcceptRequest.value = true
+                        },
+                        modifier = Modifier
+                            .padding(vertical = 16.dp)
+                    ) {
+                        Text("Accept Offer")
+                    }
 
-                            // Azione per accettare l'offerta:
+                    Spacer(modifier = Modifier.width(16.dp))
 
-                            ////////////////////////////////////////////////////////////////////////////////
-                            // Qui bisognerà mettere i controlli per verificare che le carte richieste
-                            // dell'utente corrente presenti in questa offerta NON SIANO PRESENTI:
-                            // 1) IN UNA QUALCHE OFFERTA (dentro 'listOfferedCards') INVIATA DALL'UTENTE CORRENTE..
-                            // 2) IN UNA QUALCHE OFFERTA RICEVUTA (dentro 'idRequiredCard') DALL'UTENTE CORRENTE..
-                            // 3) IN UN QUALCHE MAZZO DELL'UTENTE CORRENTE..
-                            ////////////////////////////////////////////////////////////////////////////////
+                    // Button "Reject offer" sempre visibile:
+                    Button(
+                        onClick = {
+                            // Azione per rifiutare l'offerta:
+                            confirmRejectRequest.value = true
+                        },
+                        modifier = Modifier
+                            .padding(vertical = 16.dp)
+                    ) {
+                        Text("Reject Offer")
+                    }
+                }
 
-                            ////////////////////////////////////////////////////////////////////////////////
-                            // 1) IN UNA QUALCHE OFFERTA INVIATA DALL'UTENTE CORRENTE..
-                            // SCORRI LA LISTA DI OFFERTE INVIATE DALL'UTENTE CORRENTE E SE C'E' ANCHE SOLO UNA CHE CONTIENE L'ID DELLA CARTA CORRENTE
-                            // ALLORA MOSTRA ERRORE.. ALTRIMENTI SI PUO' ESEGUIRE IL CONTROLLO 2)
-                            reqSentCurrentUser?.let { listOfSentOffers ->
-                                if (listOfSentOffers.isNotEmpty()) {
-                                    // Itera su tutti gli elementi
-                                    for ((index, SentOffer) in listOfSentOffers.withIndex()) {
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            ////////////////////////////////////////////////////////////////////////////////////
+
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            if(confirmAcceptRequest.value){
+                AlertDialog(
+                    onDismissRequest = { confirmAcceptRequest.value = false },
+                    title = { Text(text = "Accept request") },
+                    text = { Text(text = "Do you really want to accept this offer?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                confirmAcceptRequest.value = false
+                                yesAccept.value = true
+
+                                Log.d("OffersReceived", "confirmAcceptRequest.value: ${confirmAcceptRequest.value}")
+                                Log.d("OffersReceived", "yesAccept.value: ${yesAccept.value}")
+                            }
+                        ) {
+                            Text("Yes")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { confirmAcceptRequest.value = false }) {
+                            Text("No")
+                        }
+                    }
+                )
+            }
+
+            if(confirmRejectRequest.value){
+                AlertDialog(
+                    onDismissRequest = { confirmRejectRequest.value = false },
+                    title = { Text(text = "Accept request") },
+                    text = { Text(text = "Do you really want to reject this offer?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                confirmRejectRequest.value = false
+                                yesReject.value = true
+
+                                Log.d("OffersReceived", "confirmRejectRequest.value: ${confirmRejectRequest.value}")
+                                Log.d("OffersReceived", "yesReject.value: ${yesReject.value}")
+                            }
+                        ) {
+                            Text("Yes")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { confirmRejectRequest.value = false }) {
+                            Text("No")
+                        }
+                    }
+                )
+            }
+
+            if(yesAccept.value){
+                // Azione per accettare l'offerta:
+
+                ////////////////////////////////////////////////////////////////////////////////
+                // Qui bisognerà mettere i controlli per verificare che le carte richieste
+                // dell'utente corrente presenti in questa offerta NON SIANO PRESENTI:
+                // 1) IN UNA QUALCHE OFFERTA (dentro 'listOfferedCards') INVIATA DALL'UTENTE CORRENTE..
+                // 2) IN UNA QUALCHE OFFERTA RICEVUTA (dentro 'idRequiredCard') DALL'UTENTE CORRENTE..
+                // 3) IN UN QUALCHE MAZZO DELL'UTENTE CORRENTE..
+                ////////////////////////////////////////////////////////////////////////////////
+
+                ////////////////////////////////////////////////////////////////////////////////
+                // 1) IN UNA QUALCHE OFFERTA INVIATA DALL'UTENTE CORRENTE..
+                // SCORRI LA LISTA DI OFFERTE INVIATE DALL'UTENTE CORRENTE E SE C'E' ANCHE SOLO UNA CHE CONTIENE L'ID DELLA CARTA CORRENTE
+                // ALLORA MOSTRA ERRORE.. ALTRIMENTI SI PUO' ESEGUIRE IL CONTROLLO 2)
+                reqSentCurrentUser?.let { listOfSentOffers ->
+                    if (listOfSentOffers.isNotEmpty()) {
+                        // Itera su tutti gli elementi
+                        for ((index, SentOffer) in listOfSentOffers.withIndex()) {
+                            Log.d(
+                                "ShowOfferReceived",
+                                "Offerta inviata dall'utente corrente: ${SentOffer}"
+                            )
+                            // Adesso posso accedere ai campi di ogni offerta come offer.nicknameU1, offer.nicknameU2, ecc..
+                            if (SentOffer.listOfferedCards.isNotEmpty()) {
+                                // scorro tutti gli ids delle carte offerte in questa offerta:
+                                for (i in SentOffer.listOfferedCards.indices) {
+                                    if ((SentOffer.listOfferedCards[i] == selectedShowReceivedOffer.idRequiredCard) &&
+                                        (SentOffer.id != selectedShowReceivedOffer.id)) {
+
                                         Log.d(
                                             "ShowOfferReceived",
-                                            "Offerta inviata dall'utente corrente: ${SentOffer}"
+                                            "La Carta richiesta in questa offerta è stata trovata in un'altra offerta inviata dall'utente corrente."
                                         )
-                                        // Adesso posso accedere ai campi di ogni offerta come offer.nicknameU1, offer.nicknameU2, ecc..
-                                        if (SentOffer.listOfferedCards.isNotEmpty()) {
-                                            // scorro tutti gli ids delle carte offerte in questa offerta:
-                                            for (i in SentOffer.listOfferedCards.indices) {
-                                                if ((SentOffer.listOfferedCards[i] == selectedShowReceivedOffer.idRequiredCard) &&
-                                                    (SentOffer.id != selectedShowReceivedOffer.id)) {
-
-                                                    Log.d(
-                                                        "ShowOfferReceived",
-                                                        "La Carta richiesta in questa offerta è stata trovata in un'altra offerta inviata dall'utente corrente."
-                                                    )
-                                                    Log.d(
-                                                        "ShowOfferReceived",
-                                                        "SentOffer.listOfferedCards[i]: ${SentOffer.listOfferedCards[i]}"
-                                                    )
-                                                    Log.d(
-                                                        "ShowOfferReceived",
-                                                        "selectedShowReceivedOffer.idRequiredCard: ${selectedShowReceivedOffer.idRequiredCard}"
-                                                    )
-                                                    requestedCardAlreadyPresentAnotherOfferSent.value =
-                                                        true
-                                                }
-                                            }
-                                        }
+                                        Log.d(
+                                            "ShowOfferReceived",
+                                            "SentOffer.listOfferedCards[i]: ${SentOffer.listOfferedCards[i]}"
+                                        )
+                                        Log.d(
+                                            "ShowOfferReceived",
+                                            "selectedShowReceivedOffer.idRequiredCard: ${selectedShowReceivedOffer.idRequiredCard}"
+                                        )
+                                        yesAccept.value = false
+                                        requestedCardAlreadyPresentAnotherOfferSent.value = true
                                     }
                                 }
                             }
-                            ////////////////////////////////////////////////////////////////////////////////
+                        }
+                    }
+                }
+                ////////////////////////////////////////////////////////////////////////////////
 
 
-                            ////////////////////////////////////////////////////////////////////////////////
-                            // 2) IN UNA QUALCHE OFFERTA RICEVUTA DALL'UTENTE CORRENTE..
-                            // SCORRI LA LISTA DI OFFERTE INVIATE DALL'UTENTE CORRENTE E SE C'E' ANCHE SOLO UNA CHE CONTIENE L'ID DELLA CARTA CORRENTE
-                            // ALLORA MOSTRA ERRORE dicendo all'utente che prima deve rifiutare le altre offerte.. ALTRIMENTI SI PUO' ESEGUIRE IL CONTROLLO 3)
-                            reqReceivedCurrentUser?.let { listOfReceivedOffers ->
-                                if (listOfReceivedOffers.isNotEmpty()) {
-                                    // Itera su tutti gli elementi
-                                    for ((index, ReceivedOffer) in listOfReceivedOffers.withIndex()) {
+                ////////////////////////////////////////////////////////////////////////////////
+                // 2) IN UNA QUALCHE OFFERTA RICEVUTA DALL'UTENTE CORRENTE..
+                // SCORRI LA LISTA DI OFFERTE INVIATE DALL'UTENTE CORRENTE E SE C'E' ANCHE SOLO UNA CHE CONTIENE L'ID DELLA CARTA CORRENTE
+                // ALLORA MOSTRA ERRORE dicendo all'utente che prima deve rifiutare le altre offerte.. ALTRIMENTI SI PUO' ESEGUIRE IL CONTROLLO 3)
+                reqReceivedCurrentUser?.let { listOfReceivedOffers ->
+                    if (listOfReceivedOffers.isNotEmpty()) {
+                        // Itera su tutti gli elementi
+                        for ((index, ReceivedOffer) in listOfReceivedOffers.withIndex()) {
+                            Log.d(
+                                "ShowOfferReceived",
+                                "Offerta ricevuta dall'utente corrente: ${ReceivedOffer}"
+                            )
+                            // Adesso posso accedere ai campi di ogni offerta come offer.nicknameU1, offer.nicknameU2, ecc..
+                            if ((ReceivedOffer.idRequiredCard == selectedShowReceivedOffer.idRequiredCard) &&
+                                (ReceivedOffer.id != selectedShowReceivedOffer.id)) {
+                                Log.d(
+                                    "ShowOfferReceived",
+                                    "La Carta richiesta in questa offerta è stata trovata in un'altra offerta ricevuta dall'utente corrente."
+                                )
+                                Log.d(
+                                    "ShowOfferReceived",
+                                    "ReceivedOffer.idRequiredCard: ${ReceivedOffer.idRequiredCard}"
+                                )
+                                Log.d(
+                                    "ShowOfferReceived",
+                                    "selectedShowReceivedOffer.idRequiredCard: ${selectedShowReceivedOffer.idRequiredCard}"
+                                )
+                                yesAccept.value = false
+                                requestedCardAlreadyPresentAnotherOfferReceived.value = true
+                            }
+                        }
+                    }
+                }
+                ////////////////////////////////////////////////////////////////////////////////
+
+                // Il controllo 3) verrà eseguito solamente se sono stati superati correttamente i controlli 1) e 2)
+                if(!requestedCardAlreadyPresentAnotherOfferSent.value && !requestedCardAlreadyPresentAnotherOfferReceived.value){
+
+                    LaunchedEffect(requestedCardAlreadyPresentAnotherOfferSent.value && requestedCardAlreadyPresentAnotherOfferReceived.value){
+                        deckViewModel.viewModelScope.launch {
+                            // Controllo se la carta è già presente nel mazzo
+                            isCardInDeck = deckViewModel.checkCardInDeck(
+                                infoUserCurrent!!.email,
+                                selectedShowReceivedOffer.idRequiredCard
+                            )
+                            if (isCardInDeck == true) {
+                                yesAccept.value = false
+                                // Attivo messaggio di errore:
+                                theCardIsInADeck.value = true
+                            }
+
+                            // Se tutti i controlli di sopra vanno a buon fine allora invio feedback all'utente:
+                            if ((!requestedCardAlreadyPresentAnotherOfferSent.value) && (!requestedCardAlreadyPresentAnotherOfferReceived.value) && (!theCardIsInADeck.value)) {
+
+                                ////////////////////////////////////////////////////////////////////////////////
+                                // Aggiorno il proprietario della carta richiesta (diventerà colui che ha inviato l'offerta corrente):
+                                if (selectedShowReceivedOffer.typeRequiredCard == "artist") {
+                                    utilityFriendInfo?.let {
+                                        cardsViewModel.updateCardArtistOwner(
+                                            it.email,
+                                            selectedShowReceivedOffer.idRequiredCard
+                                        )
                                         Log.d(
                                             "ShowOfferReceived",
-                                            "Offerta ricevuta dall'utente corrente: ${ReceivedOffer}"
+                                            "artist-Nuovo proprietario carta richiesta: ${it.email}"
                                         )
-                                        // Adesso posso accedere ai campi di ogni offerta come offer.nicknameU1, offer.nicknameU2, ecc..
-                                        if ((ReceivedOffer.idRequiredCard == selectedShowReceivedOffer.idRequiredCard) &&
-                                            (ReceivedOffer.id != selectedShowReceivedOffer.id)) {
-                                            Log.d(
-                                                "ShowOfferReceived",
-                                                "La Carta richiesta in questa offerta è stata trovata in un'altra offerta ricevuta dall'utente corrente."
+                                    }
+                                } else {
+                                    utilityFriendInfo?.let {
+                                        cardsViewModel.updateCardTrackOwner(
+                                            it.email,
+                                            selectedShowReceivedOffer.idRequiredCard
+                                        )
+                                        Log.d(
+                                            "ShowOfferReceived",
+                                            "track-Nuovo proprietario carta richiesta: ${it.email}"
+                                        )
+                                    }
+                                }
+                                ////////////////////////////////////////////////////////////////////////////////
+
+                                ///////////////////////////////////////////////////////////////////////////////////////
+                                // Se la 'listAllInfoAboutCardsArtistOffered' NON E' VUOTA, scorro
+                                // tutti gli elementi presenti al suo interno e aggiorno il suo proprietario
+                                // (diventerà colui che ha ricevuto l'offerta):
+                                if (!listAllInfoAboutCardsArtistOffered?.isEmpty()!!) {
+                                    for (i in listAllInfoAboutCardsArtistOffered!!.indices) {
+                                        infoUserCurrent?.let {
+                                            cardsViewModel.updateCardArtistOwner(
+                                                it.email,
+                                                listAllInfoAboutCardsArtistOffered!![i].id_carta
                                             )
                                             Log.d(
                                                 "ShowOfferReceived",
-                                                "ReceivedOffer.idRequiredCard: ${ReceivedOffer.idRequiredCard}"
+                                                "listAllInfoAboutCardsArtistOffered-Nuovo proprietario carta richiesta: ${it.email}"
                                             )
-                                            Log.d(
-                                                "ShowOfferReceived",
-                                                "selectedShowReceivedOffer.idRequiredCard: ${selectedShowReceivedOffer.idRequiredCard}"
-                                            )
-                                            requestedCardAlreadyPresentAnotherOfferReceived.value = true
                                         }
                                     }
                                 }
-                            }
-                            ////////////////////////////////////////////////////////////////////////////////
+                                ///////////////////////////////////////////////////////////////////////////////////////
 
+                                ///////////////////////////////////////////////////////////////////////////////////////
+                                // Se la 'listAllInfoAboutCardsArtistOffered' NON E' VUOTA, scorro
+                                // tutti gli elementi presenti al suo interno e aggiorno il suo proprietario
+                                // (diventerà colui che ha ricevuto l'offerta):
+                                if (!listAllInfoAboutCardsTracksOffered?.isEmpty()!!) {
+                                    for (i in listAllInfoAboutCardsTracksOffered!!.indices) {
+                                        infoUserCurrent?.let {
+                                            cardsViewModel.updateCardTrackOwner(
+                                                it.email,
+                                                listAllInfoAboutCardsTracksOffered!![i].id_carta
+                                            )
+                                            Log.d(
+                                                "ShowOfferReceived",
+                                                "listAllInfoAboutCardsTracksOffered-Nuovo proprietario carta richiesta: ${it.email}"
+                                            )
+                                        }
+                                    }
+                                }
+                                ///////////////////////////////////////////////////////////////////////////////////////
 
-                            ////////////////////////////////////////////////////////////////////////////////
-                            // Controllo 3):
-                            coroutineScope.launch {
-                                if (infoUserCurrent != null) {
-                                    // Controllo se la carta è già presente nel mazzo
-                                    isCardInDeck = deckViewModel.checkCardInDeck(
-                                        infoUserCurrent!!.email,
-                                        selectedShowReceivedOffer.idRequiredCard
+                                // se nell'offerta accettata c'erano dei points offerti allora aggiorno i points togliendoli
+                                // all'utente che ha fatto l'offerta e aggiungendoli a colui che ha ricevuto l'offerta:
+                                if (selectedShowReceivedOffer.pointsOffered > 0) {
+                                    // eseguo update points:
+                                    loginViewModel.subtractPoints(
+                                        selectedShowReceivedOffer.pointsOffered,
+                                        utilityFriendInfo!!.email
                                     )
-                                    if (isCardInDeck == true) {
-                                        // Attivo messaggio di errore:
-                                        theCardIsInADeck.value = true
-                                    }
-
-                                    // Se tutti i controlli di sopra vanno a buon fine allora invio feedback all'utente:
-                                    if((!requestedCardAlreadyPresentAnotherOfferSent.value) && (!requestedCardAlreadyPresentAnotherOfferReceived.value) && (!theCardIsInADeck.value)){
-
-                                        ////////////////////////////////////////////////////////////////////////////////
-                                        // Aggiorno il proprietario della carta richiesta (diventerà colui che ha inviato l'offerta corrente):
-                                        if (selectedShowReceivedOffer.typeRequiredCard == "artist") {
-                                            utilityFriendInfo?.let {
-                                                cardsViewModel.updateCardArtistOwner(
-                                                    it.email,
-                                                    selectedShowReceivedOffer.idRequiredCard
-                                                )
-                                                Log.d(
-                                                    "ShowOfferReceived",
-                                                    "artist-Nuovo proprietario carta richiesta: ${it.email}"
-                                                )
-                                            }
-                                        } else {
-                                            utilityFriendInfo?.let {
-                                                cardsViewModel.updateCardTrackOwner(
-                                                    it.email,
-                                                    selectedShowReceivedOffer.idRequiredCard
-                                                )
-                                                Log.d(
-                                                    "ShowOfferReceived",
-                                                    "track-Nuovo proprietario carta richiesta: ${it.email}"
-                                                )
-                                            }
-                                        }
-                                        ////////////////////////////////////////////////////////////////////////////////
-
-                                        ///////////////////////////////////////////////////////////////////////////////////////
-                                        // Se la 'listAllInfoAboutCardsArtistOffered' NON E' VUOTA, scorro
-                                        // tutti gli elementi presenti al suo interno e aggiorno il suo proprietario
-                                        // (diventerà colui che ha ricevuto l'offerta):
-                                        if (!listAllInfoAboutCardsArtistOffered?.isEmpty()!!) {
-                                            for (i in listAllInfoAboutCardsArtistOffered!!.indices) {
-                                                infoUserCurrent?.let {
-                                                    cardsViewModel.updateCardArtistOwner(
-                                                        it.email,
-                                                        listAllInfoAboutCardsArtistOffered!![i].id_carta
-                                                    )
-                                                    Log.d(
-                                                        "ShowOfferReceived",
-                                                        "listAllInfoAboutCardsArtistOffered-Nuovo proprietario carta richiesta: ${it.email}"
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        ///////////////////////////////////////////////////////////////////////////////////////
-
-                                        ///////////////////////////////////////////////////////////////////////////////////////
-                                        // Se la 'listAllInfoAboutCardsArtistOffered' NON E' VUOTA, scorro
-                                        // tutti gli elementi presenti al suo interno e aggiorno il suo proprietario
-                                        // (diventerà colui che ha ricevuto l'offerta):
-                                        if (!listAllInfoAboutCardsTracksOffered?.isEmpty()!!) {
-                                            for (i in listAllInfoAboutCardsTracksOffered!!.indices) {
-                                                infoUserCurrent?.let {
-                                                    cardsViewModel.updateCardTrackOwner(
-                                                        it.email,
-                                                        listAllInfoAboutCardsTracksOffered!![i].id_carta
-                                                    )
-                                                    Log.d(
-                                                        "ShowOfferReceived",
-                                                        "listAllInfoAboutCardsTracksOffered-Nuovo proprietario carta richiesta: ${it.email}"
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        ///////////////////////////////////////////////////////////////////////////////////////
-
-                                        // se nell'offerta accettata c'erano dei points offerti allora aggiorno i points togliendoli
-                                        // all'utente che ha fatto l'offerta e aggiungendoli a colui che ha ricevuto l'offerta:
-                                        if(selectedShowReceivedOffer.pointsOffered > 0){
-                                            // eseguo update points:
-                                            loginViewModel.subtractPoints(selectedShowReceivedOffer.pointsOffered, utilityFriendInfo!!.email)
-                                            loginViewModel.addPoints(selectedShowReceivedOffer.pointsOffered, infoUserCurrent!!.email)
-                                        }
-
-
-                                        ///////////////////////////////////////////////////////////////////////////////////////
-                                        // - Adesso cancello l'offerta dal DB:
-                                        exchangeManagementCardsViewModel.deleteOffer(
-                                            selectedShowReceivedOffer.id
-                                        )
-                                        ///////////////////////////////////////////////////////////////////////////////////////
-
-                                        showSuccessUpdateExchangeCards.value =
-                                            true // feedback per l'utente
-                                    }
-
+                                    loginViewModel.addPoints(
+                                        selectedShowReceivedOffer.pointsOffered,
+                                        infoUserCurrent!!.email
+                                    )
                                 }
+
+
+                                ///////////////////////////////////////////////////////////////////////////////////////
+                                // - Adesso cancello l'offerta dal DB:
+                                exchangeManagementCardsViewModel.deleteOffer(
+                                    selectedShowReceivedOffer.id
+                                )
+                                ///////////////////////////////////////////////////////////////////////////////////////
+
+                                yesAccept.value = false
+                                showSuccessUpdateExchangeCards.value = true // feedback per l'utente
                             }
-                            ////////////////////////////////////////////////////////////////////////////////
+                            Log.d("LaunchedEffect", "theCardIsInADeck.value: ${theCardIsInADeck.value}")
+
+                        }
+                    }
+                }
 
 
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            // QUI SOTTO SI ENTRERA' SOLAMENTE SE NON SI VERIFICA NESSUNO DEI 3 CONTROLLI CITATI SOPRA: (manca quella sui mazzi)
-//                            if ((!requestedCardAlreadyPresentAnotherOfferSent.value) && (!requestedCardAlreadyPresentAnotherOfferReceived.value)) {
+//                ////////////////////////////////////////////////////////////////////////////////
+//                // Controllo 3):
+//                //coroutineScope.launch {
+//                LaunchedEffect(startControl_3.value){
+//                    coroutineScope.launch{
+//                        if (startControl_3.value) {
+//                            // Controllo se la carta è già presente nel mazzo
+//                            isCardInDeck = deckViewModel.checkCardInDeck(
+//                                infoUserCurrent!!.email,
+//                                selectedShowReceivedOffer.idRequiredCard
+//                            )
+//                            if (isCardInDeck == true) {
+//                                yesAccept.value = false
+//                                // Attivo messaggio di errore:
+//                                theCardIsInADeck.value = true
+//                            }
+//
+//                            // Se tutti i controlli di sopra vanno a buon fine allora invio feedback all'utente:
+//                            if((!requestedCardAlreadyPresentAnotherOfferSent.value) && (!requestedCardAlreadyPresentAnotherOfferReceived.value) && (!theCardIsInADeck.value)){
+//
 //                                ////////////////////////////////////////////////////////////////////////////////
 //                                // Aggiorno il proprietario della carta richiesta (diventerà colui che ha inviato l'offerta corrente):
 //                                if (selectedShowReceivedOffer.typeRequiredCard == "artist") {
@@ -3571,45 +3654,24 @@ fun ShowOfferReceived(
 //                                )
 //                                ///////////////////////////////////////////////////////////////////////////////////////
 //
-//                                showSuccessUpdateExchangeCards.value =
-//                                    true // feedback per l'utente
+//                                yesAccept.value = false
+//                                showSuccessUpdateExchangeCards.value = true // feedback per l'utente
 //                            }
-                            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        },
-                        modifier = Modifier
-                            .padding(vertical = 16.dp)
-                    ) {
-                        Text("Accept Offer")
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    // Button "Reject offer" sempre visibile:
-                    Button(
-                        onClick = {
-                            // Azione per rifiutare l'offerta:
-
-                            // cancello l'offerta corrente dal DB:
-                            exchangeManagementCardsViewModel.deleteOffer(
-                                selectedShowReceivedOffer.id
-                            )
-                            showSuccessRejectExchangeCards.value =
-                                true // feedback per l'utente
-                        },
-                        modifier = Modifier
-                            .padding(vertical = 16.dp)
-                    ) {
-                        Text("Reject Offer")
-                    }
-                }
-
-
-                Spacer(modifier = Modifier.height(16.dp))
+//
+//                            Log.d("LaunchedEffect", "theCardIsInADeck.value: ${theCardIsInADeck.value}")
+//                        }
+//                    }
+//                }
+//                ////////////////////////////////////////////////////////////////////////////////
             }
-            ////////////////////////////////////////////////////////////////////////////////////
 
-
-            Spacer(modifier = Modifier.height(8.dp))
+            if(yesReject.value){
+                // cancello l'offerta corrente dal DB:
+                exchangeManagementCardsViewModel.deleteOffer(
+                    selectedShowReceivedOffer.id
+                )
+                showSuccessRejectExchangeCards.value = true // feedback per l'utente
+            }
 
             if (showSuccessUpdateExchangeCards.value) {
                 AlertDialog(
@@ -3758,8 +3820,8 @@ fun OffersSent(
     var selectedShowSentOffer by exchangeManagementCardsViewModel.selectedShowSentOffer
 
     // finestre di dialogo:
-    var confirmDeleteRequest = remember { mutableStateOf(false) }
-    var successfullyDelete = remember { mutableStateOf(false) }
+    val confirmDeleteRequest = remember { mutableStateOf(false) }
+    val successfullyDelete = remember { mutableStateOf(false) }
     //////////////////////
 
 
@@ -3829,12 +3891,6 @@ fun OffersSent(
                             confirmButton = {
                                 TextButton(
                                     onClick = {
-
-                                        // cancello l'offerta corrente dal DB:
-                                        exchangeManagementCardsViewModel.deleteOffer(
-                                            offerSent.id
-                                        )
-
                                         confirmDeleteRequest.value = false
                                         successfullyDelete.value = true // feedback all'utente
                                     }
@@ -3860,6 +3916,10 @@ fun OffersSent(
                             confirmButton = {
                                 TextButton(
                                     onClick = {
+                                        // cancello l'offerta corrente dal DB:
+                                        exchangeManagementCardsViewModel.deleteOffer(
+                                            offerSent.id
+                                        )
                                         successfullyDelete.value = false
                                     }
                                 ) {
@@ -3903,6 +3963,7 @@ fun ShowOfferSent(
 
     //////////////////////////////////////////////////////////////////////////////
     // per finestre di dialogo:
+    val confirmdeleteRequest = remember { mutableStateOf(false) }
     val showSuccessDeleteExchangeCards = remember { mutableStateOf(false) }
     //////////////////////////////////////////////////////////////////////////////
 
@@ -4080,7 +4141,8 @@ fun ShowOfferSent(
                             exchangeManagementCardsViewModel.deleteOffer(
                                 selectedShowSentOffer.id
                             )
-                            showSuccessDeleteExchangeCards.value = true // feedback per l'utente
+                            //showSuccessDeleteExchangeCards.value = true // feedback per l'utente
+                            confirmdeleteRequest.value = true // feedback per l'utente
                         },
                         modifier = Modifier
                             .padding(vertical = 16.dp)
@@ -4097,7 +4159,28 @@ fun ShowOfferSent(
             Spacer(modifier = Modifier.height(8.dp))
 
 
-
+            if(confirmdeleteRequest.value){
+                AlertDialog(
+                    onDismissRequest = { confirmdeleteRequest.value = false },
+                    title = { Text(text = "Delete request") },
+                    text = { Text(text = "Do you really want to delete this offer?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                confirmdeleteRequest.value = false
+                                showSuccessDeleteExchangeCards.value = true
+                            }
+                        ) {
+                            Text("Yes")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { confirmdeleteRequest.value = false }) {
+                            Text("No")
+                        }
+                    }
+                )
+            }
             if (showSuccessDeleteExchangeCards.value) {
                 AlertDialog(
                     onDismissRequest = {
@@ -4118,6 +4201,7 @@ fun ShowOfferSent(
                     }
                 )
             }
+
         }
     }
 }

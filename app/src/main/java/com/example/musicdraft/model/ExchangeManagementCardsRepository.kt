@@ -78,6 +78,7 @@ class ExchangeManagementCardsRepository(val viewModel: ExchangeManagementCardsVi
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO){
                 exchangeManagementCardsDao.deleteOffer(id)
+                Log.i("ExchangeManagementCardsRepository", "id offerta cancellata: ${id}")
             }
         }
     }

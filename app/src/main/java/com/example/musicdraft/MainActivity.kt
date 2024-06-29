@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
             val marketplaceViewModelFactory = MarketplaceViewModelFactory(application, cardsViewModel, loginViewModel)
             val marketplaceViewModel: MarketplaceViewModel = ViewModelProvider(this, marketplaceViewModelFactory).get(MarketplaceViewModel::class.java)
 
-            val deckfactory = DeckViewModelFactory(application, loginViewModel, cardsViewModel)
+            val deckfactory = DeckViewModelFactory(application, loginViewModel, cardsViewModel, exchangeManagementCardsViewModel)
             val decksViewModel = ViewModelProvider(this, deckfactory).get(DeckViewModel::class.java)
 
 
@@ -485,7 +485,7 @@ fun MusicDraftUI(
                     Cards(cardsViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Cards"
                 }
                 composable(Screens.Decks.screen){
-                    Decks(decksViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"
+                    Decks(decksViewModel, loginViewModel, exchangeManagementCardsViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Decks"
                 }
                 composable(Screens.Marketplace.screen){
                     Marketplace(marketplaceViewmodel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Marketplace"

@@ -1,10 +1,9 @@
 package com.example.musicdraft.sections
 
 import DeckViewModel
-import android.util.Log
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,12 +31,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
+import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
+import com.example.musicdraft.viewModel.LoginViewModel
 
 
 //
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Decks(viewModel: DeckViewModel) {
+fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel) {
+
+
     viewModel.init()
 
     val isEditing by viewModel.isEditing
@@ -50,28 +54,40 @@ fun Decks(viewModel: DeckViewModel) {
     val deckName by viewModel.deckName.collectAsState()
     val isCreatingNewDeck by viewModel.isCreatingNewDeck.observeAsState(false)
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    val reqSentCurrentUser by exchangeManagementCardsViewModel.allOffersSentByCurrentUser.collectAsState(null) // contiene tutte le richieste inviate dall'utente corrente
+    val reqReceivedCurrentUser by exchangeManagementCardsViewModel.allOffersReceivedByCurrentUser.collectAsState(null) // contiene tutte le richieste ricevute dall'utente corrente
+    loginViewModel.userLoggedInfo.value?.let {
+        exchangeManagementCardsViewModel.getOffersReceveidByCurrentUser(it.nickname)
+        exchangeManagementCardsViewModel.getOffersSentByCurrentUser(it.nickname)
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     if (message != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearMessage() },
+            title = { Text(text = "Error") },
+            text = { Text(text = message!!) },
             confirmButton = {
                 Button(onClick = { viewModel.clearMessage() }) {
                     Text("OK")
                 }
             },
-            text = { Text(message ?: "") }
+            //text = { Text(message ?: "") }
         )
     }
 
     if (message != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearMessage() },
+            title = { Text(text = "Error") },
+            text = { Text(text = message!!) },
             confirmButton = {
                 Button(onClick = { viewModel.clearMessage() }) {
                     Text("OK")
                 }
             },
-            text = { Text(message ?: "") }
+            //text = { Text(message ?: "") }
         )
     }
 
@@ -189,7 +205,12 @@ fun Decks(viewModel: DeckViewModel) {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 4.dp)
-                                        .clickable { viewModel.toggleCardSelection(card) }
+                                        .clickable {
+                                            ////////////////////////////////////////////////////////////////////////////////////
+                                            // quando una carta viene selezionata eseguo questo:
+                                            viewModel.toggleCardSelection(card, reqSentCurrentUser, reqReceivedCurrentUser)
+                                            ////////////////////////////////////////////////////////////////////////////////////
+                                        }
                                 ) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
@@ -223,7 +244,11 @@ fun Decks(viewModel: DeckViewModel) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp)
-                                    .clickable { viewModel.toggleCardSelection(card) }
+                                    .clickable { viewModel.toggleCardSelection(
+                                        card,
+                                        reqSentCurrentUser,
+                                        reqReceivedCurrentUser
+                                    ) }
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,

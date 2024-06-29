@@ -1,3 +1,4 @@
+
 import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -6,24 +7,25 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.Deck
+import com.example.musicdraft.data.tables.exchange_management_cards.ExchangeManagementCards
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.DeckRepo
 import com.example.musicdraft.model.UserCardsRepo
 import com.example.musicdraft.viewModel.CardsViewModel
+import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
-import com.squareup.wire.internal.copyOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.util.function.Predicate.not
 
 
 class DeckViewModel(
     application: Application,
     private val loginViewModel: LoginViewModel,
-    private val cardsViewModel: CardsViewModel
+    private val cardsViewModel: CardsViewModel,
+    private val exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel
 ) : AndroidViewModel(application) {
 
     private val database = MusicDraftDatabase.getDatabase(application)
@@ -68,15 +70,8 @@ class DeckViewModel(
     private val _deckName = MutableStateFlow("")
     val deckName: StateFlow<String> get() = _deckName
 
-
     var mazzi: MutableList<Mazzo> = emptyList<Mazzo>().toMutableList()
     val cardList: MutableList<Cards> = emptyList<Cards>().toMutableList()
-
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // mi serve per sapere se una carta si trova in un qualsiasi mazzo dell'utente corrente:
-    var isInDeck = deckRepository.isInDeck
-    ////////////////////////////////////////////////////////////////////////////////////////
-
 
 
     // Inner classes
@@ -157,20 +152,15 @@ class DeckViewModel(
                 c = 0
             }
             }
-
-        }
-
+    }
 
 
 
-
-
-
-
-
-
-
-    fun toggleCardSelection(card: Cards) {
+    fun toggleCardSelection(
+        card: Cards,
+        reqSentCurrentUser: List<ExchangeManagementCards>?,
+        reqReceivedCurrentUser: List<ExchangeManagementCards>?
+    ) {
         val currentSelectedCards = _selectedCards.value?.toMutableList() ?: mutableListOf()
 
         // Check if the card is in another deck
@@ -179,9 +169,39 @@ class DeckViewModel(
             deck.id_mazzo != selectedDeck.value!!.id_mazzo && deck.carte.any { it.id_carta == cardId }
         }
 
-        if (isCardInAnotherDeck) {
+        ////////////////////////////////////////////////////////////////////////////////
+//        Log.d("toggleCardSelection", "reqReceivedCurrentUser: ${reqReceivedCurrentUser}")
+//        Log.d("toggleCardSelection", "reqSentCurrentUser: ${reqSentCurrentUser}")
+
+        // Controllo che la carta che si vuole aggiungere al mazzo non sia presente:
+        // 1) In una qualsiasi offerta ricevuta dall'utente corrente (come carta richiesta)
+        // 2) In una qualsiasi offerta inviata dall'utente corrente (come una carta offerta)
+        val isCardInAnReceivedOffer = reqReceivedCurrentUser?.any { reicevdOffer ->
+            reicevdOffer.idRequiredCard == cardId
+        }
+        val isCardInAnSentOffer = reqSentCurrentUser?.any{ sentOffer ->
+            sentOffer.listOfferedCards.any { offerdCard ->
+                offerdCard == cardId
+            }
+        }
+//        Log.d("toggleCardSelection", "isCardInAnReceivedOffer: ${isCardInAnReceivedOffer}")
+//        Log.d("toggleCardSelection", "isCardInAnSentOffer: ${isCardInAnSentOffer}")
+        ////////////////////////////////////////////////////////////////////////////////
+
+        if (false) {
             _message.value = "Questa carta è già presente in un altro mazzo"
-        } else {
+        }
+        ////////////////////////////////////////////////////////////////////////////////
+        else if(isCardInAnReceivedOffer == true){
+            _message.value = "This card was requested from you in some offer you received!\n\n" +
+                             "Before adding it to a deck you must cancel all offers received in which this card was requested."
+        }
+        else if(isCardInAnSentOffer == true){
+            _message.value = "You offered this card in some offer you sent!\n\n" +
+                             "Before adding it to a deck you must delete all offers sent in which you have offered this card."
+        }
+        ////////////////////////////////////////////////////////////////////////////////
+        else {
             if (currentSelectedCards.contains(card)) {
                 currentSelectedCards.remove(card)
             } else {
