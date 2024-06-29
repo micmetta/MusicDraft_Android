@@ -2,6 +2,8 @@ import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.Deck
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
@@ -53,6 +55,9 @@ class DeckViewModel(
 
     private val _cards:List<Cards>?=null
     val cards: MutableStateFlow<List<Cards>?> = MutableStateFlow(_cards)
+
+    private val _isCreatingNewDeck = MutableLiveData(false)
+    val isCreatingNewDeck: LiveData<Boolean> get() = _isCreatingNewDeck
 
     private val _selectedCards = MutableStateFlow<List<Cards>>(emptyList())
     val selectedCards: StateFlow<List<Cards>> get() = _selectedCards
@@ -158,13 +163,13 @@ class DeckViewModel(
 
 
     fun toggleCardSelection(card: Cards) {
-        val currentList = _selectedCards.value.toMutableList()
-        if (currentList.contains(card)) {
-            currentList.remove(card)
+        val currentSelectedCards = _selectedCards.value?.toMutableList() ?: mutableListOf()
+        if (currentSelectedCards.contains(card)) {
+            currentSelectedCards.remove(card)
         } else {
-            currentList.add(card)
+            currentSelectedCards.add(card)
         }
-        _selectedCards.value = currentList
+        _selectedCards.value = currentSelectedCards
     }
 
 
@@ -174,9 +179,29 @@ class DeckViewModel(
         selectedDeck.value = Mazzo("", emptyList())
         isEditing.value = true
         isMod.value =false
+        _selectedCards.value= emptyList<Cards>().toMutableList()
+        _isCreatingNewDeck.value = true
+
     }
 
+    fun cancelEditing() {
+        isEditing.value = false
+        selectedDeck.value = null
+    }
+    fun startEditingDeck(deck: Mazzo) {
+        selectedDeck.value = deck
+        isEditing.value = true
+        _isCreatingNewDeck.value = false
+        updateAvailableAndSelectedCards()
+    }
 
+    private fun updateAvailableAndSelectedCards() {
+        val allCards = cards.value ?: emptyList()
+        val deckCards = selectedDeck.value?.carte ?: emptyList()
+
+        _selectedCards.value = deckCards
+        cards.value = allCards.filter { card -> !deckCards.contains(card) }
+    }
 
     fun modificaMazzo(deck: Mazzo) {
 
@@ -185,6 +210,7 @@ class DeckViewModel(
 
 
     fun salvaMazzo() {
+
         val email = loginViewModel.userLoggedInfo.value!!.email
         val names = deckRepository.namesDecks?.value
         val currentDeck = selectedDeck.value
@@ -234,7 +260,13 @@ class DeckViewModel(
     }
 
     fun modificaMazzo() {
-        isEditing.value = true
+        val email = loginViewModel.userLoggedInfo.value!!.email
+        val SC =_selectedCards.value
+        Log.i("nome_vecchio","${selectedDeck.value!!.id_mazzo}")
+        mazzi.removeIf { it.id_mazzo == selectedDeck.value!!.id_mazzo }
+        deckRepository.deleteDeck(selectedDeck.value!!.id_mazzo,email)
+        salvaMazzo()
+
 
     }
 
