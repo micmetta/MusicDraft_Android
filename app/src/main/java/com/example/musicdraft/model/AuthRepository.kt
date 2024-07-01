@@ -33,6 +33,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
     val allUsersFriendsOfCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
     val allUsersrReceivedRequestByCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
     val utilityFriendInfo: MutableStateFlow<User?> = MutableStateFlow(null)
+    /////////////////////////////////////////////////////////////////////////////
+    // avversario randomico trovato nella partita veloce:
+    val opponentMatch: MutableStateFlow<User?> = MutableStateFlow(null)
+    /////////////////////////////////////////////////////////////////////////////
+
 
     /*
     - Questa funzione verrà invocata dal loginViewModel nel momento in cui l'utente cliccherà sull'interfaccia
@@ -112,6 +117,19 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
                 userFlow.collect { user ->
                     utilityFriendInfo.value = user
                     Log.i("AuthRepository", "info friend che mi ha inviato l'offerta: ${utilityFriendInfo.value}")
+                }
+            }
+        }
+    }
+
+
+    fun getOpponentByNickname(nickname: String){
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val userFlow = dao.getUserByNickname(nickname)
+                userFlow.collect { user ->
+                    opponentMatch.value = user
+                    Log.i("AuthRepository", "opponentMatch: ${opponentMatch.value}")
                 }
 
             }

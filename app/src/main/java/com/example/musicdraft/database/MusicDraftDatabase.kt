@@ -15,6 +15,10 @@ import com.example.musicdraft.data.tables.exchange_management_cards.ExchangeMana
 import com.example.musicdraft.data.tables.exchange_management_cards.ExchangeManagementCardsDao
 import com.example.musicdraft.data.tables.handleFriends.HandleFriends
 import com.example.musicdraft.data.tables.handleFriends.HandleFriendsDao
+import com.example.musicdraft.data.tables.matchmaking.MatchSummaryConcluded
+import com.example.musicdraft.data.tables.matchmaking.MatchSummaryConcludedDao
+import com.example.musicdraft.data.tables.matchmaking.Matchmaking
+import com.example.musicdraft.data.tables.matchmaking.MatchmakingDao
 import com.example.musicdraft.data.tables.track.Track
 import com.example.musicdraft.data.tables.track.TrackDao
 import com.example.musicdraft.data.tables.user.User
@@ -29,10 +33,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = [User::class, Artisti::class, Track::class, User_Cards_Artisti::class, User_Cards_Track::class, HandleFriends::class, ExchangeManagementCards:: class, Deck::class],
+    entities = [User::class, Artisti::class, Track::class, User_Cards_Artisti::class, User_Cards_Track::class, HandleFriends::class, ExchangeManagementCards:: class, Deck::class, Matchmaking:: class, MatchSummaryConcluded:: class],
     version = 1
 )
-@TypeConverters(ConvertersExchangeManagementCards::class) // per poter usare i convertitori per la tabella 'ExchangeManagementCards'
+@TypeConverters(ConvertersExchangeManagementCards::class) // per poter usare i convertitori per la tabella 'ExchangeManagementCards' c'era prima..
+//@TypeConverters(
+    //ConvertersExchangeManagementCards::class, // per poter usare i convertitori per la tabella 'ExchangeManagementCards'
+    //ConvertersMatchSummaryConcluded::class // per poter usare i convertitori per la tabella 'MatchSummaryConcluded'
+//)
 abstract class MusicDraftDatabase: RoomDatabase() {
 
     abstract fun userDao(): UserDao?
@@ -43,6 +51,8 @@ abstract class MusicDraftDatabase: RoomDatabase() {
     abstract fun handleFriendsDao(): HandleFriendsDao?
     abstract fun ExchangeManagementCardsDao(): ExchangeManagementCardsDao?
     abstract fun deckDao(): DaoDeck?
+    abstract fun matchmakingDao(): MatchmakingDao?
+    abstract fun matchSummaryConcludedDao(): MatchSummaryConcludedDao?
 
     companion object {
         // marking the instance as volatile to ensure atomic access to the variable

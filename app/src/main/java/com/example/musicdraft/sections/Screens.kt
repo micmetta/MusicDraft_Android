@@ -26,4 +26,5 @@ sealed class Screens (val screen: String) {
     data object ExchangeCards: Screens("exchangeCards")
     data object ShowOfferReceived: Screens("showOfferReceived")
     data object ShowOfferSent: Screens("showOfferSent")
+    data object SelectDeck: Screens("selectDeck")
 }

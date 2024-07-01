@@ -96,6 +96,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
             .padding(16.dp)
             .fillMaxSize()
     ) {
+        Spacer(modifier = Modifier.height(60.dp))
         Text("I miei mazzi di Carte", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
 

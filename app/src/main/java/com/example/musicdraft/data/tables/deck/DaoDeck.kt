@@ -32,6 +32,11 @@ interface DaoDeck {
     @Query("SELECT popolarita FROM Deck WHERE nome_mazzo = :nomeMazzo AND email = :email GROUP BY popolarita")
     fun getDecksPop(nomeMazzo: String, email: String): Flow<Float>
 
+//    //////////////////////////////////////////////////////
+//    @Query("SELECT * FROM Deck WHERE identifier = :id")
+//    suspend fun getDeckById(id: Int): Flow<Deck?>
+//    //////////////////////////////////////////////////////
+
 
     /**
      * Verifica se una carta specifica è associata a un mazzo di un utente specifico.

@@ -122,6 +122,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     var emailUserLog = mutableStateOf("") // conterrà l'email dell'utente loggato attraverso o
     // la registrazione o attraverso il login.
 
+    /////////////////////////////////////////////////////////////////////////////
+    val opponentMatch = authRepository.opponentMatch
+    /////////////////////////////////////////////////////////////////////////////
+
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
     //   per questo motivo prende in input un evento di tipo "UIEvent".
@@ -907,6 +911,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         authRepository.getFriendByNickname(nickname)
     }
 
+    fun getOpponentByNickname(nickname: String){
+        authRepository.getOpponentByNickname(nickname)
+    }
 
     fun addPoints(addPoints: Int, email: String) {
         authRepository.addPoints(addPoints, email)

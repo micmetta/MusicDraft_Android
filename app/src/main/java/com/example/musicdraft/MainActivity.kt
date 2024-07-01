@@ -61,6 +61,7 @@ import com.example.musicdraft.sections.Friends
 import com.example.musicdraft.sections.Home
 import com.example.musicdraft.sections.Matchmaking
 import com.example.musicdraft.sections.Screens
+import com.example.musicdraft.sections.SelectDeck
 import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.sections.ShowOfferReceived
 import com.example.musicdraft.sections.ShowOfferSent
@@ -73,6 +74,7 @@ import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
 import com.example.musicdraft.viewModel.HandleFriendsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 import com.example.musicdraft.viewModel.MarketplaceViewModel
+import com.example.musicdraft.viewModel.MatchmakingViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -87,6 +89,7 @@ class MainActivity : ComponentActivity() {
             val loginViewModel: LoginViewModel by viewModels()
             val handleFriendsViewModel: HandleFriendsViewModel by viewModels()
             val exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel by viewModels()
+            val matchmakingViewModel: MatchmakingViewModel by viewModels()
 
             val cardsViewModelFactory = CardsViewModelFactory(application, loginViewModel)
             val cardsViewModel: CardsViewModel = ViewModelProvider(this, cardsViewModelFactory).get(CardsViewModel::class.java)
@@ -102,7 +105,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ){
-                    Navigation(loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewModel, decksViewModel)
+                    Navigation(loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewModel, decksViewModel, matchmakingViewModel)
                     //Navigation(loginViewModel, handleFriendsViewModel,cardsViewModel,marketplaceViewModel,decksViewModel)
                 }
             }
@@ -120,7 +123,8 @@ fun Navigation(
     exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel,
     cardsViewModel: CardsViewModel,
     marketplaceViewmodel: MarketplaceViewModel,
-    decksViewModel: DeckViewModel
+    decksViewModel: DeckViewModel,
+    matchmakingViewModel: MatchmakingViewModel
 ){
     val navigationController = rememberNavController()
 
@@ -168,8 +172,13 @@ fun Navigation(
         composable(Screens.ShowOfferSent.screen){
             ShowOfferSent(navigationController, exchangeManagementCardsViewModel, cardsViewModel, loginViewModel)
         }
+
+        composable(Screens.SelectDeck.screen){
+            SelectDeck(navigationController, matchmakingViewModel, decksViewModel, loginViewModel)
+        }
+
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel, decksViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel, decksViewModel, matchmakingViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -186,7 +195,8 @@ fun MusicDraftUI(
     exchangeManagementCardsViewModel: ExchangeManagementCardsViewModel,
     cardsViewModel: CardsViewModel,
     marketplaceViewmodel: MarketplaceViewModel,
-    decksViewModel: DeckViewModel
+    decksViewModel: DeckViewModel,
+    matchmakingViewModel: MatchmakingViewModel
 ){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()
@@ -491,7 +501,7 @@ fun MusicDraftUI(
                     Marketplace(marketplaceViewmodel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Marketplace"
                 }
                 composable(Screens.Matchmaking.screen){
-                    Matchmaking() // composable che verrà aperto quando l'utente cliccherà sulla sezione "Matchmaking"
+                    Matchmaking(navControllerInitialScreens, matchmakingViewModel, decksViewModel, loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Matchmaking"
                 }
                 composable(Screens.Settings.screen){
                     Settings(navControllerInitialScreens, loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Settings"

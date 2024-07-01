@@ -1,14 +1,9 @@
 package com.example.musicdraft.model
 
 import DeckViewModel
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.DaoDeck
 import com.example.musicdraft.data.tables.deck.Deck
-import com.example.musicdraft.data.tables.user.User
-import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
-import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
-import com.example.musicdraft.database.MusicDraftDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -29,13 +24,19 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
     val namesDecks: MutableStateFlow<List<String>>? =  MutableStateFlow(emptyList())
 
     /** Flusso che contiene le carte associate ai mazzi dell'utente. */
-    val carteAssociate: MutableStateFlow<List<String>>? =  MutableStateFlow(emptyList())
+    val cardsassociate: List<String>? = null
+    val cardAssociate: MutableStateFlow<List<String>?> = MutableStateFlow(cardsassociate)
 
     /** Flusso che contiene la popolarità di un mazzo specifico. */
-    val Pop: MutableStateFlow<Float>? = MutableStateFlow<Float>(0F)
+    val Pop: MutableStateFlow<Float> = MutableStateFlow<Float>(0F)
 
     /** Flusso che indica se una carta è presente in un mazzo dell'utente. */
     val isInDeck:MutableStateFlow<Boolean> = MutableStateFlow<Boolean>(false)
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    val deckById: MutableStateFlow<Deck?> = MutableStateFlow(null)
+    ////////////////////////////////////////////////////////////////////////////////////////
+
 
     /**
      * Ottiene tutti i mazzi associati all'email dell'utente e li aggiorna nel flusso [allDecks].
@@ -45,7 +46,6 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
     fun getallDecksByEmail(email:String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
-
                 val deck = daoDeck.getAllDeckbyEmail(email)
                 deck.collect { it ->
                     allDecks.value = it
@@ -62,13 +62,10 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
     fun getNomedeck(email:String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
-
                 val N = daoDeck.getDistinctDeckNames(email)
                 N.collect { it ->
                     namesDecks?.value = it
-
                 }
-
             }
         }
     }
@@ -79,15 +76,12 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
      * @param email L'email dell'utente.
      * @param nomeMazzo Il nome del mazzo.
      */
-    fun getCarteAss(email: String,nomeMazzo:String){
+    fun getCarteAss(email: String, nomeMazzo:String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
-
                     val c = daoDeck.getDecksByNomeMazzoAndEmail(nomeMazzo,email)
                     c.collect { it ->
-                        carteAssociate?.value = it
-
-
+                        cardAssociate?.value = it
                 }
             }
         }
@@ -102,16 +96,15 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
     fun getDeckPop(email: String,nomeMazzo:String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
-
                 val c = daoDeck.getDecksPop(nomeMazzo,email)
                 c.collect { it ->
                     Pop?.value = it
-
-
                 }
             }
         }
     }
+
+
     /**
      * Inserisce un nuovo mazzo nel database.
      *
@@ -166,6 +159,21 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
         }
     }
 
+
+//    ///////////////////////////////////////////////////////
+//    fun getDeckById(id: Int){
+//        viewModel.viewModelScope.launch {
+//            withContext(Dispatchers.IO) {
+//                val deckFlow = daoDeck.getDeckById(id)
+//                deckFlow.collect { deck ->
+//                    deckById.value = deck
+//                    Log.i("DeckRepo", "deckById.value: ${deckById.value}")
+//                }
+//            }
+//        }
+//
+//    }
+//    //////////////////////////////////////////////////////
 
 
 }
