@@ -4,7 +4,6 @@ import DeckViewModel
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -56,8 +56,12 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.musicdraft.data.tables.matchmaking.MatchSummaryConcluded
 import com.example.musicdraft.data.tables.matchmaking.Matchmaking
+import com.example.musicdraft.data.tables.user.User
 import com.example.musicdraft.viewModel.LoginViewModel
 import com.example.musicdraft.viewModel.MatchmakingViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -70,7 +74,7 @@ fun Matchmaking(
 
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-
+    val NUM_POINTS_MIN = 5 // numero minimo di points richiesti per giocare un game
 
     val tabItems = listOf(
         TabItem(
@@ -158,9 +162,9 @@ fun Matchmaking(
                     .weight(1f)
             ) { page ->
                 when (page) {
-                    0 -> SearchMatch(navController, matchmakingViewModel, decksViewModel, loginViewModel)
-//                    1 -> RequestReceivedList(handleFriendsViewModel, reqReceivedCurrentUser = reqReceivedCurrentUser, infoUserCurrent)
-//                    2 -> RequestSent(handleFriendsViewModel, loginViewModel, usersFilter, usersFilterbyNickname, infoUserCurrent, reqSentFromCurrentUser = reqSentFromCurrentUser, allUsersFriendsOfCurrentUser)
+                    0 -> SearchMatch(navController, matchmakingViewModel, decksViewModel, loginViewModel, NUM_POINTS_MIN)
+                    1 -> MatchesWaiting(navController, matchmakingViewModel, decksViewModel, loginViewModel)
+                    2 -> GamesConcluded(navController, matchmakingViewModel, decksViewModel, loginViewModel, NUM_POINTS_MIN)
                 }
             }
         }
@@ -172,7 +176,8 @@ fun SearchMatch(
     navController: NavController,
     matchmakingViewModel: MatchmakingViewModel,
     decksViewModel: DeckViewModel,
-    loginViewModel: LoginViewModel
+    loginViewModel: LoginViewModel,
+    NUM_POINTS_MIN: Int // numero minimo di points richiesti per giocare un game
 ){
 
     decksViewModel.init()
@@ -181,6 +186,7 @@ fun SearchMatch(
     // finestre di dialogo:
     var showDialogSelectDeck = remember { mutableStateOf(false) }
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     Column(
         modifier = Modifier
@@ -191,10 +197,17 @@ fun SearchMatch(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "In this section you can start a game against a random player by clicking on the button below. \n\n" +
-                    "If you want to challenge a friend, you can go to the section 'Friend' and after clicking on the 'Mates' screen you can click on the fiery icon.",
-            style = MaterialTheme.typography.bodyMedium,
+            text = "In this section you can start a game against a random player by clicking on the button below. \n",
+            style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Start
+        )
+        Text(
+            text = "To start a game you will need to have at least ${NUM_POINTS_MIN} points available.\n",
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.Black)
+        )
+        Text(
+            text = "If you want to challenge a friend, you can go to the section 'Friend' and after clicking on the 'Mates' screen you can click on the fiery icon.",
+            style = MaterialTheme.typography.bodyLarge
         )
         Button(
             onClick = {
@@ -208,12 +221,8 @@ fun SearchMatch(
             Text(text = "search match")
         }
     }
-
-
-//    if(showDialogSelectDeck.value){
-//        SelectDeck(navController, matchmakingViewModel, decksViewModel, loginViewModel)
-//    }
 }
+
 
 @Composable
 fun SelectDeck(
@@ -231,16 +240,22 @@ fun SelectDeck(
     val matches by matchmakingViewModel.matching.collectAsState(null)
     val infoUserCurrent by loginViewModel.userLoggedInfo.collectAsState(initial = null)
     val opponentMatch by loginViewModel.opponentMatch.collectAsState(initial = null)
-    //val deckById by decksViewModel.deckByid.collectAsState(initial = null)
-    val associateCards by decksViewModel.associateCards.collectAsState(initial = null)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // finestre di dialogo:
-    var newMatchInsert = remember { mutableStateOf(false) }
-    var matchingFoundWinner = remember { mutableStateOf(false) }
-    var matchingFoundLooser = remember { mutableStateOf(false) }
-    var matchingFoundEquality = remember { mutableStateOf(false) }
+    val newMatchInsert = remember { mutableStateOf(false) }
+    val matchingFoundWinner = remember { mutableStateOf(false) }
+    val matchingFoundLooser = remember { mutableStateOf(false) }
+    val matchingFoundEquality = remember { mutableStateOf(false) }
+    val notSufficientPoints = remember { mutableStateOf(false) }
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    val NUM_POINTS_MIN = 5 // numero minimo di points richiesti per giocare un game
+
+    infoUserCurrent?.let {
+        Log.d("SelectDeck","infoUserCurrent: ${infoUserCurrent}")
+        matchmakingViewModel.getAllMatchesWaiting(infoUserCurrent!!.nickname) // aggiorna 'matches'
+    }
 
 
     Column(
@@ -249,12 +264,13 @@ fun SelectDeck(
             .fillMaxSize()
     ) {
         Spacer(modifier = Modifier.height(60.dp))
-        Text("I miei mazzi di Carte", style = MaterialTheme.typography.titleLarge)
+        Text("My decks of cards:", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
 
         if (decks.isEmpty()) {
             Text(
-                "Non hai ancora creato nessun mazzo",
+                "You don't have any decks yet.\n" +
+                     "Create at least one in the 'Decks' section.",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(16.dp)
             )
@@ -267,7 +283,7 @@ fun SelectDeck(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
-                            .clickable { decksViewModel.startEditingDeck(deck) }
+                            //.clickable { decksViewModel.startEditingDeck(deck) }
                     ) {
                         Column(
                             modifier = Modifier.padding(8.dp),
@@ -286,9 +302,6 @@ fun SelectDeck(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text("${card.nome_carta} (Popolarità: ${card.popolarita})")
-
-                                    // aggiorno pop media deck corrente:
-                                    pop_deck += card.popolarita
                                 }
                             }
                             Row(
@@ -296,54 +309,51 @@ fun SelectDeck(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
 
-                                //////////////////////////////////////////////////////////////////////////////////////////////////
-                                // invocazione 'getAllMatchesWithARangeOfPop' e aggiornamento pop deck selezionato:
-                                matchmakingViewModel.getAllMatchesWithARangeOfPop(pop_deck) // aggiorna 'matches'
-                                pop_deck = pop_deck/5
-                                Log.d("SelectDeck","pop_deck: ${pop_deck}")
-                                //////////////////////////////////////////////////////////////////////////////////////////////////
-
                                 Button(onClick = {
 
-                                    //matchmakingViewModel.getAllMatchesWithARangeOfPop(pop_deck) // aggiorna 'matches'
+//                                    matchmakingViewModel.getAllMatchesWithARangeOfPop(infoUserCurrent!!.nickname, pop_deck) // aggiorna 'matches'
+//
+                                    // calcolo pop deck selezionato:
+                                    for (card in deck.carte) {
+                                        pop_deck += card.popolarita
+                                    }
+                                    pop_deck = pop_deck/5
 
-                                    // 2) Controllo se ci sono altri utenti in attesa che il sistema può matchare con l'utente corrente:
-//                                    matches.let {
+                                    // controllo se il giocatore corrente ha almeno NUM_POINTS_MIN per poter giocare un game:
+                                    if(infoUserCurrent!!.points >= NUM_POINTS_MIN){
+//                                        // calcolo pop deck selezionato:
+//                                        for (card in deck.carte) {
+//                                            pop_deck += card.popolarita
+//                                        }
+                                        //pop_deck = pop_deck/5
+//                                        matchmakingViewModel.getAllMatchesWithARangeOfPop(infoUserCurrent!!.nickname, pop_deck) // aggiorna 'matches'
 
-                                    Log.d("SelectDeck","matches: ${matches}")
-                                    if(!matches.isNullOrEmpty()){
-                                            // vuol dire che ho trovato almeno un altro giocatore in attesa e quindi quello che faccio è questo:
+                                        Log.d("SelectDeck","pop_deck: ${pop_deck}")
+                                        Log.d("SelectDeck","matches: ${matches}")
+
+                                        // 1) Controllo se ci sono altri utenti in attesa che il sistema può matchare con l'utente corrente (matches):
+                                        if(!matches.isNullOrEmpty()){
                                             loginViewModel.getOpponentByNickname(matches!![0].nickname1) // aggiorna opponentMatch
+                                            // vuol dire che ho trovato almeno un altro giocatore in attesa e quindi quello che faccio è questo:
+//                                        loginViewModel.getOpponentByNickname(matches!![0].nickname1) // aggiorna opponentMatch
+                                            Log.d("SelectDeck","nickname_opponent: ${matches!![0].nickname1}")
 
+                                            //////////////////////////////////////////////////////////////
+                                            // caricamento data odierna:
 
+                                            // prendo la data corrente
+                                            val currentDate = LocalDate.now()
+                                            // definisco il formato
+                                            val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+                                            // Formatto l'oggetto LocalDate come stringa
+                                            val formattedDate = currentDate.format(formatter)
+                                            // Stampa la data formattata
+                                            Log.d("SelectDeck","formattedDate: ${formattedDate}")
+                                            //////////////////////////////////////////////////////////////
+
+                                            //////////////////////////////////////////////////////////////////
                                             // 1) seleziono l'utente in cerca di un'avversario che è in attesa da più tempo:
                                             val opponentMatching = matches!![0]
-                                            val associatedcardsdeckU1: MutableList<String> = mutableListOf()
-                                            val associatedcardsdeckU2: MutableList<String> = mutableListOf()
-
-                                            //////////////////////////////////////////////////////////////////
-                                            // aggiungo tutti gli id delle carte del mazzo dell'avversario
-                                            // alla lista 'associatedcardsdeckU1:
-                                            opponentMatch?.let { it1 ->
-                                                decksViewModel.getCarteAss(it1.nickname, opponentMatching.nameDeckU1) // aggiorna 'associateCards'
-                                            }
-                                            //////////////////////////////////////////////////////////////////
-
-                                            //////////////////////////////////////////////////////////////////
-                                            // aggiungo tutti gli id delle carte del mazzo dell'utente corrente
-                                            // alla lista 'associatedcardsdeckU2:
-                                            deck.carte.forEach { card ->
-                                                associatedcardsdeckU2.add(card.id_carta)
-                                            }
-                                            //////////////////////////////////////////////////////////////////
-
-                                            //////////////////////////////////////////////////////////////////
-                                            // aggiungo tutti gli id delle carte del mazzo dell'avversario alla lista
-                                            // 'associatedcardsdeckU1'
-                                            associateCards?.forEach { idCard ->
-                                                associatedcardsdeckU1.add(idCard)
-                                            }
-                                            //////////////////////////////////////////////////////////////////
 
                                             // 2) Vedo chi tra l'utente corrente e il suo avversario ha vinto il game:
                                             if(pop_deck > opponentMatching.popularityDeckU1){
@@ -352,13 +362,12 @@ fun SelectDeck(
                                                 val matchSummaryConcluded =
                                                     infoUserCurrent?.let { it1 ->
                                                         MatchSummaryConcluded(
+                                                            dataGame = formattedDate,
                                                             nickWinner = infoUserCurrent!!.nickname,
                                                             nickname1 = opponentMatching.nickname1,
                                                             nickname2 = it1.nickname,
                                                             nameDeckU1 = opponentMatching.nameDeckU1,
                                                             nameDeckU2 = deck.id_mazzo,
-                                                            associatedcardsDeckU1 = associatedcardsdeckU1,
-                                                            associatedcardsDeckU2 = associatedcardsdeckU2,
                                                             popularityDeckU1 = opponentMatching.popularityDeckU1,
                                                             popularityDeckU2 = pop_deck
                                                         )
@@ -368,6 +377,9 @@ fun SelectDeck(
                                                     matchmakingViewModel.insertNewSummaryMatch(matchSummaryConcluded)
 
                                                     // aggiornamento points:
+                                                    loginViewModel.addPoints(NUM_POINTS_MIN, infoUserCurrent!!.email)
+                                                    // non c'è bisogno di sottrarre points all'avversario perchè per mettersi in attesa gli erano
+                                                    // stati già sottratti NUM_POINTS_MIN.
 
                                                     // elimino la partita appena conclusa:
                                                     matchmakingViewModel.deleteMatch(opponentMatching.id)
@@ -380,13 +392,12 @@ fun SelectDeck(
                                                 val matchSummaryConcluded =
                                                     infoUserCurrent?.let { it1 ->
                                                         MatchSummaryConcluded(
+                                                            dataGame = formattedDate,
                                                             nickWinner = opponentMatching.nickname1,
                                                             nickname1 = opponentMatching.nickname1,
                                                             nickname2 = it1.nickname,
                                                             nameDeckU1 = opponentMatching.nameDeckU1,
                                                             nameDeckU2 = deck.id_mazzo,
-                                                            associatedcardsDeckU1 = associatedcardsdeckU1,
-                                                            associatedcardsDeckU2 = associatedcardsdeckU2,
                                                             popularityDeckU1 = opponentMatching.popularityDeckU1,
                                                             popularityDeckU2 = pop_deck
                                                         )
@@ -396,6 +407,9 @@ fun SelectDeck(
                                                     matchmakingViewModel.insertNewSummaryMatch(matchSummaryConcluded)
 
                                                     // aggiornamento points:
+                                                    loginViewModel.subtractPoints(NUM_POINTS_MIN, infoUserCurrent!!.email) // sottraggo points all'utente corrente
+                                                    loginViewModel.addPoints((2*NUM_POINTS_MIN), opponentMatch!!.email) // 2x perchè gli erano stati sotratti
+                                                    // NUM_POINTS_MIN per mettersi in coda
 
                                                     // elimino la partita appena conclusa:
                                                     matchmakingViewModel.deleteMatch(opponentMatching.id)
@@ -408,13 +422,12 @@ fun SelectDeck(
                                                 val matchSummaryConcluded =
                                                     infoUserCurrent?.let { it1 ->
                                                         MatchSummaryConcluded(
+                                                            dataGame = formattedDate,
                                                             nickWinner = "",
                                                             nickname1 = opponentMatching.nickname1,
                                                             nickname2 = it1.nickname,
                                                             nameDeckU1 = opponentMatching.nameDeckU1,
                                                             nameDeckU2 = deck.id_mazzo,
-                                                            associatedcardsDeckU1 = associatedcardsdeckU1,
-                                                            associatedcardsDeckU2 = associatedcardsdeckU2,
                                                             popularityDeckU1 = opponentMatching.popularityDeckU1,
                                                             popularityDeckU2 = pop_deck
                                                         )
@@ -424,14 +437,19 @@ fun SelectDeck(
                                                     matchmakingViewModel.insertNewSummaryMatch(matchSummaryConcluded)
 
                                                     // aggiornamento points:
+                                                    loginViewModel.addPoints(NUM_POINTS_MIN, infoUserCurrent!!.email)
+                                                    loginViewModel.addPoints((2*NUM_POINTS_MIN), opponentMatch!!.email) // 2x perchè gli erano stati sotratti
+                                                    // NUM_POINTS_MIN per mettersi in coda
 
                                                     // elimino la partita appena conclusa:
                                                     matchmakingViewModel.deleteMatch(opponentMatching.id)
                                                     matchingFoundEquality.value = true
                                                 }
                                             }
+                                            //////////////////////////////////////////////////////////////////
+
                                         }else{
-                                            // 3) Se 2) non va a buon fine allora creo una nuova istanza della tabella 'Matchmaking':
+                                            // 2) Se 1) non va a buon fine allora creo una nuova istanza della tabella 'Matchmaking':
                                             val matchmaking = Matchmaking(
                                                 nickname1 = infoUserCurrent!!.nickname,
                                                 nickname2 = "",
@@ -440,11 +458,18 @@ fun SelectDeck(
                                                 popularityDeckU1 = pop_deck,
                                                 popularityDeckU2 = 0f
                                             )
+
+                                            // sottraggo NUM_POINTS_MIN all'utente corrente per mettersi in coda:
+                                            loginViewModel.subtractPoints(NUM_POINTS_MIN, infoUserCurrent!!.email)
+
                                             matchmakingViewModel.insertNewMatch(matchmaking)
                                             newMatchInsert.value = true
                                         }
+                                    }else{
+                                        notSufficientPoints.value = true
+                                    }
 
-//                                    }
+
                                 }) {
                                     Text("Select")
                                 }
@@ -454,13 +479,29 @@ fun SelectDeck(
                 }
             }
 
+            if(notSufficientPoints.value){
+                AlertDialog(
+                    onDismissRequest = { notSufficientPoints.value = false },
+                    title = { Text(text = "Operation not executable") },
+                    text = { Text(text =  "You don't have enough points to play a game..\n" +
+                                          "(${NUM_POINTS_MIN} points required)") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { notSufficientPoints.value = false }
+                        ) {
+                            Text("OK")
+                        }
+                    }
+                )
+            }
+
             if (newMatchInsert.value) {
                 AlertDialog(
                     onDismissRequest = { newMatchInsert.value = false },
                     title = { Text(text = "Operation performed successfully") },
                     text = { Text(text = "You have been successfully entered into the database!\n" +
-                                         "As soon as an opponent is found the match will begin.\n\n" +
-                                         "You can go to the 'Matches waiting' section to manage pending matches.") },
+                            "As soon as an opponent is found the match will begin.\n\n" +
+                            "You can go to the 'Matches waiting' section to manage pending matches.") },
                     confirmButton = {
                         TextButton(
                             onClick = { newMatchInsert.value = false }
@@ -494,7 +535,6 @@ fun SelectDeck(
                     }
                 )
             }
-
 
             if (matchingFoundLooser.value) {
                 AlertDialog(
@@ -544,6 +584,275 @@ fun SelectDeck(
                 )
             }
 
+
         }
+    }
+}
+
+
+
+@Composable
+fun MatchesWaiting(
+    navController: NavController,
+    matchmakingViewModel: MatchmakingViewModel,
+    decksViewModel: DeckViewModel,
+    loginViewModel: LoginViewModel){
+
+    // Ottieni le informazioni sull'utente loggato
+    val infoUserCurrent by loginViewModel.userLoggedInfo.collectAsState(initial = null)
+
+    // Ottieni le partite concluse dall'utente corrente
+    val matchesWait by matchmakingViewModel.matchesWait.collectAsState(null)
+
+
+    // Carica le partite in attesa dell'utente corrente
+    infoUserCurrent?.let {
+        matchmakingViewModel.getAllMatchesWaitingByNickname(it.nickname)
+    }
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
+    ) {
+        Spacer(modifier = Modifier.height(30.dp))
+        Text("Games waiting to find an opponent:", style = MaterialTheme.typography.headlineLarge)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (matchesWait.isNullOrEmpty()) {
+            Text(
+                "You are not waiting in any match.",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.weight(1f)
+            ) {
+                items(matchesWait!!) { match ->
+                    GameCardWait(match, matchmakingViewModel)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun GameCardWait(match: Matchmaking, matchmakingViewModel: MatchmakingViewModel) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // "name deck" in nero
+                Text(
+                    "name deck: ",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.Black)
+                )
+                // Spazio per separare "name deck" da match.nameDeckU1
+                Spacer(modifier = Modifier.width(8.dp))
+                // match.nameDeckU1
+                Text(
+                    match.nameDeckU1,
+                    style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF2196F3))
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "popularity deck: ",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.Black)
+                )
+                // Spazio per separare "popularity deck" da match.popularityDeckU1
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    "${match.popularityDeckU1}",
+                    style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF2196F3))
+                )
+            }
+
+            // Pulsante "Delete" allineato a destra, al centro della card
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {
+                        // Azione che verrà eseguita quando viene premuto il pulsante Delete
+                        matchmakingViewModel.deleteMatch(match.id)
+                    },
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
+                    Text("Delete")
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun GameCard(
+    match: MatchSummaryConcluded,
+    matchmakingViewModel: MatchmakingViewModel,
+    infoUserCurrent: User?,
+    NUM_POINTS_MIN: Int
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                match.dataGame,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.DarkGray)
+            )
+
+            if (infoUserCurrent != null) {
+                if(match.nickWinner != infoUserCurrent.nickname){
+                    Text(
+                        "LOST GAME (-${NUM_POINTS_MIN} POINTS)",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color =  Color(0xFFC62828)) //dard red
+                    )
+                }else if(match.nickWinner == infoUserCurrent.nickname){
+                    Text(
+                        "GAME WON (+${NUM_POINTS_MIN} POINTS)",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color(0xFF388E3C)) //dard green
+                    )
+                }else{
+                    Text(
+                        "GAME DRAWN (+${NUM_POINTS_MIN} POINTS)",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color(0xFF1976D2)) //dard blue
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            if(match.nickWinner != ""){
+                Text(
+                    "Winner: ${match.nickWinner}",
+                    style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF388E3C)) //dard green
+                )
+
+                if (match.nickWinner == match.nickname1) {
+                    PlayerInfo("Player 1", match.nickname1, match.nameDeckU1, match.popularityDeckU1)
+                    Text(
+                        "Looser: ${match.nickname2}",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFFC62828)) //dard red
+                    )
+                    PlayerInfo("Player 2", match.nickname2, match.nameDeckU2, match.popularityDeckU2)
+                } else{
+                    PlayerInfo("Player 2", match.nickname2, match.nameDeckU2, match.popularityDeckU2)
+                    Text(
+                        "Looser: ${match.nickname1}",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFFC62828)) //dard red
+                    )
+                    PlayerInfo("Player 1", match.nickname1, match.nameDeckU1, match.popularityDeckU1)
+                }
+            }else{
+                Text(
+                    "Match drawn:",
+                    style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF1976D2)) //dard blue
+                )
+                PlayerInfo("Player 1", match.nickname1, match.nameDeckU1, match.popularityDeckU1)
+                PlayerInfo("Player 2", match.nickname2, match.nameDeckU2, match.popularityDeckU2)
+            }
+
+//            // Pulsante "Delete" allineato a destra, al centro della card
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.End,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Button(
+//                    onClick = {
+//                        // Azione da eseguire quando viene premuto il pulsante Delete
+//                        matchmakingViewModel.deleteSummaryMatch(match.id)
+//                    },
+//                    modifier = Modifier.padding(end = 16.dp)
+//                ) {
+//                    Text("Delete")
+//                }
+//            }
+        }
+    }
+}
+
+
+
+@Composable
+fun GamesConcluded(
+    navController: NavController,
+    matchmakingViewModel: MatchmakingViewModel,
+    decksViewModel: DeckViewModel,
+    loginViewModel: LoginViewModel,
+    NUM_POINTS_MIN: Int
+) {
+    // Ottieni le informazioni sull'utente loggato
+    val infoUserCurrent by loginViewModel.userLoggedInfo.collectAsState(initial = null)
+
+    // Ottieni le partite concluse dall'utente corrente
+    val matchesConcludedByCurrentUser by matchmakingViewModel.matchesConcludedByCurrentUser.collectAsState(null)
+
+    // Carica le partite concluse dell'utente corrente
+    infoUserCurrent?.let {
+        if (matchesConcludedByCurrentUser == null) {
+            matchmakingViewModel.getAllGamesConludedByNickname(it.nickname)
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("Games Finished", style = MaterialTheme.typography.headlineLarge)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (matchesConcludedByCurrentUser.isNullOrEmpty()) {
+            Text(
+                "You haven't played any games yet.",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.weight(1f)
+            ) {
+                items(matchesConcludedByCurrentUser!!) { match ->
+                    GameCard(match, matchmakingViewModel, infoUserCurrent, NUM_POINTS_MIN)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun PlayerInfo(playerLabel: String, nickname: String, deckName: String, deckPopularity: Float) {
+    Column(
+        modifier = Modifier.padding(start = 16.dp)
+    ) {
+        Text("$playerLabel: $nickname", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.Black))
+        Text("Deck: $deckName", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.Black))
+        Text("Popularity: $deckPopularity", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = Color.Black))
     }
 }

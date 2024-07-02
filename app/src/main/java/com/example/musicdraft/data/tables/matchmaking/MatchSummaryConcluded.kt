@@ -8,13 +8,12 @@ import androidx.room.PrimaryKey
 data class MatchSummaryConcluded(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    var dataGame: String,
     var nickWinner: String,
     var nickname1: String,
     var nickname2: String,
     var nameDeckU1: String,
     var nameDeckU2: String,
-    var associatedcardsDeckU1: List<String>,
-    var associatedcardsDeckU2: List<String>,
     var popularityDeckU1: Float,
     var popularityDeckU2: Float,
 )

@@ -176,7 +176,6 @@ fun Navigation(
         composable(Screens.SelectDeck.screen){
             SelectDeck(navigationController, matchmakingViewModel, decksViewModel, loginViewModel)
         }
-
         composable(Screens.MusicDraftUI.screen){
             MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel, decksViewModel, matchmakingViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }

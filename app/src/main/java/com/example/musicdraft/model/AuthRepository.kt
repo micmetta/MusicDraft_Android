@@ -13,6 +13,7 @@ import com.google.firebase.auth.auth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -33,11 +34,16 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
     val allUsersFriendsOfCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
     val allUsersrReceivedRequestByCurrentUser: MutableStateFlow<List<User>?> = MutableStateFlow(users)
     val utilityFriendInfo: MutableStateFlow<User?> = MutableStateFlow(null)
+
     /////////////////////////////////////////////////////////////////////////////
     // avversario randomico trovato nella partita veloce:
-    val opponentMatch: MutableStateFlow<User?> = MutableStateFlow(null)
+    //val opponentMatch: MutableStateFlow<User?> = MutableStateFlow(null)
     /////////////////////////////////////////////////////////////////////////////
 
+    // MutableStateFlow per gestire lo stato interno
+    val user: User = User(-1, "", "", false, -1)
+    private val _opponentMatch = MutableStateFlow<User?>(user)
+    val opponentMatch: StateFlow<User?> get() = _opponentMatch
 
     /*
     - Questa funzione verrà invocata dal loginViewModel nel momento in cui l'utente cliccherà sull'interfaccia
@@ -126,12 +132,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
     fun getOpponentByNickname(nickname: String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val userFlow = dao.getUserByNickname(nickname)
+                val userFlow = dao.getOpponentByNickname(nickname)
                 userFlow.collect { user ->
-                    opponentMatch.value = user
+                    _opponentMatch.value = user
                     Log.i("AuthRepository", "opponentMatch: ${opponentMatch.value}")
                 }
-
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.example.musicdraft.model
 
 import DeckViewModel
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.DaoDeck
 import com.example.musicdraft.data.tables.deck.Deck
@@ -76,16 +77,45 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
      * @param email L'email dell'utente.
      * @param nomeMazzo Il nome del mazzo.
      */
+//    fun getCarteAss(email: String, nomeMazzo:String){
+//        viewModel.viewModelScope.launch {
+//            withContext(Dispatchers.IO) {
+//                    val c = daoDeck.getDecksByNomeMazzoAndEmail(nomeMazzo, email)
+//                    c.collect { it ->
+//                        cardAssociate?.value = it
+//                }
+//            }
+//            Log.d("DeckRepo","cardAssociate?.value: ${cardAssociate?.value}")
+//        }
+//    }
+//    fun getCarteAss(email: String, nomeMazzo:String){
+//        viewModel.viewModelScope.launch {
+//            withContext(Dispatchers.IO) {
+//                val c = daoDeck.getDecksByNomeMazzoAndEmail(nomeMazzo, email)
+//                c.collect { it ->
+//                    cardAssociate?.value = it
+//                }
+//            }
+//            Log.d("DeckRepo","cardAssociate?.value: ${cardAssociate?.value}")
+//        }
+//    }
+
     fun getCarteAss(email: String, nomeMazzo:String){
+        //Log.i("DeckRepo", "cardAssociate: ${cardAssociate}")
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                    val c = daoDeck.getDecksByNomeMazzoAndEmail(nomeMazzo,email)
-                    c.collect { it ->
-                        cardAssociate?.value = it
+                val cards = daoDeck.getDecksByNomeMazzoAndEmail(nomeMazzo, email)
+                cards.collect { response ->
+                    cardAssociate.value = response
+                    Log.i("DeckRepo", "email: ${email}")
+                    Log.i("DeckRepo", "nomeMazzo: ${nomeMazzo}")
+                    Log.i("DeckRepo", "cardAssociate.value: ${cardAssociate.value}")
                 }
             }
         }
     }
+
+
 
     /**
      * Ottiene la popolarità di un mazzo specifico dell'utente e la aggiorna nel flusso [Pop].

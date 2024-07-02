@@ -15,6 +15,9 @@ class MatchmakingRepository(val viewModel: MatchmakingViewModel, val dao: Matchm
     val matchings: List<Matchmaking>? = null
     val matching: MutableStateFlow<List<Matchmaking>?> = MutableStateFlow(matchings)
 
+    val matchingsWait: List<Matchmaking>? = null
+    val matchesWait: MutableStateFlow<List<Matchmaking>?> = MutableStateFlow(matchingsWait)
+
 
 
     fun insertNewMatch(matchmaking: Matchmaking){
@@ -30,10 +33,22 @@ class MatchmakingRepository(val viewModel: MatchmakingViewModel, val dao: Matchm
     }
 
     // aggiorna matching:
-    fun getAllMatchesWithARangeOfPop(pop: Float) {
+//    fun getAllMatchesWithARangeOfPop(nicknameUserCurrent:String, pop: Float) {
+//        viewModel.viewModelScope.launch {
+//            withContext(Dispatchers.IO) {
+//                val match = dao.getAllMatchesWithARangeOfPop(nicknameUserCurrent, pop)
+//                match.collect { matchFound ->
+//                    matching.value = matchFound
+//                    Log.i("MatchmakingRepository", "matching.value: ${matching.value}")
+//                }
+//            }
+//        }
+//    }
+
+    fun getAllMatchesWaiting(nicknameUserCurrent:String) {
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val match = dao.getAllMatchesWithARangeOfPop(pop)
+                val match = dao.getAllMatchesWaiting(nicknameUserCurrent)
                 match.collect { matchFound ->
                     matching.value = matchFound
                     Log.i("MatchmakingRepository", "matching.value: ${matching.value}")
@@ -41,5 +56,19 @@ class MatchmakingRepository(val viewModel: MatchmakingViewModel, val dao: Matchm
             }
         }
     }
+
+
+    fun getAllMatchesWaitingByNickname(nickname: String) {
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                val match = dao.getAllMatchesWaitingByNickname(nickname)
+                match.collect { matchWait ->
+                    matchesWait.value = matchWait
+                    Log.i("MatchmakingRepository", "matchesWait.value: ${matchesWait.value}")
+                }
+            }
+        }
+    }
+
 
 }

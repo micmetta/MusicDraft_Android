@@ -35,7 +35,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChangeCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Markunread
 import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material.icons.filled.Person
@@ -335,9 +334,9 @@ fun RequestMatesList(
                             }) {
                                 Icon(imageVector = Icons.Default.ChangeCircle, contentDescription = "exchangeCards")
                             }
-                            IconButton(onClick = { /* Azione quando si clicca sull'icona 2 */ }) {
-                                Icon(imageVector = Icons.Default.LocalFireDepartment, contentDescription = "ChallengeFriend")
-                            }
+//                            IconButton(onClick = { /* Azione quando si clicca sull'icona 2 */ }) {
+//                                Icon(imageVector = Icons.Default.LocalFireDepartment, contentDescription = "ChallengeFriend")
+//                            }
                             IconButton(onClick = {
                                 // quando clicco su questa icona, viene chiesto all'utente se è sicuro di voler cancellare
                                 // dalla sua lista amici l'amico che ha selezionato e se conferma allora verrà cancellata dal
@@ -2562,8 +2561,6 @@ fun AddCardComposable(
         }
     }
 }
-
-
 
 
 /*

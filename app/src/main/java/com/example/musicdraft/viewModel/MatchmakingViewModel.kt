@@ -27,6 +27,7 @@ class MatchmakingViewModel(application: Application) : AndroidViewModel(applicat
     private val matchSummaryConcludedRepository: MatchSummaryConcludedRepository = MatchSummaryConcludedRepository(this, matchSummaryConcludedDao!!)
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    var matchesConcludedByCurrentUser =  matchSummaryConcludedRepository.matchesConcludedByCurrentUser
 
 
 
@@ -38,6 +39,10 @@ class MatchmakingViewModel(application: Application) : AndroidViewModel(applicat
 
     /////////////////////////////////////////////////////////////////////////////
     var matching = matchmakingRepository.matching
+    /////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////
+    var matchesWait = matchmakingRepository.matchesWait
     /////////////////////////////////////////////////////////////////////////////
 
 
@@ -58,11 +63,22 @@ class MatchmakingViewModel(application: Application) : AndroidViewModel(applicat
         matchSummaryConcludedRepository.deleteSummaryMatch(id)
     }
 
-
-
     // aggiorna matching:
-    fun getAllMatchesWithARangeOfPop(pop: Float) {
-        return matchmakingRepository.getAllMatchesWithARangeOfPop(pop)
+//    fun getAllMatchesWithARangeOfPop(nicknameUserCurrent:String, pop: Float) {
+//        return matchmakingRepository.getAllMatchesWithARangeOfPop(nicknameUserCurrent, pop)
+//    }
+
+    fun getAllMatchesWaiting(nicknameUserCurrent:String) {
+        return matchmakingRepository.getAllMatchesWaiting(nicknameUserCurrent)
+    }
+
+    // aggiorna tutte le partite giocate dall'utente corrente
+    fun getAllGamesConludedByNickname(nickname: String){
+        return matchSummaryConcludedRepository.getAllGamesConludedByNickname(nickname)
+    }
+
+    fun getAllMatchesWaitingByNickname(nickname: String) {
+        return matchmakingRepository.getAllMatchesWaitingByNickname(nickname)
     }
 
 }

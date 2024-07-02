@@ -17,6 +17,15 @@ interface MatchmakingDao {
     - Mi restituisce tutte le partite dove non è stato trovato ancora il secondo giocatore e inoltre la forza massima del mazzo del primo
       giocatore è compresa tra: (pop-50 < pop <= pop+50)
     */
-    @Query("SELECT * FROM Matchmaking WHERE nickname2 = '' AND popularityDeckU1 > :pop - 50 OR popularityDeckU1 <= :pop + 50")
-    fun getAllMatchesWithARangeOfPop(pop: Float): Flow<List<Matchmaking>>
+//    @Query("SELECT * FROM Matchmaking WHERE nickname1 != :nicknameUserCurrent AND nickname2 = '' AND popularityDeckU1 > :pop - 50")
+//    fun getAllMatchesWithARangeOfPop_1(nicknameUserCurrent:String, pop: Float): Flow<List<Matchmaking>>
+
+//    @Query("SELECT * FROM Matchmaking WHERE nickname1 != :nicknameUserCurrent AND popularityDeckU1 <= :pop + 50")
+//    fun getAllMatchesWithARangeOfPop_2(nicknameUserCurrent:String, pop: Float): Flow<List<Matchmaking>>
+
+    @Query("SELECT * FROM Matchmaking WHERE nickname1 != :nicknameUserCurrent AND nickname2 = '' LIMIT 100")
+    fun getAllMatchesWaiting(nicknameUserCurrent:String): Flow<List<Matchmaking>>
+
+    @Query("SELECT * FROM Matchmaking WHERE (nickname1 = :nickname)")
+    fun getAllMatchesWaitingByNickname(nickname: String): Flow<List<Matchmaking>>
 }
