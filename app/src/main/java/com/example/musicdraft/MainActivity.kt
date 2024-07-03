@@ -204,6 +204,7 @@ fun MusicDraftUI(
 
     val navigationManager = remember { NavigationManager() } // istanzio il navigationManager
     val num_max_new_screens = 10 // num max di schermate che potranno essere inserite nello stack.
+    val NUM_POINTS_MIN = 100 // numero minimo di points richiesti per giocare un game
 
     // Il "ModalNavigationDrawer" sarà proprio il menù laterale sulla sinistra in verticale tramite il quale
     // l'utente potrà navigare all'interno delle diverse sezioni dell'app:
@@ -484,7 +485,7 @@ fun MusicDraftUI(
             // - La Schermata iniziale sarà "Home"
             NavHost(navController = navigationController, startDestination = Screens.Home.screen){
                 composable(Screens.Home.screen){
-                    Home(loginViewModel, handleFriendsViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
+                    Home(loginViewModel, handleFriendsViewModel, matchmakingViewModel, cardsViewModel, NUM_POINTS_MIN) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
                 }
                 composable(Screens.Friends.screen){
 //                    Friends(navigationController) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Home"
@@ -500,7 +501,7 @@ fun MusicDraftUI(
                     Marketplace(marketplaceViewmodel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Marketplace"
                 }
                 composable(Screens.Matchmaking.screen){
-                    Matchmaking(navControllerInitialScreens, matchmakingViewModel, decksViewModel, loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Matchmaking"
+                    Matchmaking(navControllerInitialScreens, matchmakingViewModel, decksViewModel, loginViewModel, NUM_POINTS_MIN) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Matchmaking"
                 }
                 composable(Screens.Settings.screen){
                     Settings(navControllerInitialScreens, loginViewModel) // composable che verrà aperto quando l'utente cliccherà sulla sezione "Settings"

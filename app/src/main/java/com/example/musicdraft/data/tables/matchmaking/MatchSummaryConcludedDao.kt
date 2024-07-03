@@ -15,7 +15,7 @@ interface MatchSummaryConcludedDao {
     @Query("DELETE FROM MatchSummaryConcluded WHERE id = :id")
     suspend fun deleteSummaryMatch(id: Int)
 
-    @Query("SELECT * FROM MatchSummaryConcluded WHERE (nickname1 = :nickname OR nickname2 = :nickname)")
+    @Query("SELECT * FROM MatchSummaryConcluded WHERE (nickname1 = :nickname OR nickname2 = :nickname) ORDER BY id DESC")
     fun getAllGamesConludedByNickname(nickname: String): Flow<List<MatchSummaryConcluded>>
 
 }

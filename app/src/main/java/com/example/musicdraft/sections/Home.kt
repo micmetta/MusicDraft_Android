@@ -3,7 +3,6 @@ package com.example.musicdraft.sections
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,7 +22,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
@@ -44,17 +41,37 @@ import co.yml.charts.ui.linechart.model.LineType
 import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
+import com.example.musicdraft.data.tables.matchmaking.MatchSummaryConcluded
 import com.example.musicdraft.data.tables.user.User
+import com.example.musicdraft.viewModel.CardsViewModel
 import com.example.musicdraft.viewModel.HandleFriendsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
+import com.example.musicdraft.viewModel.MatchmakingViewModel
 
 
 @Composable
-fun Home(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsViewModel) {
+fun Home(
+    loginViewModel: LoginViewModel,
+    handleFriendsViewModel: HandleFriendsViewModel,
+    matchmakingViewModel: MatchmakingViewModel,
+    cardsViewModel: CardsViewModel,
+    NUM_POINTS_MIN: Int
+) {
 
     val infoUserCurrent by loginViewModel.userLoggedInfo.collectAsState(initial = null)
     val allFriendsCurrentUser by handleFriendsViewModel.allFriendsCurrentUser.collectAsState(null)
     val allUsersFriendsOfCurrentUser by loginViewModel.allUsersFriendsOfCurrentUser.collectAsState(null)
+    val matchesConcludedByCurrentUser by matchmakingViewModel.matchesConcludedByCurrentUser.collectAsState(null)
+    // caricamento carte dell'utente corrente:
+    val artistsUser by cardsViewModel.acquiredCardsA.collectAsState(emptyList()) // lista artisti dell'utente corrente (Flow<List<User_Cards_Track>>)
+    val tracksUser by cardsViewModel.acquiredCardsT.collectAsState(emptyList()) // lista brani dell'utente corrente (Flow<List<User_Cards_Track>>)
+    ////////////////////////////////////////////
+
+    //////////////////////
+    var rankUser = 0f
+    var contCardsUser = 0
+    //////////////////////
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Se non c'è nessun utente attivo allora
@@ -89,6 +106,15 @@ fun Home(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsVi
             loginViewModel.getAllNicknameFriendsOfCurrentUser(emailsList)
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Aggiorno tutte le partite terminate dell'utente corrente: (aggiorna 'matchesConcludedByCurrentUser')
+        matchmakingViewModel.getAllGamesConludedByNickname(infoUserCurrent!!.nickname)
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // richiesta aggiornamento carte artisti/brani dell'utente:
+        cardsViewModel.getallcards()
+        ////////////////////////////////////////////
 
         Log.d("Home", "Sono dentro la schermata Home() e..:")
         Log.d("Home", "Sono dentro la schermata Home() e l'email dell'utente è il seguente: " + infoUserCurrent!!.email)
@@ -156,11 +182,22 @@ fun Home(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsVi
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Testo "Rank" e valore "0" concatenati
-                    Text(
-                        text = "Rank: 0",
-                        style = MaterialTheme.typography.headlineMedium,
-                    )
+                    infoUserCurrent?.let { user ->
+                        artistsUser?.forEach { artistCard ->
+                            rankUser += artistCard.popolarita
+                            contCardsUser++
+                        }
+                        tracksUser?.forEach { tracksCard ->
+                            rankUser += tracksCard.popolarita
+                            contCardsUser++
+                        }
+                        rankUser = rankUser/contCardsUser
+                        //formattedRank = String.format("%.2f", rankUser)
+                        Text(
+                            text = "Rank: ${String.format("%.2f", rankUser)}",
+                            style = MaterialTheme.typography.headlineMedium,
+                        )
+                    }
                 }
             }
         }
@@ -187,7 +224,7 @@ fun Home(loginViewModel: LoginViewModel, handleFriendsViewModel: HandleFriendsVi
             )
             // creo il grafico:
             //BarChartScreen()
-            LineChartComposable(allUsersFriendsOfCurrentUser)
+            LineChartComposable(allUsersFriendsOfCurrentUser, matchesConcludedByCurrentUser, infoUserCurrent, NUM_POINTS_MIN)
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -266,207 +303,182 @@ fun FriendCard(friendUser: User) {
 
 
 @Composable
-fun LineChartComposable(allUsersFriendsOfCurrentUser: List<User>?) {
-    val steps = 10
-    val pointsData = mapOf(
-        "01-06-2022" to 40f,
-        "02-06-2022" to 90f,
-        "03-06-2022" to 0f,
-        "04-06-2022" to 60f,
-        "05-06-2022" to 10f,
-        "06-06-2022" to 80f,
-        "07-06-2022" to 45f,
-        "08-06-2022" to 39f,
-        "09-06-2022" to 100f,
-        "10-06-2022" to 90f,
-    )
+fun LineChartComposable(
+    allUsersFriendsOfCurrentUser: List<User>?,
+    matchesConcludedByCurrentUser: List<MatchSummaryConcluded>?,
+    infoUserCurrent: User?,
+    NUM_POINTS_MIN: Int
+) {
 
-    // Estraggo le chiavi (le date) dalla mappa e ordino le date
-    val sortedDates = pointsData.keys.toList().sorted()
+    Log.d("LineChartComposable", "matchesConcludedByCurrentUser: ${matchesConcludedByCurrentUser}")
+    if (matchesConcludedByCurrentUser != null) {
 
-    // Crea i punti utilizzando i valori float corrispondenti alle date
-    val points = sortedDates.mapIndexed { index, date ->
-        Point(index.toFloat(), pointsData[date]!!)
-    }
+        val steps = matchesConcludedByCurrentUser.size
+        val pointsData = mutableMapOf<String, Int>() // mappa vuota
 
-    val xAxisData = AxisData.Builder()
-        .axisStepSize(100.dp)
-        .backgroundColor(Color.Transparent)
-        .steps(points.size - 1)
-        .labelData { i -> sortedDates[i] } // Utilizza le date come etichette sull'asse x
-        .labelAndAxisLinePadding(10.dp)
-        .axisLineColor(MaterialTheme.colorScheme.tertiary)
-        .axisLabelColor(MaterialTheme.colorScheme.tertiary)
-        .build()
+        if(matchesConcludedByCurrentUser.size > 10){
+            // inserisco nel grafico i punteggi solamente delle ultime 10 partite:
+            val last10Matches = matchesConcludedByCurrentUser.take (10)
 
-    val yAxisData = AxisData.Builder()
-        .steps(steps)
-        .backgroundColor(Color.Transparent)
-        .labelAndAxisLinePadding(20.dp)
-        .labelData { i ->
-            val yScale = 100 / steps // 100 = numero max asse y
-            (i * yScale).toString()
-        }
-        .axisLineColor(MaterialTheme.colorScheme.tertiary)
-        .axisLineColor(MaterialTheme.colorScheme.tertiary)
-        .build()
-
-    val lineChartData = LineChartData(
-        linePlotData = LinePlotData(
-            lines = listOf(
-                Line(
-                    dataPoints = points,
-                    LineStyle(
-                        color = MaterialTheme.colorScheme.tertiary,
-                        lineType = LineType.SmoothCurve(isDotted = false)
-                    ),
-                    IntersectionPoint(
-                        color = MaterialTheme.colorScheme.tertiary
-                    ),
-                    SelectionHighlightPoint(color = MaterialTheme.colorScheme.primary),
-                    ShadowUnderLine(
-                        alpha = 0.5f,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.inversePrimary,
-                                Color.Transparent
-                            )
+            // inserisco nel grafico tutte le partite
+            last10Matches.forEach { matchConcluded ->
+                if (matchConcluded.nickWinner == infoUserCurrent!!.nickname || matchConcluded.nickWinner == "") { // l'utente corrente ha vinto o ha pareggiato il game
+                    if (matchConcluded.dataGame in pointsData) { // controllo se la data del match corrente è già presente nella mappa
+                        Log.d(
+                            "LineChartComposable",
+                            "La data ${matchConcluded.dataGame} è già presente nella mappa."
                         )
-                    ),
-                    SelectionHighlightPopUp()
-                )
+                        pointsData[matchConcluded.dataGame] =
+                            pointsData[matchConcluded.dataGame]!! + NUM_POINTS_MIN
+                    } else {
+                        Log.d(
+                            "LineChartComposable",
+                            "La data ${matchConcluded.dataGame} NON è già presente nella mappa."
+                        )
+                        pointsData[matchConcluded.dataGame] = NUM_POINTS_MIN
+                    }
+                } else { // l'utente corrente ha perso
+                    if (matchConcluded.dataGame in pointsData) { // controllo se la data del match corrente è già presente nella mappa
+                        Log.d(
+                            "LineChartComposable",
+                            "La data ${matchConcluded.dataGame} è già presente nella mappa."
+                        )
+                        pointsData[matchConcluded.dataGame] =
+                            pointsData[matchConcluded.dataGame]!! - NUM_POINTS_MIN
+                    } else {
+                        Log.d(
+                            "LineChartComposable",
+                            "La data ${matchConcluded.dataGame} NON è già presente nella mappa."
+                        )
+                        pointsData[matchConcluded.dataGame] = -NUM_POINTS_MIN
+                    }
+                }
+            }
+
+
+        }else {
+
+            //Log.d("LineChartComposable", "matchesConcludedByCurrentUser.take (2): ${matchesConcludedByCurrentUser.take (2)}")
+
+            // aggiungo in cima come primo elemento un elemento fittizio in modo tale da migliorare la visualizzazione del grafico:
+            pointsData[""] = 0
+
+            // inserisco nel grafico tutte le partite
+            matchesConcludedByCurrentUser.forEach { matchConcluded ->
+                if (matchConcluded.nickWinner == infoUserCurrent!!.nickname || matchConcluded.nickWinner == "") { // l'utente corrente ha vinto o ha pareggiato il game
+                    if (matchConcluded.dataGame in pointsData) { // controllo se la data del match corrente è già presente nella mappa
+                        Log.d(
+                            "LineChartComposable",
+                            "La data ${matchConcluded.dataGame} è già presente nella mappa."
+                        )
+                        pointsData[matchConcluded.dataGame] = pointsData[matchConcluded.dataGame]!! + NUM_POINTS_MIN
+                    } else {
+                        Log.d(
+                            "LineChartComposable",
+                            "La data ${matchConcluded.dataGame} NON è già presente nella mappa."
+                        )
+                        pointsData[matchConcluded.dataGame] = NUM_POINTS_MIN
+                    }
+                } else { // l'utente corrente ha perso
+                    if (matchConcluded.dataGame in pointsData) { // controllo se la data del match corrente è già presente nella mappa
+                        Log.d(
+                            "LineChartComposable",
+                            "La data ${matchConcluded.dataGame} è già presente nella mappa."
+                        )
+                        pointsData[matchConcluded.dataGame] =
+                            pointsData[matchConcluded.dataGame]!! - NUM_POINTS_MIN
+                    } else {
+                        Log.d(
+                            "LineChartComposable",
+                            "La data ${matchConcluded.dataGame} NON è già presente nella mappa."
+                        )
+                        pointsData[matchConcluded.dataGame] = -NUM_POINTS_MIN
+                    }
+                }
+            }
+        }
+
+
+        // Estraggo le chiavi (le date) dalla mappa e ordino le date
+        val sortedDates = pointsData.keys.toList().sorted()
+
+        // Crea i punti utilizzando i valori float corrispondenti alle date
+        val points = sortedDates.mapIndexed { index, date ->
+//            Point(index.toFloat(), pointsData[date]!!) // c'era prima
+            //android.graphics.Point(index, pointsData[date]!!)
+            Point(index.toFloat(), pointsData[date]!!.toFloat())
+        }
+
+        val xAxisData = AxisData.Builder()
+            .axisStepSize(100.dp)
+            .backgroundColor(Color.Transparent)
+            .steps(points.size - 1)
+            .labelData { i -> sortedDates[i] } // Utilizza le date come etichette sull'asse x
+            .labelAndAxisLinePadding(10.dp)
+            .axisLineColor(MaterialTheme.colorScheme.tertiary)
+            .axisLabelColor(MaterialTheme.colorScheme.tertiary)
+            .build()
+
+        val yAxisData = AxisData.Builder()
+            .steps(steps)
+            .backgroundColor(Color.Transparent)
+            .labelAndAxisLinePadding(20.dp)
+            .labelData { i ->
+                val yScale = 100 / steps // 100 = numero max asse y
+                (i * yScale).toString()
+            }
+            .axisLineColor(MaterialTheme.colorScheme.tertiary)
+            .axisLineColor(MaterialTheme.colorScheme.tertiary)
+            .build()
+
+        val lineChartData = LineChartData(
+            linePlotData = LinePlotData(
+                lines = listOf(
+                    Line(
+                        dataPoints = points,
+                        LineStyle(
+                            color = MaterialTheme.colorScheme.tertiary,
+                            lineType = LineType.SmoothCurve(isDotted = false)
+                        ),
+                        IntersectionPoint(
+                            color = MaterialTheme.colorScheme.tertiary
+                        ),
+                        SelectionHighlightPoint(color = MaterialTheme.colorScheme.primary),
+                        ShadowUnderLine(
+                            alpha = 0.5f,
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.inversePrimary,
+                                    Color.Transparent
+                                )
+                            )
+                        ),
+                        SelectionHighlightPopUp()
+                    )
+                ),
             ),
-        ),
-        backgroundColor = MaterialTheme.colorScheme.surface,
-        xAxisData = xAxisData,
-        yAxisData = yAxisData,
-        gridLines = GridLines(color = MaterialTheme.colorScheme.outlineVariant)
-    )
-
-    if (!allUsersFriendsOfCurrentUser.isNullOrEmpty()){
-        LineChart(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(230.dp), // se ci sono amici allora il grafico sarà più piccolo
-            lineChartData = lineChartData
-        )
-    }else{
-        LineChart(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp),
-            lineChartData = lineChartData
-        )
-    }
-
-}
-
-
-//@Composable
-//fun BarChartScreen() {
-//    val stepSize = 5
-//    val barsData = DataUtils.getBarChartData(
-//        listSize = 8,
-//        maxRange = 8,
-//        barChartType = BarChartType.VERTICAL,
-//        dataCategoryOptions = DataCategoryOptions()
-//    )
-//
-//    // Lista di date specificate manualmente
-//    val dates = listOf("01/06", "02/06", "03/06", "04/06", "05/06", "06/06", "07/06", "08/06")
-//
-//
-//    val xAxisData = AxisData.Builder()
-//        .axisStepSize(100.dp)
-//        .steps(barsData.size - 1)
-//        .labelAndAxisLinePadding(40.dp)
-//        .axisLabelAngle(20f)
-//        .labelData { index -> barsData[index].label }
-//        .axisLineColor(MaterialTheme.colorScheme.tertiary)
-//        .axisLabelColor(MaterialTheme.colorScheme.tertiary)
-//        .build()
-//
-//    val yAxisData = AxisData.Builder()
-//        .steps(stepSize)
-//        .labelAndAxisLinePadding(20.dp)
-//        .axisOffset(20.dp)
-//        .labelData {index -> (index * (100 / stepSize)).toString()}
-//        .axisLineColor(MaterialTheme.colorScheme.tertiary)
-//        .axisLineColor(MaterialTheme.colorScheme.tertiary)
-//        .build()
-//
-//    val barChartData = BarChartData(
-//        chartData = barsData,
-//        xAxisData = xAxisData,
-//        yAxisData = yAxisData,
-//        backgroundColor = MaterialTheme.colorScheme.surface
-//    )
-//
-//    Column(
-//        modifier = Modifier.fillMaxSize(),
-//        verticalArrangement = Arrangement.Bottom
-//    ) {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(350.dp)
-//                .padding(start = 50.dp) // Aggiungi margine a sinistra per l'asse x
-//        ) {
-//            BarChart(
-//                modifier = Modifier.fillMaxSize(),
-//                barChartData = barChartData
-//            )
-//        }
-//        LazyRow(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(horizontal = 50.dp),
-//            horizontalArrangement = Arrangement.spacedBy(20.dp)
-//        ) {
-//            items(dates) { date ->
-//                Text(
-//                    text = date,
-//                    style = MaterialTheme.typography.bodySmall,
-//                    modifier = Modifier.width(60.dp)
-//                )
-//            }
-//        }
-//    }
-//}
-
-
-@Composable
-fun PlayerCard(playerName: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
-    ) {
-        Text(
-            text = playerName,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(12.dp)
-        )
-    }
-}
-
-@Composable
-fun OnlinePlayerIndicator(playerName: String) {
-    Column(
-        modifier = Modifier.size(48.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .background(MaterialTheme.colorScheme.secondary)
-                .clip(androidx.compose.foundation.shape.CircleShape)
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            xAxisData = xAxisData,
+            yAxisData = yAxisData,
+            gridLines = GridLines(color = MaterialTheme.colorScheme.outlineVariant)
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        if (!allUsersFriendsOfCurrentUser.isNullOrEmpty()){
+            LineChart(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(230.dp), // se ci sono amici allora il grafico sarà più piccolo
+                lineChartData = lineChartData
+            )
+        }else{
+            LineChart(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp),
+                lineChartData = lineChartData
+            )
+        }
 
-        Text(text = playerName, style = MaterialTheme.typography.bodySmall)
     }
 }
 

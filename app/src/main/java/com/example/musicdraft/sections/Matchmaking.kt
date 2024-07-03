@@ -69,12 +69,12 @@ fun Matchmaking(
     navController: NavController,
     matchmakingViewModel: MatchmakingViewModel,
     decksViewModel: DeckViewModel,
-    loginViewModel: LoginViewModel
+    loginViewModel: LoginViewModel,
+    NUM_POINTS_MIN: Int
     ) {
 
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val NUM_POINTS_MIN = 5 // numero minimo di points richiesti per giocare un game
 
     val tabItems = listOf(
         TabItem(

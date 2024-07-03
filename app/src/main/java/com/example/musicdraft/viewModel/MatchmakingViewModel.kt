@@ -27,15 +27,9 @@ class MatchmakingViewModel(application: Application) : AndroidViewModel(applicat
     private val matchSummaryConcludedRepository: MatchSummaryConcludedRepository = MatchSummaryConcludedRepository(this, matchSummaryConcludedDao!!)
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /////////////////////////////////////////////////////////////////////////////
     var matchesConcludedByCurrentUser =  matchSummaryConcludedRepository.matchesConcludedByCurrentUser
-
-
-
-//    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    // - Variabili logica di controllo
-//    private val _matches = MutableStateFlow<List<Matchmaking>>(emptyList())
-//    val matches: StateFlow<List<Matchmaking>> get() = _matches
-//    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
 
     /////////////////////////////////////////////////////////////////////////////
     var matching = matchmakingRepository.matching
@@ -45,40 +39,61 @@ class MatchmakingViewModel(application: Application) : AndroidViewModel(applicat
     var matchesWait = matchmakingRepository.matchesWait
     /////////////////////////////////////////////////////////////////////////////
 
-
+    /**
+     * Inserisce un nuovo oggetto nella tabella Matchmaking.
+     *
+     * @param matchmaking Oggetto da inserire come nuova riga nella tabella.
+     */
     fun insertNewMatch(matchmaking: Matchmaking){
         matchmakingRepository.insertNewMatch(matchmaking)
     }
 
+    /**
+     * Inserisce un nuovo oggetto nella tabella MatchSummaryConcluded.
+     *
+     * @param matchSummaryConcluded Oggetto da inserire come nuova riga nella tabella.
+     */
     fun insertNewSummaryMatch(matchSummaryConcluded: MatchSummaryConcluded){
         matchSummaryConcludedRepository.insertNewSummaryMatch(matchSummaryConcluded)
     }
 
-
+    /**
+     * Elimina una riga della tabella Matchmaking.
+     *
+     * @param id Identificatore della riga da eliminare.
+     */
     fun deleteMatch(id: Int){
         matchmakingRepository.deleteMatch(id)
     }
 
-    fun deleteSummaryMatch(id: Int){
-        matchSummaryConcludedRepository.deleteSummaryMatch(id)
-    }
-
-    // aggiorna matching:
-//    fun getAllMatchesWithARangeOfPop(nicknameUserCurrent:String, pop: Float) {
-//        return matchmakingRepository.getAllMatchesWithARangeOfPop(nicknameUserCurrent, pop)
-//    }
-
+    /**
+     * Aggiorna la variabile 'matching' legata al -MutableStateFlow<List<Matchmaking>?>- di 'MatchmakingRepository'.
+     * In questo modo si riesce ad ottenere l'aggiornamento di tutte le partite (con un max di 100) nelle quali
+     * ci sono utenti che sono in attesa di trovare un avversario.
+     *
+     * @param nicknameUserCurrent Nickname dell'utente per il quale si vuole eseguire l'aggiornamento.
+     */
     fun getAllMatchesWaiting(nicknameUserCurrent:String) {
         return matchmakingRepository.getAllMatchesWaiting(nicknameUserCurrent)
     }
 
-    // aggiorna tutte le partite giocate dall'utente corrente
+    /**
+     * Aggiorna la variabile 'matchesConcludedByCurrentUser' legata al -MutableStateFlow<List<MatchSummaryConcluded>?>- di 'MatchSummaryConcludedRepository'.
+     * In questo modo si riesce ad ottenere l'aggiornamento di tutte le partite giocate dall'utente loggato.
+     *
+     * @param nickname Nickname dell'utente per il quale si vuole eseguire l'aggiornamento.
+     */
     fun getAllGamesConludedByNickname(nickname: String){
         return matchSummaryConcludedRepository.getAllGamesConludedByNickname(nickname)
     }
 
+    /**
+     * Aggiorna la variabile 'matchesWait' legata al -MutableStateFlow<List<Matchmaking>?>- di 'MatchmakingRepository'.
+     * In questo modo si riesce ad ottenere l'aggiornamento di tutte le partite nelle quali l'utente loggato è in attesa.
+     *
+     * @param nickname Nickname dell'utente per il quale si vuole eseguire l'aggiornamento.
+     */
     fun getAllMatchesWaitingByNickname(nickname: String) {
         return matchmakingRepository.getAllMatchesWaitingByNickname(nickname)
     }
-
 }
