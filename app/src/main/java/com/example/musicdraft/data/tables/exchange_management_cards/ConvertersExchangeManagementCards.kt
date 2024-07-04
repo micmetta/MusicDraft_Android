@@ -4,6 +4,11 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
+
+/**
+ * Classe che si preoccupa di eseguire la conversione dei dati di tipo List<String> per le tabelle 'ExchangeManagementCards'.
+ *
+ */
 class ConvertersExchangeManagementCards {
     @TypeConverter
     fun fromString(value: String): List<String> {

@@ -275,7 +275,6 @@ class DeckViewModel(
                     _message.value = "Deck name already exists!"
                     return
                 }
-
             }
 
             // Check if exactly 5 unique cards are selected

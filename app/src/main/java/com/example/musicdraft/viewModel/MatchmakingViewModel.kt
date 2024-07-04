@@ -8,6 +8,14 @@ import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.MatchSummaryConcludedRepository
 import com.example.musicdraft.model.MatchmakingRepository
 
+
+
+/**
+ * Viewmodel che estende la classe AndroidViewModel e che si preoccupa della gestione delle sfide tra gli utenti registrati nell'applicazione
+ * e dell'aggiornamento dei risultati dei matches ottenuti da questi ultimi.
+ * Per queste ragioni istanzia al suo interno oggetti dei seguenti tipi: MatchmakingRepository e MatchSummaryConcludedRepository
+ * @param application utilizzato come contesto dell'applicazione.
+ */
 class MatchmakingViewModel(application: Application) : AndroidViewModel(application) {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +48,7 @@ class MatchmakingViewModel(application: Application) : AndroidViewModel(applicat
     /////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Inserisce un nuovo oggetto nella tabella Matchmaking.
+     * Inserisce un nuovo oggetto nella tabella Matchmaking richiamando la funzione insertNewMatch di MatchmakingRepository.
      *
      * @param matchmaking Oggetto da inserire come nuova riga nella tabella.
      */
@@ -49,7 +57,7 @@ class MatchmakingViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     /**
-     * Inserisce un nuovo oggetto nella tabella MatchSummaryConcluded.
+     * Inserisce un nuovo oggetto nella tabella MatchSummaryConcluded richiamando la funzione insertNewSummaryMatch di MatchSummaryConcluded.
      *
      * @param matchSummaryConcluded Oggetto da inserire come nuova riga nella tabella.
      */
@@ -58,7 +66,7 @@ class MatchmakingViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     /**
-     * Elimina una riga della tabella Matchmaking.
+     * Elimina una riga della tabella Matchmaking richiamando la funzione deleteMatch di MatchmakingRepository.
      *
      * @param id Identificatore della riga da eliminare.
      */

@@ -63,6 +63,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 
+
+/**
+ * Composable che permette all'utente di poter visualizzare e gestire tutte le sezioni che fanno riferimento alla schermata Matchmaking
+ * dell'applicazione.
+ *
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Matchmaking(

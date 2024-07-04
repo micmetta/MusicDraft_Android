@@ -3,6 +3,11 @@ package com.example.musicdraft.data.tables.exchange_management_cards
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+
+/**
+ * Tabella del database che conterrà tutte le informazioni riguardanti le offerte inviate da un giocatore ad un altro.
+ *
+ */
 @Entity
 data class ExchangeManagementCards(
     @PrimaryKey(autoGenerate = true)

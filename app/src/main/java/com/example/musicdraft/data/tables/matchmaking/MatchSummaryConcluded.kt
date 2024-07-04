@@ -4,6 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
+/**
+ * Tabella del database che conterrà tutte le informazioni riguardanti i riepiloghi delle partite giocate dall'utente loggato.
+ *
+ */
 @Entity
 data class MatchSummaryConcluded(
     @PrimaryKey(autoGenerate = true)
