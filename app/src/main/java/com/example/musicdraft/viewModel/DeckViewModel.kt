@@ -83,7 +83,7 @@ class DeckViewModel(
     val deckName: StateFlow<String> get() = _deckName
 
     // Lista dei mazzi di carte dell'utente
-    var mazzi: MutableList<Mazzo> = mutableListOf()
+    var mazzi: MutableLiveData<MutableList<Mazzo>> = MutableLiveData(mutableListOf())
 
     /**
      * Classe interna per rappresentare una carta.
@@ -117,7 +117,7 @@ class DeckViewModel(
     fun init() {
         // Pulizia delle liste e recupero delle carte possedute dall'utente
         val cardList: MutableList<Cards> = mutableListOf()
-        mazzi.clear()
+        mazzi.value!!.clear()
         val email = loginViewModel.userLoggedInfo.value!!.email
 
         // Recupero delle carte degli artisti dell'utente
@@ -170,7 +170,7 @@ class DeckViewModel(
                 // Creazione di una copia profonda di cardList
                 val deepCopyCardList = cardList.map { Cards(it.id_carta, it.nome_carta, it.immagine, it.popolarita) }
                     .toMutableList()
-                mazzi.add(Mazzo(i.nome_mazzo, deepCopyCardList))
+                mazzi.value!!.add(Mazzo(i.nome_mazzo, deepCopyCardList))
                 cardList.clear()
                 c = 0
             }
@@ -187,7 +187,7 @@ class DeckViewModel(
 
         // Verifica se la carta è presente in un altro mazzo
         val cardId = card.id_carta
-        val isCardInAnotherDeck = mazzi.any { deck ->
+        val isCardInAnotherDeck = mazzi.value!!.any { deck ->
             deck.id_mazzo != selectedDeck.value!!.id_mazzo && deck.carte.any { it.id_carta == cardId }
         }
 
@@ -256,7 +256,7 @@ class DeckViewModel(
 
         if (currentDeck != null) {
             // Verifica se il nome del mazzo è unico
-            mazzi.forEach { elem ->
+            mazzi.value!!.forEach { elem ->
                 /*
                  if (names?.contains(deckName.value) == true) {
                     _message.value = "Il nome del mazzo esiste già!"
@@ -277,7 +277,7 @@ class DeckViewModel(
                 _message.value = "È necessario selezionare esattamente 5 carte uniche!"
                 return
             }*/
-            if(distinctCards(currentCards)){
+            if(!(distinctCards(currentCards))){
                 _message.value = "È necessario selezionare esattamente 5 carte uniche!"
                 return
             }
@@ -294,7 +294,7 @@ class DeckViewModel(
             }
             deckRepository.insertAllNewDeck(temp)
 
-            mazzi.add(Mazzo(deckName.value, _selectedCards.value))
+            mazzi.value!!.add(Mazzo(deckName.value, _selectedCards.value))
 
             // Reset degli stati
             annullaModifica()
@@ -338,17 +338,28 @@ class DeckViewModel(
      */
     fun eliminaMazzo(deck: Mazzo) {
         val email = loginViewModel.userLoggedInfo.value!!.email
-        mazzi.removeIf { it.id_mazzo == deck.id_mazzo }
 
+        // Crea una nuova lista a partire da quella esistente e rimuovi il mazzo
+        val updatedList = mazzi.value?.toMutableList()?.apply {
+            removeIf { it.id_mazzo == deck.id_mazzo }
+        }
+
+        // Aggiorna il valore del MutableLiveData
+        mazzi.value = updatedList
+
+        // Esegui l'operazione di eliminazione nel repository
         deckRepository.deleteDeck(deck.id_mazzo, email)
 
+        // Inizializza nuovamente i dati se necessario
         init()
+        _message.value = "Deck cancellato!"
+        return
     }
     fun modificaMazzo() {
         val email = loginViewModel.userLoggedInfo.value!!.email
         val SC =_selectedCards.value
         Log.i("nome_vecchio","${selectedDeck.value!!.id_mazzo}")
-        mazzi.removeIf { it.id_mazzo == selectedDeck.value!!.id_mazzo }
+        mazzi.value!!.removeIf { it.id_mazzo == selectedDeck.value!!.id_mazzo }
         deckRepository.deleteDeck(selectedDeck.value!!.id_mazzo,email)
         salvaMazzo()
 

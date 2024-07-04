@@ -90,7 +90,7 @@ fun Decks(viewModel: DeckViewModel) {
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (decks == null || decks.isEmpty()) {
+            if (decks == null || decks.value!!.isEmpty()) {
                 Text(
                     "Non hai ancora creato nessun mazzo",
                     style = MaterialTheme.typography.bodyLarge,
@@ -100,7 +100,7 @@ fun Decks(viewModel: DeckViewModel) {
                 LazyColumn(
                     modifier = Modifier.weight(1f)
                 ) {
-                    items(decks!!) { deck ->
+                    items(decks.value!!) { deck ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
