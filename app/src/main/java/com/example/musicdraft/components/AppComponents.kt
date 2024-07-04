@@ -62,7 +62,11 @@ import com.example.musicdraft.ui.theme.Secondary
 import com.example.musicdraft.ui.theme.TextColor
 import com.example.musicdraft.viewModel.LoginViewModel
 
-
+/**
+ * Funzione Composable per visualizzare un componente di testo normale.
+ *
+ * @param value Il testo da visualizzare.
+ */
 @Composable
 fun NormalTextComponent(value:String){
     Text(
@@ -81,6 +85,11 @@ fun NormalTextComponent(value:String){
     )
 }
 
+/**
+ * Funzione Composable per visualizzare un componente di testo di intestazione.
+ *
+ * @param value Il testo da visualizzare.
+ */
 @Composable
 fun HeadingTextComponent(value:String){
     Text(
@@ -100,16 +109,16 @@ fun HeadingTextComponent(value:String){
 }
 
 
-// - Questo composable di sotto è utilizzato per tutti i campi
-//   nei quali l'utente inserisce i dati ECCETTO IL CAMPO "password"
-//   per il quale ho creato un composable specifico chiamato "PasswordTextFieldComponent".
-// - onTextSelected: (String) -> Unit è una funzione di callback che mi permette di poter catturare la stringa di testo inserita
-//   nel MyTextFieldComponent da parte dell'utente.
-// - errorStatus: permette al composable di potersi auto-aggiornare (in termini di cambiamento di colore) nel momento in cui l'utente inserire dei dati
-//   al suo interno e quindi se i dati inseriti saranno corretti allora il composable assumerà un certo colore altrimenti ne assumerà un altro.
-//   (Il valore di questo parametro verrà modificato direttamente dal 'LoginViewModel' e ricevuto dal composable).
-//   Il valore di default è 'false'.
-// - registration: mi permette di sapere se il 'MyTextFieldComponent' si trova nella schermata di registrazione (true) o no (false) (default = false).
+/**
+ * Funzione Composable per un campo di testo, tranne per i campi password.
+ *
+ * @param loginViewModel Il ViewModel per la gestione del login.
+ * @param labelValue L'etichetta del campo di testo.
+ * @param icon L'icona da visualizzare all'interno del campo di testo.
+ * @param onTextSelected Callback per catturare la stringa di testo inserita dall'utente.
+ * @param errorStatus Stato di errore del campo di testo (predefinito = false).
+ * @param registration Indica se il campo di testo si trova nella schermata di registrazione (predefinito = false).
+ */
 @Composable
 fun MyTextFieldComponent(loginViewModel: LoginViewModel, labelValue:String, icon:ImageVector, onTextSelected:(String) -> Unit, errorStatus:Boolean = false, registration:Boolean = false){
 
@@ -190,14 +199,15 @@ fun MyTextFieldComponent(loginViewModel: LoginViewModel, labelValue:String, icon
 
 }
 
-// - Questo composable è specifico per il campo password.
-// - onTextSelected: (String) -> Unit è una funzione di callback che mi permette di poter catturare la stringa di testo inserita
-//   nel PasswordTextFieldComponent da parte dell'utente.
-// - errorStatus: permette al composable di potersi auto-aggiornare (in termini di cambiamento di colore) nel momento in cui l'utente inserire dei dati
-//   al suo interno e quindi se i dati inseriti saranno corretti allora il composable assumerà un certo colore altrimenti ne assumerà un altro.
-//   (Il valore di questo parametro verrà modificato direttamente dal 'LoginViewModel' e ricevuto dal composable).
-//   Il valore di default è 'false'.
-// - registration: mi permette di sapere se il 'MyTextFieldComponent' si trova nella schermata di registrazione (true) o no (false) (default = false).
+/**
+ * Funzione Composable specifica per il campo password.
+ *
+ * @param labelValue L'etichetta del campo password.
+ * @param icon L'icona da visualizzare all'interno del campo password.
+ * @param onTextSelected Callback per catturare la stringa di testo inserita dall'utente.
+ * @param errorStatus Stato di errore del campo password (predefinito = false).
+ * @param registration Indica se il campo password si trova nella schermata di registrazione (predefinito = false).
+ */
 @Composable
 fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelected: (String) -> Unit, errorStatus:Boolean = false, registration:Boolean = false) {
 
@@ -280,7 +290,13 @@ fun PasswordTextFieldComponent(labelValue:String, icon: ImageVector, onTextSelec
     )
 }
 
-
+/**
+ * Funzione Composable per un componente checkbox.
+ *
+ * @param value Il testo da visualizzare accanto alla checkbox.
+ * @param onTextSelected Callback per catturare il testo selezionato dall'utente.
+ * @param CheckedChange Callback per catturare il cambiamento di stato della checkbox.
+ */
 @Composable
 fun CheckboxComponent(value: String, onTextSelected: (String) -> Unit, CheckedChange :(Boolean)-> Unit){
     Row(modifier = Modifier
@@ -308,9 +324,12 @@ fun CheckboxComponent(value: String, onTextSelected: (String) -> Unit, CheckedCh
 }
 
 
-// - Il composable di sotto mi permette di
-//   inserire la stringa di accettazione dei termini d'uso
-//   rendendo cliccabile anche due parti di questa stringa
+/**
+ * Funzione Composable per creare una stringa cliccabile, utilizzata per accettare i termini d'uso.
+ *
+ * @param value Il testo da visualizzare.
+ * @param onTextSelected Callback per catturare il testo selezionato dall'utente.
+ */
 @Composable
 fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
 
@@ -357,10 +376,13 @@ fun ClickableTextComponent(value: String, onTextSelected: (String) -> Unit){
 }
 
 
-// - Utilizzato come botton per avviare la registrazione.
-// - La funzione di callback onButtonClick: () -> Unit che mi permette
-//   di poter catturare il click del button e lanciare ad esempio in 'SignUpScreen.kt'
-//   l'eventi 'loginViewModel.onEvent(UIEvent.RegisterButtonClick)'
+/**
+ * Funzione Composable per un pulsante utilizzato per avviare la registrazione.
+ *
+ * @param value Il testo da visualizzare nel pulsante.
+ * @param onButtonClick Callback per catturare il click del pulsante.
+ * @param isEnabled Indica se il pulsante è abilitato (predefinito = false).
+ */
 @Composable
 fun ButtonComponent(value: String, onButtonClick: () -> Unit, isEnabled : Boolean = false){
     Button(onClick = {
@@ -395,10 +417,13 @@ fun ButtonComponent(value: String, onButtonClick: () -> Unit, isEnabled : Boolea
 }
 
 
-// - Utilizzato come botton per effettuare il login.
-// - La funzione di callback onButtonClick: () -> Unit che mi permette
-//   di poter catturare il click del button e lanciare ad esempio in 'SignUpScreen.kt'
-//   l'eventi 'loginViewModel.onEvent(UIEvent.RegisterButtonClick)'
+/**
+ * Funzione Composable per un pulsante utilizzato per effettuare il login.
+ *
+ * @param value Il testo da visualizzare nel pulsante.
+ * @param onButtonClick Callback per catturare il click del pulsante.
+ * @param isEnabled Indica se il pulsante è abilitato (predefinito = false).
+ */
 @Composable
 fun ButtonComponentLogin(value: String, onButtonClick: () -> Unit, isEnabled : Boolean = false){
     Button(onClick = {
@@ -433,8 +458,11 @@ fun ButtonComponentLogin(value: String, onButtonClick: () -> Unit, isEnabled : B
 }
 
 
-// - Utilizzato per avere le due linee a sinistra e destra di 'or' per permettere
-//   all'utente di creare l'account o fare il login con Google o con un altro social:
+/**
+ * Funzione composable utilizzata per creare una linea di divisione con la parola "or"
+ * al centro, per permettere all'utente di creare un account o fare il login con Google
+ * o con un altro social.
+ */
 @Composable
 fun DividerTextComponent(){
     Row(
@@ -466,14 +494,14 @@ fun DividerTextComponent(){
 }
 
 
-// - Se tryingToLogin == true (comportamento di default), allora
-//   Mi permette di creare due stringhe,
-//   la prima con la scritta "Already have an account? "
-//   e di avere la seconda stringa "Login" cliccabile,
-//   ALTRIMENTI,
-//   Mi permette di creare due stringhe,
-//   la prima con la scritta "Don't have an account yet? "
-//   e di avere la seconda stringa "Register" cliccabile.
+/**
+ * Funzione composable utilizzata per creare due stringhe: la prima con la scritta
+ * "Already have an account?" o "Don't have an account yet?" e la seconda stringa
+ * "Login" o "Register" cliccabile.
+ *
+ * @param tryingToLogin Indica se l'utente sta cercando di fare il login (default: true).
+ * @param onTextSelected Funzione da eseguire quando viene cliccato il testo.
+ */
 @Composable
 fun ClickableLoginTextComponent(tryingToLogin:Boolean = true, onTextSelected: (String) -> Unit){
 
@@ -525,7 +553,13 @@ fun ClickableLoginTextComponent(tryingToLogin:Boolean = true, onTextSelected: (S
 }
 
 
-// - Composable utilizzato per la scritta "Forgot your password":
+/**
+ * Funzione composable utilizzata per creare un testo cliccabile con sottolineatura,
+ * spesso utilizzato per la scritta "Forgot your password".
+ *
+ * @param value Testo da visualizzare.
+ * @param onClick Azione da eseguire quando viene cliccato.
+ */
 @Composable
 fun ClickableUnderLinedNormalTextComponent(
     value: String,
@@ -547,7 +581,12 @@ fun ClickableUnderLinedNormalTextComponent(
         textDecoration = TextDecoration.Underline
     )
 }
-
+/**
+ * Funzione composable utilizzata per creare un dialogo con un messaggio di errore.
+ *
+ * @param message Messaggio da visualizzare nel dialogo.
+ * @param active Indica se il dialogo deve essere mostrato o meno.
+ */
 @Composable
 fun Dialog(message: String, active: Boolean){
     Column {

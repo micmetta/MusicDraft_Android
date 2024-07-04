@@ -42,9 +42,9 @@ import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import com.example.musicdraft.viewModel.LoginViewModel
 
 
-// Adesso creati il viewModel che prenderà i points dell'utente dal DB, calcolerà il suo rank in base alle carte che possiede,
-// i suoi amici.. E CAMBIA IL COLORE DEI COMPONENTI IN MODO DA RENDERLI PIU' VICINI A QUELLI DELL'app
-
+/** Adesso creati il viewModel che prenderà i points dell'utente dal DB, calcolerà il suo rank in base alle carte che possiede,
+ i suoi amici.. E CAMBIA IL COLORE DEI COMPONENTI IN MODO DA RENDERLI PIU' VICINI A QUELLI DELL'app
+*/
 @Composable
 fun Home(loginViewModel: LoginViewModel) {
 

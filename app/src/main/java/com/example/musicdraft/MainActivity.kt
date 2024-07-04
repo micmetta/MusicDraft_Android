@@ -1,7 +1,7 @@
 package com.example.musicdraft
 
-import DeckViewModel
 import Decks
+import Marketplace
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -36,20 +36,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.musicdraft.factory.CardsViewModelFactory
+import com.example.musicdraft.factory.DeckViewModelFactory
+import com.example.musicdraft.factory.MarketplaceViewModelFactory
 import com.example.musicdraft.screens_to_signUp_signIn.ForgotPassword
 import com.example.musicdraft.screens_to_signUp_signIn.LoginScreen
 import com.example.musicdraft.screens_to_signUp_signIn.SignUpScreen
 import com.example.musicdraft.screens_to_signUp_signIn.TermsAndConditionsScreen
 import com.example.musicdraft.sections.Cards
-import Marketplace
-import androidx.lifecycle.ViewModelProvider
-import com.example.musicdraft.factory.CardsViewModelFactory
-import com.example.musicdraft.factory.DeckViewModelFactory
-import com.example.musicdraft.factory.MarketplaceViewModelFactory
 import com.example.musicdraft.sections.Friends
 import com.example.musicdraft.sections.Home
 import com.example.musicdraft.sections.Matchmaking
@@ -58,29 +57,18 @@ import com.example.musicdraft.sections.Settings
 import com.example.musicdraft.ui.theme.BlueApp
 import com.example.musicdraft.ui.theme.MusicDraftTheme
 import com.example.musicdraft.viewModel.CardsViewModel
+import com.example.musicdraft.viewModel.DeckViewModel
 import com.example.musicdraft.viewModel.HandleFriendsViewModel
-import kotlinx.coroutines.launch
-import com.example.musicdraft.viewModel.MarketplaceViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
+import com.example.musicdraft.viewModel.MarketplaceViewModel
+import kotlinx.coroutines.launch
 
+/**
+ * Classe principale dell'attività che avvia l'applicazione.
+ */
 class MainActivity : ComponentActivity() {
 
-    //private lateinit var loginViewModel: LoginViewModel
 
-//    private val googleAuthUiClient by lazy {
-//        GoogleAuthUiClient(
-//            context = applicationContext,
-//            oneTapClient = Identity.getSignInClient(applicationContext)
-//        )
-//    }
-
-//    private val db by lazy {
-//        Room.databaseBuilder(
-//            applicationContext,
-//            MusicDraftDatabase::class.java,
-//            "musicdraft.db"
-//        ).build()
-//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,7 +98,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
+/**
+ * Funzione composable che gestisce la navigazione all'interno dell'applicazione.
+ *
+ * @param loginViewModel ViewModel per la gestione del login.
+ * @param handleFriendsViewModel ViewModel per la gestione degli amici.
+ * @param cardsViewModel ViewModel per la gestione delle carte.
+ * @param marketplaceViewmodel ViewModel per la gestione del marketplace.
+ * @param decksViewModel ViewModel per la gestione dei mazzi.
+ */
 @Composable
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState, launcher: ActivityResultLauncher<IntentSenderRequest>, googleAuthUiClient: GoogleAuthUiClient, context: Context){ // c'era prima
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState){
@@ -144,7 +140,16 @@ fun Navigation(
 }
 
 
-
+/**
+ * Funzione composable che rappresenta l'interfaccia utente principale dell'app una volta loggati.
+ *
+ * @param navControllerInitialScreens NavController per gestire la navigazione tra schermate.
+ * @param loginViewModel ViewModel per la gestione del login.
+ * @param handleFriendsViewModel ViewModel per la gestione degli amici.
+ * @param cardsViewModel ViewModel per la gestione delle carte.
+ * @param marketplaceViewmodel ViewModel per la gestione del marketplace.
+ * @param decksViewModel ViewModel per la gestione dei mazzi.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

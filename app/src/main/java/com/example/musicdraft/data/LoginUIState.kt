@@ -1,5 +1,13 @@
 package com.example.musicdraft.data
 
+/**
+ * Stato dell'interfaccia utente per la schermata di login.
+ *
+ * @property email Indirizzo email inserito dall'utente.
+ * @property password Password inserita dall'utente.
+ * @property emailError Indica se c'è un errore nell'indirizzo email.
+ * @property passwordError Indica se c'è un errore nella password.
+ */
 data class LoginUIState (
     var email :String = "",
     var password :String = "",

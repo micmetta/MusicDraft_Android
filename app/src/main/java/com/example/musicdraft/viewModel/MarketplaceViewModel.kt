@@ -146,8 +146,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
         viewModelScope.launch {
             val email = loginViewModel.userLoggedInfo.value!!.email
 
-            // Logica sospesa, ad esempio una chiamata al database
-            // Aggiorna il database, se necessario
+
 
             // Aggiorna le liste di tracce filtrate e le carte acquistate
             val size = _filteredBrani.value?.size
@@ -201,8 +200,6 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
         viewModelScope.launch {
             val email = loginViewModel.userLoggedInfo.value!!.email
 
-            // Logica sospesa, ad esempio una chiamata al database
-            // Aggiorna il database, se necessario
 
             // Aggiorna le liste di artisti filtrati e le carte acquistate
             val size = _filteredArtisti.value?.size

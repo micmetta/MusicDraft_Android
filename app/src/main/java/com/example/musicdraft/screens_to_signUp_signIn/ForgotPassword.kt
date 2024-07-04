@@ -27,7 +27,7 @@ import com.example.musicdraft.sections.Screens
 import com.example.musicdraft.viewModel.LoginViewModel
 
 
-/*
+/**
 - Schermata che permette all'utente di reimpostare la password tramite l'utilizzo del servizio di Firebase.
 */
 @Composable

@@ -26,7 +26,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
+/**
+ * Database principale dell'applicazione MusicDraft. Questa classe estende [RoomDatabase] e fornisce
+ * accesso ai DAO necessari per interagire con le varie tabelle del database.
+ *
+ * @property userDao DAO per la tabella degli utenti.
+ * @property artistDao DAO per la tabella degli artisti.
+ * @property trackDao DAO per la tabella dei brani musicali.
+ * @property ownArtCardsDao DAO per la tabella delle carte degli artisti possedute dagli utenti.
+ * @property ownTrackCardsDao DAO per la tabella delle carte dei brani musicali possedute dagli utenti.
+ * @property handleFriendsDao DAO per la tabella delle richieste di amicizia.
+ * @property deckDao DAO per la tabella dei mazzi.
+ */
 @Database(
     entities = [User::class,Artisti::class,Track::class, User_Cards_Artisti::class,User_Cards_Track::class, HandleFriends::class, Deck::class],
     version = 1
@@ -47,7 +58,13 @@ abstract class MusicDraftDatabase: RoomDatabase() {
         @Volatile
         private var INSTANCE: MusicDraftDatabase? = null
 
-
+        /**
+         * Ottiene un'istanza del database MusicDraft. Se il database non è stato ancora creato,
+         * viene creato e popolato con dati predefiniti.
+         *
+         * @param context Contesto dell'applicazione.
+         * @return Istanza del database MusicDraft.
+         */
         fun getDatabase(context: Context): MusicDraftDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -64,7 +81,11 @@ abstract class MusicDraftDatabase: RoomDatabase() {
                             }
                         }
                     }
-
+                    /**
+                     * Popola la tabella dei brani musicali con dati iniziali.
+                     *
+                     * @param trackDao DAO per la tabella dei brani musicali.
+                     */
                     private suspend fun populateTracks(dao: TrackDao) {
                         val filepath = "\"C:\\Users\\pietr\\Desktop\\Uni\\brani.json\""
                         val file = "[{\"id\":\"00xLoYaAPqR76gf0t06EWX\", \"anno_pubblicazione\":\"2016-01-15\", \"durata\":\"2minuti e 40secondi\", \"immagine\":\"https://i.scdn.co/image/ab67616d0000b2733a6d59ebf7adcf185541bf44\", \"nome\":\"Abby's Song\", \"popolarita\":14},\n" +
@@ -246,7 +267,11 @@ abstract class MusicDraftDatabase: RoomDatabase() {
                         dao.insertAllTracks(tracks)
                         print("cc")
                     }
-
+                    /**
+                     * Popola la tabella degli artisti con dati iniziali.
+                     *
+                     * @param artistiDao DAO per la tabella degli artisti.
+                     */
                     private suspend fun populateArtisti(dao: ArtistiDao) {
                         val filePath = "C:\\Users\\pietr\\AndroidStudioProjects\\MusicDraft_Android\\artista.json" // Replace with your JSON file path
                         val file = "[{\"id\":\"00eXgMv8c9rsPVyhs7Lyu0\", \"genere\":\"Non disponibile\", \"immagine\":\"https://i.scdn.co/image/ab67616d0000b27340bc03af5cb8b3e31137bd6e\", \"nome\":\"Baybe Heem\", \"popolarita\":16},\n" +

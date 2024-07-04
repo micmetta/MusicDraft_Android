@@ -1,3 +1,5 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -6,6 +8,8 @@ plugins {
 //    id("com.google.gms.google-services") version "4.3.15" apply false
     id("com.google.gms.google-services")
     id("kotlin-kapt")
+    id("org.jetbrains.dokka") version "1.8.10" // Assicurati di usare la versione corretta di Dokka
+
 }
 
 android {
@@ -115,6 +119,7 @@ dependencies {
     implementation ("androidx.compose.runtime:runtime-livedata:1.4.0")
     implementation ("androidx.compose.material3:material3:1.1.0")
     implementation ("io.coil-kt:coil-compose:2.1.0")
+    implementation(kotlin("stdlib"))
 
 
 
