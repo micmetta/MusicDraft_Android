@@ -1,8 +1,5 @@
 package com.example.musicdraft.sections
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-
 
 // Tutto l'insieme finito delle sottoclassi della classe sealed "Screens" di sotto
 // sono quelle presenti al suo interno.
@@ -24,5 +21,10 @@ sealed class Screens (val screen: String) {
     data object Matchmaking: Screens("matchmaking")
     data object Settings: Screens("settings")
     data object ErrorDialog: Screens("errorDialog")
-
+    data object ForgotPassword: Screens("forgotPassword")
+    data object UpdateNickname: Screens("updateEmail")
+    data object ExchangeCards: Screens("exchangeCards")
+    data object ShowOfferReceived: Screens("showOfferReceived")
+    data object ShowOfferSent: Screens("showOfferSent")
+    data object SelectDeck: Screens("selectDeck")
 }

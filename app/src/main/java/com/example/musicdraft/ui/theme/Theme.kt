@@ -10,31 +10,54 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+//private val DarkColorScheme = darkColorScheme(
+//    primary = Purple80,
+//    secondary = PurpleGrey80,
+//    tertiary = Pink80
+//)
+//
+//private val LightColorScheme = lightColorScheme(
+//    primary = Purple40,
+//    secondary = PurpleGrey40,
+//    tertiary = Pink40
+//
+//    /* Other default colors to override
+//    background = Color(0xFFFFFBFE),
+//    surface = Color(0xFFFFFBFE),
+//    onPrimary = Color.White,
+//    onSecondary = Color.White,
+//    onTertiary = Color.White,
+//    onBackground = Color(0xFF1C1B1F),
+//    onSurface = Color(0xFF1C1B1F),
+//    */
+//)
+
+val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF4EABE6),
+    secondary = Color(0xFF10D7E6),
+    background = Color.White,
+    surface = Color.White,
+    onPrimary = Color(0xFF793EE6),
+    onSecondary = Color.Black,
+    onBackground = Color.Black,
+    onSurface = Color(0xFF793EE6)
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFF5C6BC0),
+    secondary = Color(0xFF00BCD4),
+    background = Color.Black,
+    surface = Color(0xFF303030),
     onPrimary = Color.White,
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onBackground = Color.White,
+    onSurface = Color.White
 )
 
 @Composable

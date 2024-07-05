@@ -18,14 +18,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,14 +40,13 @@ import androidx.navigation.NavController
 import com.example.musicdraft.R
 import com.example.musicdraft.components.ButtonComponentLogin
 import com.example.musicdraft.components.ClickableLoginTextComponent
+import com.example.musicdraft.components.ClickableUnderLinedNormalTextComponent
 import com.example.musicdraft.components.DividerTextComponent
 import com.example.musicdraft.components.HeadingTextComponent
 import com.example.musicdraft.components.MyTextFieldComponent
 import com.example.musicdraft.components.NormalTextComponent
 import com.example.musicdraft.components.PasswordTextFieldComponent
-import com.example.musicdraft.components.UnderLinedNormalTextComponent
 import com.example.musicdraft.data.UIEventSignIn
-import com.example.musicdraft.data.UIEventSignUp
 import com.example.musicdraft.utility.Constant
 import com.example.musicdraft.viewModel.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -53,76 +54,79 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.launch
 
+/**
+ * Schermata di login rappresentata come composable.
+ *
+ * @param navController Il controller di navigazione utilizzato per navigare tra i composables.
+ * @param loginViewModel Il ViewModel che gestisce la logica e lo stato della schermata di login.
+ */
 @Composable
-//fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel = viewModel()){ // c'era prima..
-fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
+fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
 
+    // Contesto per l'accesso alle risorse
     val context = LocalContext.current
-    val googleSignInState = loginViewModel.googleState.value // collego il composable allo stato 'googleState' presente in 'loginViewModel'
+
+    // Stato dal ViewModel
+    val googleSignInState = loginViewModel.googleState.value
     val scope = rememberCoroutineScope()
-    var errorDialogActivated = loginViewModel.errorDialogActivated.value
-    var stringToShowErrorDialog = loginViewModel.stringToShowErrorDialog.value
 
-    val launcher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-            val account = GoogleSignIn.getSignedInAccountFromIntent(it.data) // per prendere le info sull'account dell'utente
-            try {
-                val result = account.getResult(ApiException::class.java) // memorizzo in 'result' le info sull'account
-                val email = result.email // prendo l'email dell'utente
-                Log.d("SignUpScreen", "L'utente vuole loggare con questa email: $email") // stampo l'email nel log
-                // se l'email non è null allora aggiorno il campo 'registrationUIState.email' generando l'evento 'UIEventSignUp.EmailChanged()' nel loginViewModel:
-                email?.let {
-                    Log.d("SignUpScreen", "Sono in email?.let")
-                    Log.d("SignUpScreen", "it: $it")
-                    loginViewModel.onEvent(UIEventSignIn.EmailChanged(it), navController) // Aggiorna lo stato dell'email nel ViewModel
-                }
-                // - Queste due righe qui sotto c'erano prima ma esegue direttamente il signup con google usando le 'credentials' senza aspettare che l'utente abbia inserito la password
-                //    e che solo dopo abbia premuto il button Register per questo motivo l'ho commentato:
-                //val credentials = GoogleAuthProvider.getCredential(result.idToken, null) // fornisco in input a 'getCredential' l'oggetto 'result'
-                //loginViewModel.googleSignIn(credentials) // invoco il metodo 'googleSignIn' del 'loginViewModel' passandogli le credenziali che si preoccuperà di aggiornare
-                // il "GoogleSignInState" in base a se si verifica un successo, un caricamento o un errore.
+    // Variabili osservabili dal ViewModel
+    val errorDialogActivated by loginViewModel.errorDialogActivated
+    val stringToShowErrorDialog by loginViewModel.stringToShowErrorDialog
 
-            }catch (it: ApiException){
-                print(it) // stampo l'eventuale eccezione
+    // Launcher per il risultato dell'attività di accesso con Google
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
+        val account = GoogleSignIn.getSignedInAccountFromIntent(it.data)
+        try {
+            val result = account.getResult(ApiException::class.java)
+            val email = result.email
+            Log.d("SignUpScreen", "L'utente vuole loggare con questa email: $email")
+            email?.let {
+                loginViewModel.onEvent(UIEventSignIn.EmailChanged(it), navController)
             }
+            // Queste righe erano commentate perché eseguivano direttamente la registrazione con Google
+            // utilizzando le credenziali, senza attendere che l'utente inserisse la password e premesse il pulsante Register.
+            // val credentials = GoogleAuthProvider.getCredential(result.idToken, null)
+            // loginViewModel.googleSignIn(credentials)
+
+        } catch (it: ApiException) {
+            print(it)
         }
+    }
 
-
-
-    Box(modifier = Modifier.fillMaxSize(),
+    // Struttura principale dell'UI
+    Box(
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-
         Surface(
             color = Color.White,
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
                 .padding(28.dp)
-        ){
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
 
-            Column(modifier = Modifier
-                .fillMaxSize()
-            ){
-
+                // Titolo della schermata di login
                 NormalTextComponent(value = stringResource(id = R.string.login))
-                HeadingTextComponent(value = stringResource(id = R.string.welcome))
-                Spacer(modifier = Modifier.height(20.dp)) // spazio
 
+                // Testo di benvenuto
+                HeadingTextComponent(value = stringResource(id = R.string.welcome))
+
+                // Spazio verticale
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Campo di testo per l'email
                 MyTextFieldComponent(
                     loginViewModel = loginViewModel,
                     stringResource(id = R.string.email),
-                    Icons.Default.Email, // onTextSelected è una funzione di callback che verrà chiamata ogni volta che
-                    // l'utente inserirà qualcosa all'interno del 'MyTextFieldComponent' corrente
-                    // nella schermata di creazione dell'account:
+                    Icons.Default.Email,
                     onTextSelected = {
-                        // Chiamo la funzione 'onEvent' del loginViewModel e gli passo in input
-                        // il tipo di evento che è stato generato (in questo caso il 'UIEvent.NicknameChanged'
-                        // in modo tale che il loginViewModel possa modificare lo stato presente al suo interno chiamato
-                        // loginUIState (in questo caso in realtà verrà modificato solo il campo 'loginUIState.NicknameChanged'
-                        // mentre gli altri due rimarranno invariati):
                         loginViewModel.onEvent(UIEventSignIn.EmailChanged(it), navController)
                     })
+
+                // Campo di testo per la password
                 PasswordTextFieldComponent(
                     stringResource(id = R.string.password),
                     Icons.Default.Lock,
@@ -135,11 +139,20 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                         loginViewModel.onEvent(UIEventSignIn.PasswordChanged(it), navController)
                     })
 
-                Spacer(modifier = Modifier.height(40.dp)) // spazio
-                UnderLinedNormalTextComponent(stringResource(id = R.string.forgot_password))
+                // Spazio verticale
+                Spacer(modifier = Modifier.height(40.dp))
 
-                Spacer(modifier = Modifier.height(40.dp)) // spazio
-                ButtonComponentLogin(value = stringResource(id = R.string.login),
+                // Testo cliccabile per il recupero della password
+                ClickableUnderLinedNormalTextComponent(stringResource(id = R.string.forgot_password)) {
+                    loginViewModel.onEvent(UIEventSignIn.ForgotPassword, navController)
+                }
+
+                // Spazio verticale
+                Spacer(modifier = Modifier.height(40.dp))
+
+                // Pulsante di login
+                ButtonComponentLogin(
+                    value = stringResource(id = R.string.login),
                     onButtonClick = {
                         loginViewModel.onEvent(UIEventSignIn.LoginButtonClick, navController)
                     },
@@ -148,9 +161,13 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                     isEnabled = loginViewModel.allValidationCompletedLogin.value
                 )
 
-                Spacer(modifier = Modifier.height(20.dp)) // spazio
+                // Spazio verticale
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Divider
                 DividerTextComponent()
 
+                // Testo cliccabile per passare alla schermata di registrazione
                 ClickableLoginTextComponent(tryingToLogin = false, onTextSelected = {
                     loginViewModel.onEvent(UIEventSignIn.InvalidateDataSignIn, navController) // invalido i dati della schermata di login subito dopo che l'utente
                     // ha cliccato su questa schermata sul button 'Register' in modo tale che se dovesse tornare di nuovo sulla schermata di Login
@@ -158,7 +175,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                     navController.navigate("signUp")
                 })
 
-
+                // Box per il pulsante di login con Google
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -204,23 +221,24 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                     }
                 }
 
-                // mi permette di mostrare un messaggio di errore sullo schermo nel momento in cui l'utente cerca di regsitrarsi
-                // con un'email già registrata nel sistema:
-                LaunchedEffect(key1 = errorDialogActivated) {
-                    // lancio una coroutine per non bloccare il thread UI:
-                    scope.launch {
-                        if (errorDialogActivated) {
-                            // se entro qui vuol dire che il login con Google è avvenuto con successo e quindi
-                            // tramite Toast.makeText mostro un breve messaggio informativo all'utente sottoforma di
-                            // popup (che si sovrappone all'interfaccia) che in questo caso poichè c'è il parametro "Toast.LENGTH_LONG" durerà un tempo più lungo:
-                            Toast.makeText(context, stringToShowErrorDialog, Toast.LENGTH_LONG).show()
-                            loginViewModel.reset_errorDialogActivated(mutableStateOf(false))
-                            loginViewModel.reset_stringToShowErrorDialog(mutableStateOf(""))
-                        }
-                    }
-                }
-
-
+//                // - COMPARE SOLO SU UNO SMARTPHONE FISICO!!!
+//                // mi permette di mostrare un messaggio di errore sullo schermo nel momento in cui l'utente cerca di regsitrarsi
+//                // con un'email già registrata nel sistema:
+//                LaunchedEffect(key1 = loginViewModel.errorDialogActivated.value) {
+//                    // lancio una coroutine per non bloccare il thread UI:
+//                    scope.launch {
+//                        if (loginViewModel.errorDialogActivated.value) {
+//                            // se entro qui vuol dire che il login con Google è avvenuto con successo e quindi
+//                            // tramite Toast.makeText mostro un breve messaggio informativo all'utente sottoforma di
+//                            // popup (che si sovrappone all'interfaccia) che in questo caso poichè c'è il parametro "Toast.LENGTH_LONG" durerà un tempo più lungo:
+//                            Toast.makeText(context, loginViewModel.stringToShowErrorDialog.value, Toast.LENGTH_LONG).show()
+////                            loginViewModel.reset_errorDialogActivated(mutableStateOf(false))
+////                            loginViewModel.reset_stringToShowErrorDialog(mutableStateOf(""))
+//                            loginViewModel.reset_errorDialogActivated()
+//                            loginViewModel.reset_stringToShowErrorDialog()
+//                        }
+//                    }
+//                }
             }
 
             // - Barra di caricamento che si attiverà nel momento in cui l'attributo
@@ -231,6 +249,37 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel){
                 }
             }
         }
+
+        if(errorDialogActivated){
+            // In questo caso inserisco l'indicatore circolare di caricamento
+            // che verrà mostrato subito dopo che l'utente
+            // avrà cliccato su "Register":
+            //CircularProgressIndicator() c'era prima..
+            //Dialog(stringToShowErrorDialog, true)
+            Column {
+                AlertDialog(
+                    onDismissRequest = {
+                        loginViewModel.reset_errorDialogActivated()
+                        loginViewModel.reset_stringToShowErrorDialog()
+                    },
+                    title = {
+                        Text(text = "Error") },
+                    text = {
+                        Text(text = stringToShowErrorDialog) },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                loginViewModel.reset_errorDialogActivated()
+                                loginViewModel.reset_stringToShowErrorDialog()
+                            }
+                        ) {
+                            Text(text = "Ok")
+                        }
+                    }
+                )
+            }
+        }
+
 
         // controllo che lo stato "signUpInProgress" presente in "loginViewModel"
         // sia true:

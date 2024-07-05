@@ -1,3 +1,5 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -5,6 +7,9 @@ plugins {
 //  id("com.google.gms.google-services") version "4.4.1" apply false
 //    id("com.google.gms.google-services") version "4.3.15" apply false
     id("com.google.gms.google-services")
+    id("kotlin-kapt")
+    id("org.jetbrains.dokka") version "1.8.10" // Assicurati di usare la versione corretta di Dokka
+
 }
 
 android {
@@ -64,6 +69,14 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
+    implementation(libs.play.services.fitness)
+    implementation(libs.androidx.material3.android)
+
+    //implementation(libs.androidx.benchmark.macro) c'era prima..
+    //implementation(libs.androidx.compose.material.core) c'era prima..
+
+//    implementation(libs.androidx.room.common)
+//    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -75,15 +88,13 @@ dependencies {
     implementation ("androidx.navigation:navigation-compose:2.7.6")
     implementation ("androidx.compose.material:material-icons-extended:1.6.7")
 
-    // Import the Firebase BoM
+    // Import the Firebase BoM, with BoM, I don't specify versions in Firebase library dependencies
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
-
-    // When using the BoM, you don't specify versions in Firebase library dependencies
 
     // Add the dependency for the Firebase SDK for Google Analytics
     implementation("com.google.firebase:firebase-analytics")
 
-    // Here I can Add the dependencies for any other Firebase products you want to use:
+    // Here I can Add the dependencies for any other Firebase products I want to use:
     // See https://firebase.google.com/docs/android/setup#available-libraries
     // For example, add the dependencies for Firebase Authentication and Cloud Firestore
     implementation("com.google.firebase:firebase-auth")
@@ -92,4 +103,28 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx:21.1.0")
     implementation("com.google.android.gms:play-services-auth:20.4.1") // Google auth dependency
     implementation("io.coil-kt:coil-compose:2.2.2")
+
+    // Room:
+//    implementation("androix.room:room-ktx:2.5.0")
+//    kapt("androix.room:room-compiler:2.5.0")
+
+    // Room components
+    implementation (libs.androidx.room.ktx.v261)
+    kapt (libs.androidx.room.compiler.v261)
+    androidTestImplementation (libs.androidx.room.testing)
+
+    // Per interfaccia:
+    implementation("co.yml:ycharts:2.1.0")
+
+    // Per avere più icone disponibili:
+    implementation("androidx.compose.material:material-icons-extended-android:1.6.7")
+
+    implementation("com.google.code.gson:gson:2.7")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.4.0")
+    implementation ("androidx.compose.material3:material3:1.1.0")
+    implementation ("io.coil-kt:coil-compose:2.1.0")
+    implementation(kotlin("stdlib"))
+
+
+
 }

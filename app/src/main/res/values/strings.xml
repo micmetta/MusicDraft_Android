@@ -9,7 +9,35 @@
     <string name="hide_password">Hide password</string>
     <string name="show_password">show_password</string>
     <string name="terms_and_conditions">By continuing you accept our Privacy Policy and Term of Use</string>
-    <string name="terms_and_conditions_header">Term of Use</string>
+    <string name="terms_and_conditions_header">Privacy Policy and Terms of Use</string>
+    <string name="terms_and_conditions_body"> \n
+
+        1. Introduction\n
+        Welcome to MusicDraft! By using our app, you agree to comply with and be bound by the following terms and conditions.
+        Please review them carefully.\n\n
+
+        2. Data Collection\n
+        We collect personal data to improve our services. This includes your name, email address, and usage data.
+        We are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner.\n\n
+
+        3. Usage of Data\n
+        Your data is used to provide and enhance our services, respond to customer inquiries, and comply with legal obligations.
+        We do not sell or share your personal information with third parties without your consent, except as necessary to provide our services or comply with the law.\n\n
+
+        4. User Responsibilities\n
+        You agree not to misuse our services. This includes, but is not limited to, unauthorized access to our systems, distributing malware, or engaging in activities that harm other users.\n\n
+
+        5. Modifications to Terms\n
+        We may update these terms and conditions from time to time. You will be notified of any changes through our app or via email.
+        Continued use of the app after such modifications constitutes your acceptance of the new terms.\n\n
+
+        6. Contact Information\n
+        If you have any questions about these terms, please contact us at support@musicdraft.com.\n\n
+
+        By using MusicDraft, you acknowledge that you have read and understood these terms and agree to be bound by them.\n\n
+
+        Last updated: [27/06/2024]
+    </string>
     <string name="register">Register</string>
     <string name="or">or</string>
     <string name="go_to_login">Already have an account? Login</string>

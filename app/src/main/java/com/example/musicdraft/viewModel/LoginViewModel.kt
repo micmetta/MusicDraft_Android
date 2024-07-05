@@ -1,35 +1,47 @@
 package com.example.musicdraft.viewModel
 
+import android.app.Application
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.lifecycle.ViewModel
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.example.musicdraft.data.RegistrationUIState
 import com.example.musicdraft.data.LoginUIState
+import com.example.musicdraft.data.RegistrationUIState
 import com.example.musicdraft.data.UIEventSignIn
 import com.example.musicdraft.data.UIEventSignUp
 import com.example.musicdraft.data.rules.ValidatorFields
+import com.example.musicdraft.data.tables.handleFriends.HandleFriends
+import com.example.musicdraft.data.tables.user.User
+import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.login.GoogleSignInState
 import com.example.musicdraft.model.AuthRepository
 import com.example.musicdraft.sections.Screens
-import com.example.musicdraft.utility.Resource
-import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
+import kotlinx.coroutines.withContext
 
 // - Nel momento in cui un 'UIEvent' verrà innescato, questo sarà catturato dal "LoginViewModel" che si
 //   preoccuperà di gestirlo andando a modificare lo stato dell'interfaccia chiamato 'registrationUIState'.
-class LoginViewModel() : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val authRepository: AuthRepository = AuthRepository() // istanzio il repository
+
+//    // definisco l'oggetto DAO che mi permetterà di eseguire le queries sul DB:
+//    private var userDao = application.userDao()
+
+    // mi prendo il riferimento al DB:
+    private val database = MusicDraftDatabase.getDatabase(application)
+    private val userDao = database.userDao()
+    ///////
+
+    private val authRepository: AuthRepository = AuthRepository(this, userDao!!) // istanzio il repository
 
     // - La variabile qui sotto sarà uno STATE di tipo "RegistrationUIState()" in modo tale che
     //   il viewModel possa aggiornarsi ogni volta che questo stato cambierà (ovvero ogni volta che
@@ -58,10 +70,61 @@ class LoginViewModel() : ViewModel() {
 
     // stato per attivare/disattivare la finestra 'ErrorDialog':
     var errorDialogActivated = mutableStateOf(false)
+        private set
     var stringToShowErrorDialog = mutableStateOf("")
-
+        private set
     ///////////////////////////////////////////////////////////////
 
+    // sottoscrizione alla variabile "userLoggedInfo" sempre del repository, in questo modo
+    // non appena "repository.userLoggedInfo" cambierà, automaticamente cambierà anche "userLoggedInfo" del LoginViewModel:
+    var userLoggedInfo =  authRepository.userLoggedInfo
+
+    // altra sottoscrizione:
+    var friendRequestCard = authRepository.friendRequestCard
+
+    ///////////////////////////////////////////////////////
+    // altre sottoscrizioni a variabili del repository:
+    var allUsersFriendsOfCurrentUser =  authRepository.allUsersFriendsOfCurrentUser
+    var allUsersrReceivedRequestByCurrentUser =  authRepository.allUsersrReceivedRequestByCurrentUser
+    ///////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////
+    // States utili per permettere all'utente di eseguire il reset della password:
+    var email by mutableStateOf("")
+    var forgotPasswordInProgress by mutableStateOf(false)
+    var forgotPasswordSuccess by mutableStateOf<String?>(null)
+    var forgotPasswordError by mutableStateOf<String?>(null)
+    var showDialogSentEmail = mutableStateOf(false)
+        private set
+    var showDialogErrorSentEmail = mutableStateOf(false)
+        private set
+    /////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////
+    // States utili per permettere all'utente di eseguire il reset del nickname:
+    var showDialogUpdateNickname = mutableStateOf(false)
+        private set
+    var showDialogErrorUpdateNickname = mutableStateOf(false)
+        private set
+    var messageDialogErrorUpdateNickname = mutableStateOf("")
+    /////////////////////////////////////////////////////////////////////////////
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // Mutable live data per gestire la sessione attiva dell'utente:
+    val isUSerLoggedIn: MutableLiveData<Boolean> = MutableLiveData()
+    /////////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////////
+    var utilityFriendInfo = authRepository.utilityFriendInfo
+    /////////////////////////////////////////////////////////////////////////////
+
+    var emailUserLog = mutableStateOf("") // conterrà l'email dell'utente loggato attraverso o
+    // la registrazione o attraverso il login.
+
+    /////////////////////////////////////////////////////////////////////////////
+    val opponentMatch = authRepository.opponentMatch
+    /////////////////////////////////////////////////////////////////////////////
 
     // - La funzione qui sotto verrà invocata ogni volta che l'utente
     //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
@@ -119,6 +182,7 @@ class LoginViewModel() : ViewModel() {
                 invalidateDataSigUp()
             }
 
+
         }
 
         // Ogni volta che uno qualsiasi degli eventi sopra è stato gestito,
@@ -159,6 +223,15 @@ class LoginViewModel() : ViewModel() {
 
             is UIEventSignIn.InvalidateDataSignIn -> {
                 invalidateDataSigIn()
+            }
+
+            // evento che viene generato nel momento in cui l'utente vuole aggiornare la password
+            is UIEventSignIn.ForgotPassword -> {
+                navController.navigate(Screens.ForgotPassword.screen)
+            }
+
+            is UIEventSignIn.UpdateNickname -> {
+                navController.navigate(Screens.UpdateNickname.screen)
             }
         }
 
@@ -207,6 +280,7 @@ class LoginViewModel() : ViewModel() {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // - Controllerà se la registrazione potrà andare a buon fine o meno:
         createUserInFirebase(
+            nickname = registrationUIState.value.nickName,
             email = registrationUIState.value.email,
             password = registrationUIState.value.password,
             navController
@@ -225,6 +299,8 @@ class LoginViewModel() : ViewModel() {
 //            navController.navigate(Screens.MusicDraftUI.screen)
 //        }
 
+//        // Inserisco il nuovo utente nel DB:
+//        SaveNewUserInDB(registrationUIState.value.email, registrationUIState.value.nickName, registrationUIState.value.password)
     }
 
     // - Questa è la funzione che verrà eseguita una volta che l'utente avrà premuto sul button "Login".
@@ -295,7 +371,7 @@ class LoginViewModel() : ViewModel() {
         Log.d(TAG, "emailResult= $emailResult")
         Log.d(TAG, "passwordResult= $passwordResult")
 
-        // aggiornamenti dello stato 'registrationUIState' in base ai risultati di validazione per ogni campo:
+        // aggiornamenti dello stato 'loginUIState' in base ai risultati di validazione per ogni campo:
         loginUIState.value = loginUIState.value.copy(
             emailError = emailResult.status,
             passwordError = passwordResult.status,
@@ -328,46 +404,74 @@ class LoginViewModel() : ViewModel() {
      - Questa funzione verrà invocata dalla funzione di SignUp per creare e memorizzare nel DB di firebase
        il nuovo utente con tutte le sue info.
     */
-    private fun createUserInFirebase(email:String, password:String, navController: NavController){
+    private fun createUserInFirebase(nickname: String, email:String, password:String, navController: NavController){
 
         // attivo l'indicatore di caricamento:
         signUpInProgress.value = true
 
-        FirebaseAuth
-            .getInstance() // ottengo l'istanza di Firebase
-            .createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener{
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Qui controllo se nel DB esiste già un tale utente con il nickname inserito
+        // prima di richiamare il servizio di FirebaseAuth in modo tale da
+        // avere l'unicità anche sul Nickname poichè Firebase controlla l'unicità solo sul campo email:
+        checkUserExistenceWithNickname(nickname) { exists ->
+            if (!exists) {
+                FirebaseAuth
+                    .getInstance() // ottengo l'istanza di Firebase
+                    .createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener{
 
-                // disattivo l'indicatore di caricamento:
-                signUpInProgress.value = false
+//                        // disattivo l'indicatore di caricamento:
+//                        signUpInProgress.value = false
 
-                // qui dentro c'è quello che verrà eseguito nel momento in cui il processo di creazione viene completato.
-                Log.d(TAG, "Sono dentro addOnCompleteListener di CREATE USER IN FIREBASE!")
-                Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
-                Log.d(TAG, "Il nuovo utente è stato REGISTRATO NEL DB DI FIREBASE!")
+                        // qui dentro c'è quello che verrà eseguito nel momento in cui il processo di creazione viene completato.
+                        Log.d(TAG, "Sono dentro addOnCompleteListener di CREATE USER IN FIREBASE!")
+                        Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
 
-                if(it.isSuccessful){
-                    // resetto tutti i campi di "registrationUIState":
-                    registrationUIState.value = registrationUIState.value.copy(
-                        nickName = "",
-                        email = "",
-                        password = "",
-                        privacyPolicyAccepted = false
-                    )
-                    navController.navigate(Screens.MusicDraftUI.screen)
-                }
-            }
-            .addOnFailureListener {
-                // qui dentro c'è quello che verrà eseguito nel momento in cui si verifica un qualche errore durante il processo di creazione.
-                Log.d(TAG, "Sono dentro addOnFailureListener ")
-                Log.d(TAG, "Si è verificato un errore durante la creazione dell'utente su FIREBASE.")
-                Log.d(TAG, " Exception = ${it.message}") // messaggio d'errore
-                Log.d(TAG, " Exception = ${it.localizedMessage}")
+                        if(it.isSuccessful){
 
+                            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                            // Adesso sono certo di poter inserire il nuovo utente nel DB:
+                            SaveNewUserInDB(registrationUIState.value.email, registrationUIState.value.nickName, registrationUIState.value.password)
+                            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                            Log.d(TAG, "Il nuovo utente è stato REGISTRATO NEL DB DI FIREBASE!")
+
+                            // prendo le info principali dell'utente dalla tabella User:
+                            //authRepository.getUserByEmail(email)
+                            emailUserLog.value = email // mi memorizzo l'email dell'utente che si è appena registrato
+
+                            // resetto tutti i campi di "registrationUIState":
+                            registrationUIState.value = registrationUIState.value.copy(
+                                nickName = "",
+                                email = "",
+                                password = "",
+                                privacyPolicyAccepted = false
+                            )
+                            navController.navigate(Screens.MusicDraftUI.screen) // cambio schermata
+
+                        }
+                    }
+                    .addOnFailureListener {
+                        // qui dentro c'è quello che verrà eseguito nel momento in cui si verifica un qualche errore durante il processo di creazione.
+                        Log.d(TAG, "Sono dentro addOnFailureListener ")
+                        Log.d(TAG, "Si è verificato un errore durante la creazione dell'utente su FIREBASE.")
+                        Log.d(TAG, " Exception = ${it.message}") // messaggio d'errore
+                        Log.d(TAG, " Exception = ${it.localizedMessage}")
+
+                        // Attivo il Popup di errore che verrà mostrato all'utente:
+                        stringToShowErrorDialog.value = it.message.toString()
+                        errorDialogActivated.value = true
+                    }
+            }else{
+                // L'utente non esiste, fai qualcos'altro
+                println("Nickname already exists..")
                 // Attivo il Popup di errore che verrà mostrato all'utente:
-                stringToShowErrorDialog.value = it.message.toString()
+                stringToShowErrorDialog.value = "Nickname already exists into Database.."
                 errorDialogActivated.value = true
             }
+            // disattivo l'indicatore di caricamento:
+            signUpInProgress.value = false
+        }
     }
 
     /*
@@ -375,104 +479,449 @@ class LoginViewModel() : ViewModel() {
     */
     private fun login(navController: NavController){
 
+        //checkForActiveSessionUser()
+        //securityLogoutFromFirebase()
+
         // attivo l'indicatore di caricamento:
         signInInProgress.value = true
 
+        ////////////////////////////////////////////////////////
+//        val firebaseAuth = FirebaseAuth.getInstance()
+//        firebaseAuth.signOut()
+        ////////////////////////////////////////////////////////
+
         val email = loginUIState.value.email
         val password = loginUIState.value.password
-        FirebaseAuth
-            .getInstance()
-            .signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener{
-                // lamda function che verrà eseguita qualora il login avesse successo
+        emailUserLog.value = email // mi memorizzo l'email dell'utente che vuole loggare
 
-                // disattivo l'indicatore di caricamento:
-                signInInProgress.value = false
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Qui controllo se nel DB esiste tale utente prima di richiamare il servizio di FirebaseAuth in modo tale da
+        // utilizzare il CASE SENSITIVE poichè Firebase non lo implementa per le email:
+        checkUserExistenceWithEmail(email) { exists ->
+            if (exists) {
+                // L'utente esiste, fai qualcosa
+                println("User exist!")
+                FirebaseAuth
+                    .getInstance()
+                    .signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener{
+                        // lamda function che verrà eseguita qualora il login avesse successo
+                        Log.d(TAG, "login: Sono dentro addOnCompleteListener di LOGIN!")
+                        Log.d(TAG, "login: l'utente vuole loggare con questa mail: ${email}")
 
-                Log.d(TAG, "Sono dentro addOnCompleteListener di LOGIN!")
-                Log.d(TAG, " isSuccesful = ${it.isSuccessful}")
-                Log.d(TAG, "Login completato con successo!")
-                if(it.isSuccessful){
+                        Log.d(TAG, "login: isSuccesful = ${it.isSuccessful}")
+                        Log.d(TAG, "login: Login completato con successo!")
+
+                        if(it.isSuccessful){
+
+                            Log.d(TAG, "login: it.isSuccessful")
+
+                            // prendo le info principali dell'utente dalla tabella User per aggiornare automaticamente
+                            // anche il mutableState 'userLoggedInfo' che contiene le info dell'utente
+                            // (come ad esempio l'email) che verranno mostrate automaticamente sull'interfaccia
+                            // grafica (in particolare nella schermata 'Home' e 'Friends'):
+                            //authRepository.getUserByEmail(email)
+
+                            // setto che l'utente è online (in modo tale da avere isOnline=true nel DB in
+                            // corrispondenza dell'utente corrente):
+                            authRepository.setisOnlineUser(email, true)
+
+                            // resetto tutti i campi di "loginUIState":
+                            loginUIState.value = loginUIState.value.copy(
+                                email = "",
+                                password = ""
+                            )
+
+                            navController.navigate(Screens.MusicDraftUI.screen)
+                        }
+                    }
+                    .addOnFailureListener{
+                        // lamda function che verrà eseguita qualora il login fallisse
+                        Log.d(TAG, "login: Sono dentro addOnFailureListener di LOGIN!")
+                        Log.d(TAG, "login: Si è verificato un errore durante il login dell'utente su FIREBASE.")
+                        Log.d(TAG, "login: message = ${it.message}")
+                        Log.d(TAG, "login: Exception = ${it.localizedMessage}")
+
+                        // Attivo il Popup di errore che verrà mostrato all'utente:
+                        stringToShowErrorDialog.value = it.message.toString()
+                        errorDialogActivated.value = true
+                    }
+            } else {
+                // L'utente non esiste, fai qualcos'altro
+                println("User not exist..")
+                // Attivo il Popup di errore che verrà mostrato all'utente:
+                stringToShowErrorDialog.value = "User not exist into Database.."
+                errorDialogActivated.value = true
+            }
+            // disattivo l'indicatore di caricamento:
+            signInInProgress.value = false
+        }
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    }
+
+
+    fun getUserByEmail(){
+        authRepository.getUserByEmail(emailUserLog.value)
+    }
+
+
+    /*
+    - Funzione che si preoccuperà di controllare se c'è ancora una sessione attiva dell'utente.
+    */
+    fun checkForActiveSessionUser(){
+        if(FirebaseAuth.getInstance().currentUser != null){
+            // mi prendo l'email dell'utente ancora attivo
+            FirebaseAuth.getInstance().currentUser?.also {
+                it.email?.also {email ->
+                    // se entro qui vuol dire che c'è ancora una sessione attiva
+                    Log.d(TAG, "checkForActiveSessionUser: C'è ancora una sessione attiva!")
+                    isUSerLoggedIn.value = true // aggiorno il mutableLiveData che memorizza lo stato della sessione
+                    // adesso invoco il metodo 'authRepository.getUserByEmail(email)' passandogli l'email dell'utente attivo,
+                    // in modo tale da
+                    // aggiornare automaticamente anche la var 'userLoggedInfo' che conterrà i dati
+                    // dell'utente che verranno mostrati sull'interfaccia grafica (in particolare nella
+                    // schermata 'Home' e 'Friends'):
+                    authRepository.getUserByEmail(email)
+                }
+            }
+        }else{
+            Log.d(TAG, "checkForActiveSessionUser: NON c'è una sessione attiva!")
+            isUSerLoggedIn.value = false
+        }
+    }
+
+
+    /*
+     - Questa funzione permette all'utente di eseguire il logout.
+    */
+    fun logoutFromFirebase(navController: NavController) {
+
+        val firebaseAuth = FirebaseAuth.getInstance()
+        val emailUserLogged = firebaseAuth.currentUser?.email
+        firebaseAuth.signOut() // eseguo il logout
+
+        val authStateListener = AuthStateListener {
+                if (firebaseAuth.currentUser == null) {
+
+                    // Logout successful
+                    if (emailUserLogged != null) {
+                        Log.d(TAG, "logoutFromFirebase, valore di 'emailUserLogged' prima di 'authRepository.LogoutUserLoggedInfo(emailUserLogged)': $emailUserLogged")
+                        authRepository.LogoutUserLoggedInfo(emailUserLogged)
+                    }
+
+                    // Reset loginUIState
+                    loginUIState.value = loginUIState.value.copy(
+                        email = "",
+                        password = ""
+                    )
+
+                    // Reset registrationUIState
+                    registrationUIState.value = registrationUIState.value.copy(
+                        nickName = "",
+                        email = "",
+                        password = "",
+                        privacyPolicyAccepted = false
+                    )
+
+                    // Update login status
+                    isUSerLoggedIn.value = false
+
+                    Log.d(TAG, "logoutFromFirebase: Logout eseguito con successo!")
+                    navController.navigate(Screens.Login.screen) {
+                        popUpTo(0) // Clear the back stack
+                    }
+
+                    //authRepository.getUserByEmail("")
+
+                    // Remove the listener
+                    //firebaseAuth.removeAuthStateListener(this)
+                } else {
+                    Log.d(TAG, "logoutFromFirebase: Logout fallito.")
+                    // Remove the listener
+                    //firebaseAuth.removeAuthStateListener(this)
+                }
+        }
+        firebaseAuth.addAuthStateListener(authStateListener)
+        //firebaseAuth.addAuthStateListener(authStateListener)
+        //firebaseAuth.signOut() // Perform logout
+        //firebaseAuth.removeAuthStateListener(authStateListener)
+    }
+
+
+    fun securityLogoutFromFirebase(){
+
+        if(FirebaseAuth.getInstance().currentUser != null) {
+
+            val firebaseAuth = FirebaseAuth.getInstance()
+            firebaseAuth.signOut()
+
+            val authStateListener = AuthStateListener {
+                if (it.currentUser == null) {
+
+                    // se entro qui vuol dire che il logout è andato a buon fine.
+                    userLoggedInfo.value?.let {
+                        it1 -> authRepository.LogoutUserLoggedInfo(it1.email)
+                    }
+
                     // resetto tutti i campi di "loginUIState":
                     loginUIState.value = loginUIState.value.copy(
                         email = "",
                         password = ""
                     )
-                    navController.navigate(Screens.MusicDraftUI.screen)
+
+                    // resetto tutti i campi di "registrationUIState":
+                    registrationUIState.value = registrationUIState.value.copy(
+                        nickName = "",
+                        email = "",
+                        password = "",
+                        privacyPolicyAccepted = false
+                    )
+
+                    // specifico che non c'è un utente loggato:
+                    isUSerLoggedIn.value = false
+
+                    Log.d(
+                        TAG,
+                        "securityLogoutFromFirebase: Logout di SICUREZZA eseguito con successo!"
+                    )
+
+                } else {
+                    Log.d(TAG, "securityLogoutFromFirebase: Logout di SICUREZZA fallito.")
                 }
             }
-            .addOnFailureListener{
-                // lamda function che verrà eseguita qualora il login fallisse
-                Log.d(TAG, "Sono dentro addOnFailureListener di LOGIN!")
-                Log.d(TAG, "Si è verificato un errore durante il login dell'utente su FIREBASE.")
-                Log.d(TAG, " message = ${it.message}")
-                Log.d(TAG, " Exception = ${it.localizedMessage}")
+            firebaseAuth.addAuthStateListener(authStateListener)
 
-                // Attivo il Popup di errore che verrà mostrato all'utente:
-                stringToShowErrorDialog.value = it.message.toString()
-                errorDialogActivated.value = true
-            }
-    }
-
-    /*
-     - Questa funzione permette all'utente di eseguire il logout.
-    */
-    fun logoutFromFirebase(navController: NavController){
-        val firebaseAuth = FirebaseAuth.getInstance()
-        firebaseAuth.signOut()
-        val authStateListener = AuthStateListener {
-            if(it.currentUser == null){
-                // se entro qui vuol dire che il logout è andato a buon fine.
-                Log.d(TAG, "Logout eseguito con successo!")
-                navController.navigate(Screens.Login.screen)
-            }else{
-                Log.d(TAG, "Logout fallito.")
-            }
+        }else{
+            Log.d(TAG, "securityLogoutFromFirebase: Logout di SICUREZZA non necessario.")
         }
-        firebaseAuth.addAuthStateListener(authStateListener)
     }
 
 
-    /*
-    - Funzione che permette all'utente di eseguire il login con Google grazie a Firebase.
-    */
-    fun googleSignIn(credential: AuthCredential) = viewModelScope.launch{
 
-        authRepository.googleSignIn(credential).collect{ result ->
-            // Una volta ottenuta la risposta da 'repository.googleSignIn(credential)'
-            // in base al caso che si verificherà verrà aggiornato lo stato '_googleState'
-            // a cui l'UI è collegata e quindi in base al risultato l'interfaccia grafica
-            // si auto-aggiornerà:
-            when(result){
-                is Resource.Success ->{
-                    val email = result.data?.user?.email
-                    if (email != null) {
-                        Log.d("LoginViewModel", "Sono entrato in is googleSignIn -> is Resource.Success ->")
-                        Log.d("LoginViewModel", "email: $email")
-                        //registrationUIState.value = registrationUIState.value.copy(email = email)
-                        registrationUIState.value = registrationUIState.value.copy(
-                            email = email
-                        )
-                        printStateSignUp() // stampo per verificare che il registrationUIState sia stato aggiornato
+
+    fun forgotPassword(email: String) {
+        forgotPasswordInProgress = true
+        forgotPasswordSuccess = null
+        forgotPasswordError = null
+
+        checkUserExistenceWithEmail(email) { exists ->
+            if (exists) {
+                // L'utente esiste:
+                Log.d(TAG, "L'email: ${email} esiste nel DB e quindi avvio il processo di reset della password.")
+                FirebaseAuth
+                    .getInstance()
+                    .sendPasswordResetEmail(email)
+                    .addOnCompleteListener { task ->
+                        forgotPasswordInProgress = false
+                        if (task.isSuccessful) {
+                            forgotPasswordSuccess = "Email sent, check it to reset your password"
+                            showDialogSentEmail.value = true
+                        } else {
+                            forgotPasswordError = "Error sending the reset email: ${task.exception?.message}"
+                        }
                     }
-                    _googleState.value = GoogleSignInState(success = result.data)
+                    .addOnFailureListener { exception ->
+                        forgotPasswordInProgress = false
+                        forgotPasswordError = "Error sending the reset email: ${exception.message}"
+                    }
+            }else{
+                Log.d(TAG, "L'email: ${email} NON esiste nel DB e quindi NON POSSO AVVIARE IL processo di reset della password..")
+                showDialogErrorSentEmail.value = true
+            }
+
+        }
+    }
+
+
+    fun reauthenticateUser(email: String, password: String, onComplete: (Boolean, String?) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val credential = EmailAuthProvider.getCredential(email, password)
+            user.reauthenticate(credential)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d(TAG, "User re-authenticated.")
+                        onComplete(true, null)
+                    } else {
+                        Log.e(TAG, "User re-authentication failed: ${task.exception?.message}")
+                        onComplete(false, task.exception?.message)
+                    }
                 }
-                is Resource.Loading ->{
-                    _googleState.value = GoogleSignInState(loading = true)
+                .addOnFailureListener { exception ->
+                    Log.e(TAG, "User re-authentication failed: ${exception.message}")
+                    onComplete(false, exception.message)
                 }
-                is Resource.Error ->{
-                    _googleState.value = GoogleSignInState(error = result.message!!)
+        } else {
+            onComplete(false, "No active user found.")
+        }
+    }
+
+//    fun sendVerificationEmail(user: FirebaseUser, newEmail: String, onComplete: (Boolean, String?) -> Unit) {
+//        user.verifyBeforeUpdateEmail(newEmail)
+//            .addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    Log.d(TAG, "Verification email sent to $newEmail.")
+//                    onComplete(true, null) // notifico il chiamante facendogli capire che l'operazione è stata completata con successo.
+//                } else {
+//                    Log.e(TAG, "Failed to send verification email: ${task.exception?.message}")
+//                    onComplete(false, task.exception?.message) // notifico il chiamante facendogli capire che l'operazione è stata completata con INsuccesso.
+//                }
+//            }
+//            .addOnFailureListener { exception ->
+//                Log.e(TAG, "Failed to send verification email: ${exception.message}")
+//                onComplete(false, exception.message) // notifico il chiamante facendogli capire che l'operazione è stata completata con INsuccesso.
+//            }
+//    }
+//    fun updateEmail(currentEmail: String, password: String, newEmail: String) {
+//
+//        checkUserExistenceWithEmail(newEmail) { exists ->
+//            if (!exists) {
+//                Log.d(TAG, "L'email: $newEmail NON esiste ancora nel DB e quindi posso avviare il processo di update dell'email.")
+//
+//                val user = FirebaseAuth.getInstance().currentUser
+//                if (user != null) {
+//                    // Prima ri-autentica l'utente
+//                    reauthenticateUser(currentEmail, password) { reauthSuccess, reauthError ->
+//                        if (reauthSuccess) {
+//                            // Procedi con l'aggiornamento dell'email
+//                            sendVerificationEmail(user, newEmail) { success, errorMessage ->
+//                                if (success) {
+//                                    Log.d(TAG, "Email di verifica inviata all'email corrente!")
+//                                    showDialogSentEmail.value = true
+//                                } else {
+//                                    Log.e(TAG, "Errore durante l'invio dell'email di verifica: $errorMessage")
+//                                    showDialogErrorSentEmail.value = true
+//                                }
+//                            }
+//                        } else {
+//                            Log.e(TAG, "Ri-autenticazione fallita: $reauthError")
+//                            showDialogErrorSentEmail.value = true
+//                        }
+//                    }
+//                } else {
+//                    Log.e(TAG, "Non c'è nessuna sessione attiva e quindi non posso eseguire l'update dell'email..")
+//                    showDialogErrorSentEmail.value = true
+//                }
+//            } else {
+//                Log.d(TAG, "L'email: $newEmail esiste già nel DB e quindi NON POSSO AVVIARE IL processo di update dell'email.")
+//                showDialogErrorSentEmail.value = true
+//            }
+//        }
+//    }
+
+    fun updateNickname(currentEmail: String, password: String, currentNickname: String, newNickname: String){
+        checkUserExistenceWithNickname(newNickname) { exists ->
+            if (!exists) {
+                Log.d(TAG, "Il nickname: $newNickname NON esiste ancora nel DB e quindi posso avviare il processo di update del nickname.")
+
+                val user = FirebaseAuth.getInstance().currentUser
+                if (user != null) {
+                    // Prima ri-autentica l'utente
+                    reauthenticateUser(currentEmail, password) { reauthSuccess, reauthError ->
+                        if (reauthSuccess) {
+                            // Procedi con l'aggiornamento dell'email
+                            authRepository.updateNicknameUser(currentEmail, currentNickname, newNickname)
+                            showDialogUpdateNickname.value = true
+                        } else {
+                            Log.e(TAG, "Ri-autenticazione fallita: $reauthError")
+                            if (reauthError != null) {
+                                messageDialogErrorUpdateNickname.value = reauthError
+                            }
+                            showDialogErrorUpdateNickname.value = true
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "Non c'è nessuna sessione attiva e quindi non posso eseguire l'update dell'email..")
+                    messageDialogErrorUpdateNickname.value = "There isn't an active session and so it is impossible update nickname.."
+                    showDialogErrorUpdateNickname.value = true
                 }
+            } else {
+                Log.d(TAG, "Il nickname: $newNickname esiste già nel DB e quindi NON POSSO AVVIARE IL processo di update del nickname.")
+                messageDialogErrorUpdateNickname.value = "The new nickname already exists into DB so it is impossible update nickname.."
+                showDialogErrorUpdateNickname.value = true
             }
         }
     }
 
-    fun reset_errorDialogActivated(value: MutableState<Boolean>){
-        errorDialogActivated = value
-    }
-    fun reset_stringToShowErrorDialog(value: MutableState<String>){
-        stringToShowErrorDialog = value
+    fun backToScreenSettings(navController: NavController){
+        navController.navigate(Screens.Settings.screen)
     }
 
+
+    fun reset_errorDialogActivated(){
+        errorDialogActivated.value = false
+    }
+
+    fun reset_stringToShowErrorDialog(){
+        stringToShowErrorDialog.value = ""
+    }
+
+    fun SaveNewUserInDB(email: String, nickname: String, password: String){
+        ////////////////////////////////////////////////////
+        // inserisco il nuovo utente nel DB:
+        val user = User(
+            email = email,
+            nickname = nickname,
+            //password = password,
+            isOnline = true, // setto che l'utente in questo momento è online
+            points = 1000 // I points iniziali sono 1000
+        )
+        authRepository.insertNewUser(user)
+        ////////////////////////////////////////////////////
+    }
+
+    fun checkUserExistenceWithEmail(email: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val exists = withContext(Dispatchers.IO) {
+                authRepository.doesUserExistWithEmail(email)
+            }
+            onResult(exists)
+        }
+    }
+
+    fun checkUserExistenceWithNickname(nickname: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val exists = withContext(Dispatchers.IO) {
+                authRepository.doesUserExistWithNickname(nickname)
+            }
+            onResult(exists)
+        }
+    }
+
+    fun getAllNicknameFriendsOfCurrentUser(emails: List<String>){
+        authRepository.getAllUsersFriendsOfCurrentUser(emails)
+    }
+
+    fun getallUsersrReceivedRequestByCurrentUser(emails: List<HandleFriends>?){
+        // Da ogni 'handleFriends' presente in emails prendo solo il valore del campo 'email2' in modo tale da crearmi
+        // una lista di email di utenti che hanno ricevuto la richiesta dall'utente corrente e dopodchè
+        // fornisco tale lista in input al metodo 'authRepository.getallUsersrReceivedRequestByCurrentUser'
+        // per prendermi tutti i nickname di questi utenti:
+        val email2List: List<String>? = emails?.map { it.email2 }
+        if (email2List != null) {
+            authRepository.getallUsersrReceivedRequestByCurrentUser(email2List)
+        }
+    }
+
+
+    fun getUserByNickname(nickname: String){
+        authRepository.getUserByNickname(nickname)
+    }
+
+    fun getFriendByNickname(nickname: String){
+        authRepository.getFriendByNickname(nickname)
+    }
+
+    fun getOpponentByNickname(nickname: String){
+        authRepository.getOpponentByNickname(nickname)
+    }
+
+    fun addPoints(addPoints: Int, email: String) {
+        authRepository.addPoints(addPoints, email)
+    }
+
+    fun subtractPoints(subtractPoints: Int, email: String) {
+        authRepository.subtractPoints(subtractPoints, email)
+    }
 
 }
