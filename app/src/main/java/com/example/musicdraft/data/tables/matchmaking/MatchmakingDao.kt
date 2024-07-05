@@ -34,6 +34,7 @@ interface MatchmakingDao {
      * l'aggiornamento di tutte le partite (con un max di 100) nelle quali ci sono utenti che sono in attesa di trovare un avversario.
      *
      * @param nicknameUserCurrent Nickname dell'utente per il quale si vuole eseguire l'aggiornamento.
+     * @return Flow che emette una lista di Matchmaking.
      */
     @Query("SELECT * FROM Matchmaking WHERE nickname1 != :nicknameUserCurrent AND nickname2 = '' LIMIT 100")
     fun getAllMatchesWaiting(nicknameUserCurrent:String): Flow<List<Matchmaking>>
@@ -43,6 +44,7 @@ interface MatchmakingDao {
      * l'aggiornamento di tutte le partite nelle quali l'utente loggato è in attesa.
      *
      * @param nickname Nickname dell'utente per il quale si vuole eseguire l'aggiornamento.
+     * @return Flow che emette una lista di Matchmaking.
      */
     @Query("SELECT * FROM Matchmaking WHERE (nickname1 = :nickname)")
     fun getAllMatchesWaitingByNickname(nickname: String): Flow<List<Matchmaking>>

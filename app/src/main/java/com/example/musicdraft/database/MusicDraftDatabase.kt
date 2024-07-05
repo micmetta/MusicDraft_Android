@@ -1,14 +1,11 @@
 package com.example.musicdraft.database
 
 import android.content.Context
-import androidx.lifecycle.viewModelScope
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.musicdraft.data.tables.handleFriends.HandleFriends
-import com.example.musicdraft.data.tables.handleFriends.HandleFriendsDao
 import com.example.musicdraft.data.tables.artisti.Artisti
 import com.example.musicdraft.data.tables.artisti.ArtistiDao
 import com.example.musicdraft.data.tables.deck.DaoDeck
@@ -35,7 +32,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-import kotlinx.coroutines.withContext
 /**
  * Database principale dell'applicazione MusicDraft. Questa classe estende [RoomDatabase] e fornisce
  * accesso ai DAO necessari per interagire con le varie tabelle del database.
@@ -49,7 +45,7 @@ import kotlinx.coroutines.withContext
  * @property deckDao DAO per la tabella dei mazzi.
  */
 @Database(
-    entities = [User::class,Artisti::class,Track::class, User_Cards_Artisti::class,User_Cards_Track::class, HandleFriends::class, Deck::class],
+    entities = [User::class, Artisti::class, Track::class, User_Cards_Artisti::class, User_Cards_Track::class, HandleFriends::class, ExchangeManagementCards:: class, Deck::class, Matchmaking:: class, MatchSummaryConcluded:: class],
     version = 1
 )
 @TypeConverters(ConvertersExchangeManagementCards::class) // per poter usare i convertitori per la tabella 'ExchangeManagementCards' c'era prima..

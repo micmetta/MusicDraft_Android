@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
  */
 @Dao
 interface DaoDeck {
+
     /**
      * Ottiene tutti i mazzi di carte di un utente specifico in modo asincrono tramite Flow.
      *
@@ -82,11 +83,6 @@ interface DaoDeck {
     @Query("SELECT popolarita FROM Deck WHERE nome_mazzo = :nomeMazzo AND email = :email GROUP BY popolarita")
     fun getDecksPop(nomeMazzo: String, email: String): Flow<Float>
 
-//    //////////////////////////////////////////////////////
-//    @Query("SELECT * FROM Deck WHERE identifier = :id")
-//    suspend fun getDeckById(id: Int): Flow<Deck?>
-//    //////////////////////////////////////////////////////
-
 
     /**
      * Verifica se una carta specifica è associata a un mazzo di un utente specifico.
@@ -95,9 +91,6 @@ interface DaoDeck {
      * @param card La carta da verificare.
      * @return True se la carta è associata a un mazzo dell'utente, altrimenti False.
      */
-//    @Query("SELECT COUNT(*) > 0 FROM Deck WHERE email = :userEmail AND carte_associate LIKE '%' || :card || '%'")
-//    fun isCardInDeck(userEmail: String, card: String): Flow<Boolean>
-
      @Query("SELECT COUNT(*) > 0 FROM Deck WHERE email = :userEmail AND carte_associate LIKE '%' || :card || '%'")
      suspend fun isCardInDeck(userEmail: String, card: String): Boolean
 

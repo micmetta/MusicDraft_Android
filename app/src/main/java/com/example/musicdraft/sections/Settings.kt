@@ -111,7 +111,7 @@ fun Settings(navController: NavController, loginViewModel: LoginViewModel) {
                 Button(
                     onClick = {
                         // Logica per cambiare il nickname
-                        loginViewModel.onEvent(UIEventSignIn.updateNickname, navController)
+                        loginViewModel.onEvent(UIEventSignIn.UpdateNickname, navController)
                     },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
@@ -143,7 +143,7 @@ fun Settings(navController: NavController, loginViewModel: LoginViewModel) {
                 Button(
                     onClick = {
                         // Logica per cambiare la password
-                        loginViewModel.onEvent(UIEventSignIn.forgotPassword, navController)
+                        loginViewModel.onEvent(UIEventSignIn.ForgotPassword, navController)
                     },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {

@@ -31,10 +31,10 @@ sealed class UIEventSignIn {
     /**
      * Evento generato quando l'utente clicca sul pulsante "Password dimenticata".
      */
-    object forgotPassword: UIEventSignIn()
+    object ForgotPassword: UIEventSignIn()
 
     /**
      * Evento generato quando l'utente vuole modificare il suo nickname.
      */
-    object updateNickname: UIEventSignIn()
+    object UpdateNickname: UIEventSignIn()
 }

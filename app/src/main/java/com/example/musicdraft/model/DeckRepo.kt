@@ -1,5 +1,6 @@
 package com.example.musicdraft.model
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.DaoDeck
 import com.example.musicdraft.data.tables.deck.Deck
@@ -74,35 +75,13 @@ class DeckRepo(val viewModel: DeckViewModel, val daoDeck: DaoDeck) {
         }
     }
 
+
     /**
      * Ottiene le carte associate a un mazzo specifico dell'utente e le aggiorna nel flusso [carteAssociate].
      *
      * @param email L'email dell'utente.
      * @param nomeMazzo Il nome del mazzo.
      */
-//    fun getCarteAss(email: String, nomeMazzo:String){
-//        viewModel.viewModelScope.launch {
-//            withContext(Dispatchers.IO) {
-//                    val c = daoDeck.getDecksByNomeMazzoAndEmail(nomeMazzo, email)
-//                    c.collect { it ->
-//                        cardAssociate?.value = it
-//                }
-//            }
-//            Log.d("DeckRepo","cardAssociate?.value: ${cardAssociate?.value}")
-//        }
-//    }
-//    fun getCarteAss(email: String, nomeMazzo:String){
-//        viewModel.viewModelScope.launch {
-//            withContext(Dispatchers.IO) {
-//                val c = daoDeck.getDecksByNomeMazzoAndEmail(nomeMazzo, email)
-//                c.collect { it ->
-//                    cardAssociate?.value = it
-//                }
-//            }
-//            Log.d("DeckRepo","cardAssociate?.value: ${cardAssociate?.value}")
-//        }
-//    }
-
     fun getCarteAss(email: String, nomeMazzo:String){
         //Log.i("DeckRepo", "cardAssociate: ${cardAssociate}")
         viewModel.viewModelScope.launch {
@@ -177,36 +156,29 @@ class DeckRepo(val viewModel: DeckViewModel, val daoDeck: DaoDeck) {
 //        }
 //    }
 
+    /**
+     * Verifica se una carta specifica è presente in un mazzo dell'utente.
+     *
+     * @param userEmail L'email dell'utente.
+     * @param card La carta da verificare.
+     */
     suspend fun isCardInDeck(userEmail: String, card: String): Boolean {
         return withContext(Dispatchers.IO) {
             daoDeck.isCardInDeck(userEmail, card)
         }
     }
 
+    /**
+     * Elimina tutti i mazzi di carte con un determinato nomemazzo e appartenenti a un utente specifico in modo asincrono.
+     *
+     * @param nomemazzo Il nome del mazzo di carte da eliminare.
+     * @param email L'email dell'utente proprietario dei mazzi.
+     */
     fun deleteDeck(nomemazzo: String, email: String) {
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO){
                 daoDeck.deleteMazziByNome(nomemazzo, email)
-
             }
         }
     }
-
-
-//    ///////////////////////////////////////////////////////
-//    fun getDeckById(id: Int){
-//        viewModel.viewModelScope.launch {
-//            withContext(Dispatchers.IO) {
-//                val deckFlow = daoDeck.getDeckById(id)
-//                deckFlow.collect { deck ->
-//                    deckById.value = deck
-//                    Log.i("DeckRepo", "deckById.value: ${deckById.value}")
-//                }
-//            }
-//        }
-//
-//    }
-//    //////////////////////////////////////////////////////
-
-
 }

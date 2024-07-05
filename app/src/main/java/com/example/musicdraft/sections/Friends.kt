@@ -1,5 +1,4 @@
 package com.example.musicdraft.sections
-import DeckViewModel
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -89,6 +88,7 @@ import com.example.musicdraft.data.tables.user.User
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Artisti
 import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
 import com.example.musicdraft.viewModel.CardsViewModel
+import com.example.musicdraft.viewModel.DeckViewModel
 import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
 import com.example.musicdraft.viewModel.HandleFriendsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel

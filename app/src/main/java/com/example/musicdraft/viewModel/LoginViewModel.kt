@@ -230,7 +230,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 navController.navigate(Screens.ForgotPassword.screen)
             }
 
-            is UIEventSignIn.updateNickname -> {
+            is UIEventSignIn.UpdateNickname -> {
                 navController.navigate(Screens.UpdateNickname.screen)
             }
         }

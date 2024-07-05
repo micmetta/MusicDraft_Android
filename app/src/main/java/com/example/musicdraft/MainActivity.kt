@@ -1,10 +1,6 @@
 package com.example.musicdraft
 
-//import com.example.musicdraft.utility.ExchangeCards
-//import com.example.musicdraft.utility.ExchangeCards
-import DeckViewModel
 import Marketplace
-import Decks
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
@@ -78,13 +74,11 @@ import com.example.musicdraft.viewModel.LoginViewModel
 import com.example.musicdraft.viewModel.MarketplaceViewModel
 import com.example.musicdraft.viewModel.MatchmakingViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.launch
 
 /**
  * Classe principale dell'attività che avvia l'applicazione.
  */
 class MainActivity : ComponentActivity() {
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

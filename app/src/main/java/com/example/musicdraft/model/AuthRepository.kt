@@ -73,6 +73,12 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
+    /**
+     * Richiama il metodo updateNicknameUser di UserDao per aggiornare il nickname di un utente.
+     *
+     * @param currentEmail Email dell'utente per il quale aggiornare il nickname.
+     * @param newNickname Nuovo nickname dell'utente.
+     */
     fun updateNicknameUser(currentEmail: String, currentNickname: String, newNickname: String){
         viewModel.viewModelScope.launch {
             dao.updateNicknameUser(currentNickname, newNickname)
@@ -115,7 +121,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
 
     }
 
-
+    /**
+     * Invoca il metodo getUserByNickname di UserDao per ottenere le informazioni dell'utente.
+     *
+     * @param nickname Nickname utente per il quale si vogliono ottenere le informazioni.
+     */
     fun getUserByNickname(nickname: String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -131,7 +141,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
-
+    /**
+     * Invoca il metodo getUserByNickname di UserDao per ottenere le informazioni su un utente che è amico dell'utente loggato.
+     *
+     * @param nickname Nickname utente-amico per il quale si vogliono ottenere le informazioni.
+     */
     fun getFriendByNickname(nickname: String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -147,6 +161,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
     }
 
 
+    /**
+     * Invoca il metodo getOpponentByNickname di UserDao per ottenere le informazioni sull'utente avversario.
+     *
+     * @param nickname Nickname utente-avversario per il quale si vogliono ottenere le informazioni.
+     */
     fun getOpponentByNickname(nickname: String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -233,6 +252,13 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         return dao.doesUserExistWithNickname(nickname)
     }
 
+
+    /**
+     * Invoca il metodo addPoints di UserDao per aggiungere dei points ad un utente.
+     *
+     * @param addPoints Points da aggiungere.
+     * @param emails Email utente.
+     */
     fun addPoints(addPoints: Int, email: String) {
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -241,6 +267,12 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
+    /**
+     * Invoca il metodo subtractPoints di UserDao per sottrarre dei points ad un utente.
+     *
+     * @param subtractPoints Points da sottrarre.
+     * @param emails Email utente.
+     */
     fun subtractPoints(subtractPoints: Int, email: String) {
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {

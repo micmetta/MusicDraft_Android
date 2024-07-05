@@ -14,9 +14,6 @@ import com.example.musicdraft.data.tables.user_cards.User_Cards_Track
 import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.DeckRepo
 import com.example.musicdraft.model.UserCardsRepo
-import com.example.musicdraft.viewModel.CardsViewModel
-import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
-import com.example.musicdraft.viewModel.LoginViewModel
 import com.example.musicdraft.utility.compareDeckNames
 import com.example.musicdraft.utility.distinctCards
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,10 +85,6 @@ class DeckViewModel(
     private val _deckName = MutableStateFlow("")
     val deckName: StateFlow<String> get() = _deckName
 
-    //var mazzi: MutableList<Mazzo> = emptyList<Mazzo>().toMutableList()
-    // Lista dei mazzi di carte dell'utente
-    var mazzi: MutableLiveData<MutableList<Mazzo>> = MutableLiveData(mutableListOf())
-
     val cardList: MutableList<Cards> = emptyList<Cards>().toMutableList()
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -107,11 +100,9 @@ class DeckViewModel(
     var associateCards = deckRepository.cardAssociate
     /////////////////////////////////////////////////////////////////////////////////////////
 
-
-    // Inner classes
-    inner class Cards(
     // Lista dei mazzi di carte dell'utente
     var mazzi: MutableLiveData<MutableList<Mazzo>> = MutableLiveData(mutableListOf())
+
 
     /**
      * Classe interna per rappresentare una carta.
@@ -436,22 +427,34 @@ class DeckViewModel(
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Ottiene la popolarità di un mazzo specifico dell'utente e la aggiorna nel flusso [Pop].
+     *
+     * @param email L'email dell'utente.
+     * @param nomeMazzo Il nome del mazzo.
+     */
     fun getDeckPop(email: String, nomeMazzo:String){
         deckRepository.getDeckPop(email, nomeMazzo)
     }
     //////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // aggiorna 'associateCards'
+    /**
+     * Richiama il metodo getCarteAss di DeckRepo
+     * per ottenere le carte associate a un mazzo specifico dell'utente e le aggiorna nel flusso [carteAssociate].
+     *
+     * @param email L'email dell'utente.
+     * @param nomeMazzo Il nome del mazzo.
+     */
     fun getCarteAss(email: String, nomeMazzo:String){
         deckRepository.getCarteAss(email, nomeMazzo)
     }
     //////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
+    /**
+     * Aggiorna un mazzo dell'utente.
+     *
+     */
     fun modificaMazzo() {
         val email = loginViewModel.userLoggedInfo.value!!.email
         val SC =_selectedCards.value
@@ -459,8 +462,6 @@ class DeckViewModel(
         mazzi.value!!.removeIf { it.id_mazzo == selectedDeck.value!!.id_mazzo }
         deckRepository.deleteDeck(selectedDeck.value!!.id_mazzo,email)
         salvaMazzo()
-
-
     }
 
 

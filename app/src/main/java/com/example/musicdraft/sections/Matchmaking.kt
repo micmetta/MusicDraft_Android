@@ -1,6 +1,5 @@
 package com.example.musicdraft.sections
 
-import DeckViewModel
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -57,6 +56,7 @@ import coil.compose.rememberImagePainter
 import com.example.musicdraft.data.tables.matchmaking.MatchSummaryConcluded
 import com.example.musicdraft.data.tables.matchmaking.Matchmaking
 import com.example.musicdraft.data.tables.user.User
+import com.example.musicdraft.viewModel.DeckViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 import com.example.musicdraft.viewModel.MatchmakingViewModel
 import java.time.LocalDate
@@ -273,7 +273,7 @@ fun SelectDeck(
         Text("My decks of cards:", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (decks.isEmpty()) {
+        if (decks.value!!.isEmpty()) {
             Text(
                 "You don't have any decks yet.\n" +
                      "Create at least one in the 'Decks' section.",
@@ -284,7 +284,7 @@ fun SelectDeck(
             LazyColumn(
                 modifier = Modifier.weight(1f)
             ) {
-                items(decks!!) { deck ->
+                items(decks.value!!) { deck ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()

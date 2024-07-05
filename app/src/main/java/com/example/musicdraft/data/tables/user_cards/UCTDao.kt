@@ -48,20 +48,40 @@ interface UCTDao {
     fun getallcards(): Flow<List<User_Cards_Track>>
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // prende le info della carta che ha email= :email_user e id==idCard
+    /**
+     * Prende tutte le informazioni della carta che fa riferimento ad uno specifico utente.
+     *
+     * @param email_user L'email dell'utente.
+     * @param idCard identificatore della carta.
+     * @return [Flow] di tipo User_Cards_Track che emette le informazioni della carta.
+     */
     @Query("SELECT * FROM User_Cards_Track WHERE email= :email_user AND id_carta= :idCard")
     fun getInfoCardTrackByEmailAndId(email_user: String, idCard: String): Flow<User_Cards_Track?>
     //////////////////////////////////////////////////////////////////////////////////////////
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // prende le info di tutte le carte di tipo brano che hanno email= :email_user e che hanno l'id uguale ad un qualche id presente nella lista 'idsCards'
+    /**
+     * Prende tutte le informazioni di tutte le carte di tipo brano che
+     * sono in possesso di un certo utente e che hanno l'id uguale ad un qualche id presente nella lista di ids
+     * fornita in input.
+     *
+     * @param email_user L'email dell'utente.
+     * @param idsCards lista degli identificatori delle carte.
+     * @return [Flow] Flow che emette una lista di User_Cards_Track.
+     */
     @Query("SELECT * FROM USER_CARDS_TRACK WHERE (email= :email_user) AND (id_carta IN (:idsCards))")
     fun getInfoAllCardTracksByEmailAndListOfIds(email_user: String, idsCards: List<String>): Flow<List<User_Cards_Track>>
     //////////////////////////////////////////////////////////////////////////////////////////
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Aggiorna il propietario di una certa carta-brano.
+     *
+     * @param newEmailOwner L'email dell'utente nuovo proprietario.
+     * @param idCard Identificatore della carta.
+     */
     @Query("UPDATE USER_CARDS_TRACK SET email = :newEmailOwner WHERE id_carta = :idCard")
     suspend fun updateCardTrackOwner(newEmailOwner: String, idCard: String)
     //////////////////////////////////////////////////////////////////////////////////////////

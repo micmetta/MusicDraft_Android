@@ -43,11 +43,8 @@ interface UserDao {
     @Insert
     suspend fun insertUser(user: User)
 
-    /*
-    - Query per aggiornare il campo 'nickname' in base ai parametro 'currentNickname' passati in input.
-    */
     /**
-     * Aggiorna lo stato online di un utente.
+     * Aggiorna il nickname di un utente.
      *
      * @param nickname nickname dell'utente da aggiornare.
      * @param newNickname nuovo nickname utente.
@@ -104,9 +101,9 @@ interface UserDao {
     fun getUserByEmail(email: String): Flow<User?>
 
     /**
-     * Ottiene una lista di utenti per una lista di indirizzi email.
+     * Ottiene le info sull'utente il cui nickname è passato in input.
      *
-     * @param emails Lista di indirizzi email da cercare.
+     * @param nickname Nickname utente per il quale si vogliono ottenere le informazioni.
      */
     @Query("SELECT * FROM User WHERE nickname = :nickname")
     fun getUserByNickname(nickname: String): Flow<User?>
