@@ -56,12 +56,14 @@ import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.launch
 
 
-// - Con il parametro loginViewModel: LoginViewModel = viewModel() istanzio e passo al 'SignUpScreen'
-//   il LoginViewModel.
-// - I parametri state e onSignInClick() -> Click di questo composable servono per gestire il SignUp con Google.
+/**
+ * Composable per la schermata di registrazione.
+ *
+ * @param navController Il NavController utilizzato per la navigazione tra composables.
+ * @param loginViewModel Il ViewModel che gestisce la logica di login e registrazione.
+ */
 @Composable
-fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel) { // c'era prima..
-//fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel, state: SignInState, onSignInClick: () -> Unit) {
+fun SignUpScreen(navController: NavController, loginViewModel: LoginViewModel) {
 
     val context = LocalContext.current
     val googleSignInState = loginViewModel.googleState.value // collego il composable allo stato 'googleState' presente in 'loginViewModel'

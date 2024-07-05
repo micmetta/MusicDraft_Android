@@ -4,6 +4,7 @@ package com.example.musicdraft
 //import com.example.musicdraft.utility.ExchangeCards
 import DeckViewModel
 import Marketplace
+import Decks
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
@@ -70,14 +71,21 @@ import com.example.musicdraft.ui.theme.MusicDraftTheme
 import com.example.musicdraft.utility.NavigationManager
 import com.example.musicdraft.utility.UpdateNickname
 import com.example.musicdraft.viewModel.CardsViewModel
+import com.example.musicdraft.viewModel.DeckViewModel
 import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
 import com.example.musicdraft.viewModel.HandleFriendsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
 import com.example.musicdraft.viewModel.MarketplaceViewModel
 import com.example.musicdraft.viewModel.MatchmakingViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.launch
 
+/**
+ * Classe principale dell'attività che avvia l'applicazione.
+ */
 class MainActivity : ComponentActivity() {
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -113,7 +121,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
+/**
+ * Funzione composable che gestisce la navigazione all'interno dell'applicazione.
+ *
+ * @param loginViewModel ViewModel per la gestione del login.
+ * @param handleFriendsViewModel ViewModel per la gestione degli amici.
+ * @param cardsViewModel ViewModel per la gestione delle carte.
+ * @param marketplaceViewmodel ViewModel per la gestione del marketplace.
+ * @param decksViewModel ViewModel per la gestione dei mazzi.
+ */
 @Composable
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState, launcher: ActivityResultLauncher<IntentSenderRequest>, googleAuthUiClient: GoogleAuthUiClient, context: Context){ // c'era prima
 //fun Navigation(loginViewModel: LoginViewModel, state: SignInState){
@@ -183,7 +199,16 @@ fun Navigation(
 }
 
 
-
+/**
+ * Funzione composable che rappresenta l'interfaccia utente principale dell'app una volta loggati.
+ *
+ * @param navControllerInitialScreens NavController per gestire la navigazione tra schermate.
+ * @param loginViewModel ViewModel per la gestione del login.
+ * @param handleFriendsViewModel ViewModel per la gestione degli amici.
+ * @param cardsViewModel ViewModel per la gestione delle carte.
+ * @param marketplaceViewmodel ViewModel per la gestione del marketplace.
+ * @param decksViewModel ViewModel per la gestione dei mazzi.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

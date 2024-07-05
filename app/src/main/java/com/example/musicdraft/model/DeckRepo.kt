@@ -1,10 +1,9 @@
 package com.example.musicdraft.model
 
-import DeckViewModel
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.musicdraft.data.tables.deck.DaoDeck
 import com.example.musicdraft.data.tables.deck.Deck
+import com.example.musicdraft.viewModel.DeckViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -17,7 +16,7 @@ import kotlinx.coroutines.withContext
  * @property viewModel Il ViewModel associato a questo repository.
  * @property daoDeck Il DAO per l'accesso alla tabella Deck nel database.
  */
-class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
+class DeckRepo(val viewModel: DeckViewModel, val daoDeck: DaoDeck) {
     /** Flusso che contiene tutti i mazzi dell'utente. */
     val allDecks: MutableStateFlow<List<Deck>?> = MutableStateFlow(emptyList())
 
@@ -47,6 +46,7 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
     fun getallDecksByEmail(email:String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
+
                 val deck = daoDeck.getAllDeckbyEmail(email)
                 deck.collect { it ->
                     allDecks.value = it
@@ -63,10 +63,13 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
     fun getNomedeck(email:String){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
+
                 val N = daoDeck.getDistinctDeckNames(email)
                 N.collect { it ->
                     namesDecks?.value = it
+
                 }
+
             }
         }
     }
@@ -182,7 +185,7 @@ class DeckRepo(val viewModel: DeckViewModel,val daoDeck: DaoDeck) {
 
     fun deleteDeck(nomemazzo: String, email: String) {
         viewModel.viewModelScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.IO){
                 daoDeck.deleteMazziByNome(nomemazzo, email)
 
             }

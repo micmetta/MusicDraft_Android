@@ -182,6 +182,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 invalidateDataSigUp()
             }
 
+
         }
 
         // Ogni volta che uno qualsiasi degli eventi sopra è stato gestito,
@@ -225,7 +226,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             // evento che viene generato nel momento in cui l'utente vuole aggiornare la password
-            is UIEventSignIn.forgotPassword -> {
+            is UIEventSignIn.ForgotPassword -> {
                 navController.navigate(Screens.ForgotPassword.screen)
             }
 

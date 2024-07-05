@@ -2,18 +2,10 @@ package com.example.musicdraft.sections
 
 import DeckViewModel
 import android.annotation.SuppressLint
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -33,9 +25,15 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.musicdraft.viewModel.ExchangeManagementCardsViewModel
 import com.example.musicdraft.viewModel.LoginViewModel
+import com.example.musicdraft.viewModel.DeckViewModel
 
 
-//
+
+/**
+ * Composable per la visualizzazione e la gestione dei mazzi di carte.
+ *
+ * @param viewModel ViewModel che gestisce la logica dei mazzi di carte.
+ */
 @SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,7 +104,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (decks == null || decks.isEmpty()) {
+            if (decks == null || decks.value!!.isEmpty()) {
                 Text(
                     "Non hai ancora creato nessun mazzo",
                     style = MaterialTheme.typography.bodyLarge,
@@ -116,7 +114,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
                 LazyColumn(
                     modifier = Modifier.weight(1f)
                 ) {
-                    items(decks!!) { deck ->
+                    items(decks.value!!) { deck ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()

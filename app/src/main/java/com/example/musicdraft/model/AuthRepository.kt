@@ -20,10 +20,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-/*
-- Questo è il model che si preoccupa di gestire in login con Google tramite l'utilizzo di Firebase.
-- Firebase viene inizializzata all'avvio dell'applicazione. (la sua inizializzazione si trova nella classe "LoginMusicDraft.kt")
-*/
+/**
+ * Repository per gestire l'autenticazione utente tramite Firebase e interazioni con il database locale.
+ *
+ * @property viewModel ViewModel che gestisce la logica dell'interfaccia utente correlata all'autenticazione.
+ * @property dao Oggetto DAO per accedere al database locale e gestire le operazioni CRUD sugli utenti.
+ */
 class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
 
     private val firebaseAuth = Firebase.auth
@@ -45,10 +47,12 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
     private val _opponentMatch = MutableStateFlow<User?>(user)
     val opponentMatch: StateFlow<User?> get() = _opponentMatch
 
-    /*
-    - Questa funzione verrà invocata dal loginViewModel nel momento in cui l'utente cliccherà sull'interfaccia
-      sul button per eseguire il login con Google.
-    */
+    /**
+     * Esegue l'accesso dell'utente utilizzando le credenziali di autenticazione fornite.
+     *
+     * @param credential Credenziali di autenticazione ottenute da Google SignIn.
+     * @return Flow di risorsa che emette lo stato di caricamento, successo o errore dell'operazione di accesso.
+     */
     fun googleSignIn(credential: AuthCredential): Flow<Resource<AuthResult>>{
         return flow{
             emit(Resource.Loading())
@@ -58,7 +62,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
             emit(Resource.Error(it.message.toString()))
         }
     }
-
+    /**
+     * Inserisce un nuovo utente nel database locale.
+     *
+     * @param user Oggetto User da inserire nel database.
+     */
     fun insertNewUser(user: User){
         viewModel.viewModelScope.launch {
             dao.insertUser(user)
@@ -73,12 +81,22 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
+    /**
+     * Imposta lo stato online/offline di un utente nel database locale.
+     *
+     * @param email Email dell'utente di cui impostare lo stato online/offline.
+     * @param isOnline Booleano che indica lo stato online/offline da impostare.
+     */
     fun setisOnlineUser(email: String, isOnline: Boolean){
         viewModel.viewModelScope.launch {
             dao.updateIsOnlineUser(email, isOnline)
         }
     }
-
+    /**
+     * Ottiene le informazioni dell'utente dal database locale per l'email specificata.
+     *
+     * @param email Email dell'utente di cui ottenere le informazioni.
+     */
     fun getUserByEmail(email: String) {
 
         Log.i("AuthRepository", "email: ${email}")
@@ -143,10 +161,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
 
 
 
-    /*
-    - Resetto i dati dell'utente corrente.
-      (Questo metodo verrà invocato quando l'utente eseguirà il logout dall'applicazione.
-    */
+    /**
+     * Resetta le informazioni dell'utente correntemente loggato.
+     *
+     * @param email Email dell'utente da disconnettere (logout).
+     */
     fun LogoutUserLoggedInfo(email: String){
         userLoggedInfo.value?.email = null.toString()
         userLoggedInfo.value?.nickname = null.toString()
@@ -162,7 +181,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
             }
         }
     }
-
+    /**
+     * Ottiene tutti gli amici dell'utente correntemente loggato dal database locale.
+     *
+     * @param emails Lista di email degli amici di cui ottenere le informazioni.
+     */
     fun getAllUsersFriendsOfCurrentUser(emails: List<String>){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -174,7 +197,11 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
             }
         }
     }
-
+    /**
+     * Ottiene tutti gli utenti che hanno ricevuto richieste dall'utente correntemente loggato dal database locale.
+     *
+     * @param emails Lista di email degli utenti di cui ottenere le informazioni.
+     */
     fun getallUsersrReceivedRequestByCurrentUser(emails: List<String>){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -187,11 +214,21 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         }
     }
 
-
+    /**
+     * Verifica se esiste un utente nel database locale con l'email specificata.
+     *
+     * @param email Email dell'utente da verificare.
+     * @return true se esiste un utente con l'email specificata, altrimenti false.
+     */
     suspend fun doesUserExistWithEmail(email: String): Boolean {
         return dao.doesUserExistWithEmail(email)
     }
-
+    /**
+     * Verifica se esiste un utente nel database locale con il nickname specificato.
+     *
+     * @param nickname Nickname dell'utente da verificare.
+     * @return true se esiste un utente con il nickname specificato, altrimenti false.
+     */
     suspend fun doesUserExistWithNickname(nickname: String): Boolean {
         return dao.doesUserExistWithNickname(nickname)
     }
