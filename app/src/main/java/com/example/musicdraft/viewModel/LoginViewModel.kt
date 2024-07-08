@@ -728,10 +728,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 Log.d(TAG, "L'email: ${email} NON esiste nel DB e quindi NON POSSO AVVIARE IL processo di reset della password..")
                 showDialogErrorSentEmail.value = true
             }
-
         }
     }
-
 
     fun reauthenticateUser(email: String, password: String, onComplete: (Boolean, String?) -> Unit) {
         val user = FirebaseAuth.getInstance().currentUser

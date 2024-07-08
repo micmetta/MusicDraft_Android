@@ -235,7 +235,8 @@ fun SelectDeck(
     navController: NavController,
     matchmakingViewModel: MatchmakingViewModel,
     decksViewModel: DeckViewModel,
-    loginViewModel: LoginViewModel
+    loginViewModel: LoginViewModel,
+    NUM_POINTS_MIN: Int // numero minimo di points richiesti per giocare un game
 ){
 
 //    decksViewModel.init()
@@ -255,8 +256,6 @@ fun SelectDeck(
     val matchingFoundEquality = remember { mutableStateOf(false) }
     val notSufficientPoints = remember { mutableStateOf(false) }
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    val NUM_POINTS_MIN = 5 // numero minimo di points richiesti per giocare un game
 
     infoUserCurrent?.let {
         Log.d("SelectDeck","infoUserCurrent: ${infoUserCurrent}")

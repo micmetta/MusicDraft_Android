@@ -52,7 +52,7 @@ fun Settings(navController: NavController, loginViewModel: LoginViewModel) {
                 Spacer(modifier = Modifier.height(80.dp))
 
                 Text(
-                    text = "In this section you can update nickname or password:",
+                    text = "In this section you can update your password:",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -108,19 +108,20 @@ fun Settings(navController: NavController, loginViewModel: LoginViewModel) {
                         )
                     }
                 }
-                Button(
-                    onClick = {
-                        // Logica per cambiare il nickname
-                        loginViewModel.onEvent(UIEventSignIn.UpdateNickname, navController)
-                    },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text(
-                        text = "Change nickname",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+
+//                Button(
+//                    onClick = {
+//                        // Logica per cambiare il nickname
+//                        loginViewModel.onEvent(UIEventSignIn.UpdateNickname, navController)
+//                    },
+//                    modifier = Modifier.align(Alignment.CenterHorizontally)
+//                ) {
+//                    Text(
+//                        text = "Change nickname",
+//                        fontSize = 15.sp,
+//                        fontWeight = FontWeight.Bold
+//                    )
+//                }
 
                 Spacer(modifier = Modifier.height(32.dp))
 

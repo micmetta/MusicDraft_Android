@@ -1128,7 +1128,12 @@ fun ExchangeCards(
                     deckViewModel
                 )
             } else {
-                Text("This is card of $nicknameUserRequestCard requested:")
+                Text(
+                    text = "This is card of $nicknameUserRequestCard requested:",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
                 if (typeOfRequestCard == "artist") {
                     // mostro la carta artista richiesta:
                     Card(modifier = Modifier.padding(8.dp)) {
@@ -1176,9 +1181,19 @@ fun ExchangeCards(
                 // può selezionare anche solo i points da inviare al suo amico:
 
                 if (thereIsAnOfferCard) {
-                    Text("These are your cards that you want offer to $nicknameUserRequestCard:")
+                    Text(
+                        text = "These are your cards that you want offer to $nicknameUserRequestCard:",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
                 } else if (!thereIsAnOfferCard || offeredPoints == 0) {
-                    Text("You can select your cards or points that you want offer to $nicknameUserRequestCard:")
+                    Text(
+                        text = "You can select your cards or points that you want offer to $nicknameUserRequestCard:",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
                 }
 
                 Row(
@@ -1224,7 +1239,12 @@ fun ExchangeCards(
 
                         // Se ci sono carte offerte, vengono mostrate:
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Offered Cards:")
+                        Text(
+                            text = "Offered Cards:",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
 
                         // Mostra le carte artisti offerte dall'utente corrente:
                         listOfCardsArtistsOfferedByCurrentUser.forEach { card ->
@@ -1249,7 +1269,12 @@ fun ExchangeCards(
 
                     // Mostro "Offered Points" anche se ancora non ci sono carte offerte o points offerti:
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Offered Points: $offeredPoints")
+                    Text(
+                        text = "Offered Points: $offeredPoints",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
 
                     // Button "Send Offer" sempre visibile:
                     Button(
@@ -1320,7 +1345,12 @@ fun ExchangeCards(
 
             }
         } else {
-            Text("Select here to select the card to request from user $nicknameUserRequestCard:")
+            Text(
+                text = "Select here to select the card to request from user $nicknameUserRequestCard:",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
             Spacer(modifier = Modifier.width(16.dp))
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -3150,7 +3180,12 @@ fun ShowOfferReceived(
             Log.d("ShowOfferReceived", "reqReceivedCurrentUser dentro COLUMN: ${reqReceivedCurrentUser}")
 
 
-            Text("This is your card that was requested:")
+            Text(
+                text = "This is your card that was requested:",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
 
             if (selectedShowReceivedOffer.typeRequiredCard == "artist") {
 
@@ -3209,9 +3244,12 @@ fun ShowOfferReceived(
 
 
             // Adesso l'utente corrente visualizzerà le carte che gli sono state offerte in questa offerta:
-
-            Text("These are the cards that have been offered to you by ${selectedShowReceivedOffer.nicknameU1}:")
-
+            Text(
+                text = "These are the cards that have been offered to you by ${selectedShowReceivedOffer.nicknameU1}:",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
 
             ////////////////////////////////////////////////////////////////////////////////////
             Column(
@@ -3245,14 +3283,19 @@ fun ShowOfferReceived(
 
                 // Mostro "Offered Points" anche qualo non ci fossero carte offerte o points offerti:
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Offered Points: ${selectedShowReceivedOffer.pointsOffered}")
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Offered Points: ${selectedShowReceivedOffer.pointsOffered}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    //modifier = Modifier.padding(vertical = 8.dp)
+                )
+                //Spacer(modifier = Modifier.height(2.dp))
 
                 // Row per posizionare i pulsanti orizzontalmente
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp),
+                        .padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     // Button "Accept offer" sempre visibile:
@@ -3261,7 +3304,7 @@ fun ShowOfferReceived(
                             confirmAcceptRequest.value = true
                         },
                         modifier = Modifier
-                            .padding(vertical = 16.dp)
+                            .padding(vertical = 8.dp)
                     ) {
                         Text("Accept Offer")
                     }
@@ -3275,7 +3318,7 @@ fun ShowOfferReceived(
                             confirmRejectRequest.value = true
                         },
                         modifier = Modifier
-                            .padding(vertical = 16.dp)
+                            .padding(vertical = 8.dp)
                     ) {
                         Text("Reject Offer")
                     }
@@ -4023,7 +4066,13 @@ fun ShowOfferSent(
             Log.d("ShowOfferSent", "reqReceivedCurrentUser dentro COLUMN: ${reqReceivedCurrentUser}")
 
 
-            Text("This is the card you requested:")
+
+            Text(
+                text = "This is the card you requested:",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
 
             if (selectedShowSentOffer.typeRequiredCard == "artist") {
 
@@ -4082,9 +4131,12 @@ fun ShowOfferSent(
 
 
             // Adesso l'utente corrente visualizzerà le carte che lui stesso ha offerto in questa offerta:
-
-            Text("These are the cards you offered:")
-
+            Text(
+                text = "These are the cards you offered:",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
 
             ////////////////////////////////////////////////////////////////////////////////////
             Column(
@@ -4100,7 +4152,7 @@ fun ShowOfferSent(
                         if (listAllInfoAboutCardsArtistRequired!!.isNotEmpty() || listAllInfoAboutCardsTracksRequired!!.isNotEmpty()) {
 
                             // Se ci sono carte offerte, vengono mostrate:
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text("Offered Cards:")
 
                             // Mostra le carte artisti offerte dall'utente corrente:
@@ -4118,8 +4170,13 @@ fun ShowOfferSent(
 
                 // Mostro "Offered Points" anche qualo non ci fossero carte offerte o points offerti:
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Offered Points: ${selectedShowSentOffer.pointsOffered}")
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Offered Points: ${selectedShowSentOffer.pointsOffered}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // Row per posizionare i pulsanti orizzontalmente
                 Row(

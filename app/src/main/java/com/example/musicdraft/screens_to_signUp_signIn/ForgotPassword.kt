@@ -33,8 +33,10 @@ import com.example.musicdraft.viewModel.LoginViewModel
 fun ForgotPassword(navController: NavController, loginViewModel: LoginViewModel){
 
     var email by remember { mutableStateOf("") }
+    val showDialogAttention = remember { mutableStateOf(false) }
     var showDialogSentEmail by loginViewModel.showDialogSentEmail // per catturare l'invio dell'email dal loginViewModel
     var showDialogErrorSentEmail by loginViewModel.showDialogErrorSentEmail
+
 
     Column(
         modifier = Modifier
@@ -63,12 +65,48 @@ fun ForgotPassword(navController: NavController, loginViewModel: LoginViewModel)
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { loginViewModel.forgotPassword(email) },
+            onClick = {
+                showDialogAttention.value = true
+                //loginViewModel.forgotPassword(email)
+            },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("send email")
         }
     }
+
+
+    if(showDialogAttention.value){
+        AlertDialog(
+            onDismissRequest = {
+                showDialogAttention.value = false
+            },
+            title = { Text(text = "Attention") },
+            text = { Text(text = "Attention, before clicking on 'yes' you must be sure that the recovery email entered is an existing email otherwise you risk not being able to re-enter the application!\n" +
+                                "\n" +
+                                "Are you sure you want to continue with the password recovery process?")
+                   },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialogAttention.value = false
+                        loginViewModel.forgotPassword(email)
+                    }
+                ) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showDialogAttention.value = false
+                }
+                ) {
+                    Text("No")
+                }
+            }
+        )
+    }
+
 
     if(showDialogSentEmail){
         AlertDialog(

@@ -137,6 +137,7 @@ fun Navigation(
     matchmakingViewModel: MatchmakingViewModel
 ){
     val navigationController = rememberNavController()
+    val NUM_POINTS_MIN = 10 // numero minimo di points richiesti per giocare un game
 
     // Determina la schermata iniziale in base al fatto se già esiste o meno una sessione attiva:
     loginViewModel.checkForActiveSessionUser() // il metodo 'loginViewModel.checkForActiveSessionUser()', qualora esistesse una sessione attiva, prende (da Firebase) l'email dell'utente
@@ -182,12 +183,11 @@ fun Navigation(
         composable(Screens.ShowOfferSent.screen){
             ShowOfferSent(navigationController, exchangeManagementCardsViewModel, cardsViewModel, loginViewModel)
         }
-
         composable(Screens.SelectDeck.screen){
-            SelectDeck(navigationController, matchmakingViewModel, decksViewModel, loginViewModel)
+            SelectDeck(navigationController, matchmakingViewModel, decksViewModel, loginViewModel, NUM_POINTS_MIN)
         }
         composable(Screens.MusicDraftUI.screen){
-            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel, decksViewModel, matchmakingViewModel) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
+            MusicDraftUI(navigationController, loginViewModel, handleFriendsViewModel, exchangeManagementCardsViewModel, cardsViewModel, marketplaceViewmodel, decksViewModel, matchmakingViewModel, NUM_POINTS_MIN) // composable che verrà aperto una volta che l'utente sarà loggato nell'app
         }
     }
 }
@@ -214,7 +214,8 @@ fun MusicDraftUI(
     cardsViewModel: CardsViewModel,
     marketplaceViewmodel: MarketplaceViewModel,
     decksViewModel: DeckViewModel,
-    matchmakingViewModel: MatchmakingViewModel
+    matchmakingViewModel: MatchmakingViewModel,
+    NUM_POINTS_MIN: Int
 ){
     val navigationController = rememberNavController() // inizializzazione del nav controller
     val coroutineScope = rememberCoroutineScope()
@@ -223,7 +224,6 @@ fun MusicDraftUI(
 
     val navigationManager = remember { NavigationManager() } // istanzio il navigationManager
     val num_max_new_screens = 10 // num max di schermate che potranno essere inserite nello stack.
-    val NUM_POINTS_MIN = 100 // numero minimo di points richiesti per giocare un game
 
     // Il "ModalNavigationDrawer" sarà proprio il menù laterale sulla sinistra in verticale tramite il quale
     // l'utente potrà navigare all'interno delle diverse sezioni dell'app:
