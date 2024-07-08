@@ -71,7 +71,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
     if (message != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearMessage() },
-            title = { Text(text = "Error") },
+            title = { Text(text = "Alert") },
             text = { Text(text = message!!) },
             confirmButton = {
                 Button(onClick = { viewModel.clearMessage() }) {
@@ -175,7 +175,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
 
             Column {
                 OutlinedTextField(
-                    value = deckName,
+                    value = selectedDeck!!.id_mazzo,
                     onValueChange = { viewModel.updateDeckName(it) },
                     label = { Text("Nome del Mazzo") },
                     placeholder = { Text("Inserisci il nome del mazzo") },

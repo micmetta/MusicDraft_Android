@@ -26,6 +26,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
     private val daoTrack = database.ownTrackCardsDao()
     private val artistDao = database.artistDao()
     private val trackDao = database.trackDao()
+    private val deckDao = database.deckDao()
 
     /** Flusso che contiene tutte le carte artista acquisite per un utente. */
     private val _acquiredCardsArtist: List<User_Cards_Artisti>? = null
@@ -101,6 +102,12 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
         MarketTrack.value = marketCardsT
     }
 
+
+    /**
+     * Recupera tutte le carte dell'artista e del brano di un amico specificato tramite email.
+     *
+     * @param email_friend L'email dell'amico di cui si vogliono recuperare le carte.
+     */
     fun getAllCardFriend(email_friend: String){
         acquiredCardsAFriend.value = ownArtistRepo.getArtCardsforFriend(email_friend)
         acquiredCardsTFriend.value =ownArtistRepo.getTrackCardsforFriend(email_friend)
@@ -254,18 +261,36 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
      */
 
     ////////////////////////////////////////////////////////////////////////////////
-    // prende le info della carta 'artista' che ha email= :email_user e id==idCard
+
+    /**
+     * Recupera le informazioni sulla carta dell'artista specificata basate su email e ID della carta.
+     *
+     * @param email_user L'email dell'utente che possiede la carta dell'artista.
+     * @param idCard L'ID della carta dell'artista.
+     */
     fun getInfoCardArtistByEmailAndId(email_user: String, idCard: String) {
         ownArtistRepo.getInfoCardArtistByEmailAndId(email_user, idCard)
     }
-    // prende le info della carta 'brano' che ha email= :email_user e id==idCard
+
+    /**
+     * Recupera le informazioni sulla carta del brano specificata basate su email e ID della carta.
+     *
+     * @param email_user L'email dell'utente che possiede la carta del brano.
+     * @param idCard L'ID della carta del brano.
+     */
     fun getInfoCardTrackByEmailAndId(email_user: String, idCard: String) {
         ownArtistRepo.getInfoCardTrackByEmailAndId(email_user, idCard)
     }
     ////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////
-    // prende tutte le info di tutte le carte offerte all'utente con 'email_user_offer':
+    /**
+     * Recupera le informazioni sulle carte offerte da un utente specifico basate su email, ID delle carte e tipi di carte.
+     *
+     * @param email_user_offer L'email dell'utente che offre le carte.
+     * @param listIdsCardsOffered Lista degli ID delle carte offerte dall'utente.
+     * @param listTypesCardsOffered Lista dei tipi di carte offerte dall'utente.
+     */
     fun getInfoCardsOfferedByEmailAndIdsAndTypes(email_user_offer: String, listIdsCardsOffered: List<String>, listTypesCardsOffered: List<String>) {
         ownArtistRepo.getInfoCardsOfferedByEmailAndIdsAndTypes(email_user_offer, listIdsCardsOffered, listTypesCardsOffered)
     }
@@ -292,7 +317,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
         MarketTrack.value = (updatedonMarket)
     }
 
-
+/*
     /**
      * Vende una carta artista, aggiornando i flussi e inserendo l'artista nel database.
      *
@@ -300,6 +325,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
      */
     fun vendi_artista(artista:User_Cards_Artisti){
         this.viewModelScope.launch {
+
             val email = loginViewModel.userLoggedInfo.value!!.email
             val cards_on_market = ownArtistRepo.getArtistCardById(artista.id_carta, email)
             MarketArtist.value = cards_on_market
@@ -331,7 +357,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
 
         }
     }
-
+*/
 }
 
 

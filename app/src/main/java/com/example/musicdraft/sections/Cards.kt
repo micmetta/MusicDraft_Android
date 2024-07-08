@@ -57,9 +57,12 @@ fun Cards(viewModel: CardsViewModel) {
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
                 Text("Brani")
             }
+            /*
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
                 Text("In Vendita")
             }
+            */
+
         }
         // Visualizza i filtri corrispondenti alla scheda selezionata
 
@@ -67,7 +70,7 @@ fun Cards(viewModel: CardsViewModel) {
         when (selectedTab) {
             0 -> artisti?.let { ArtistiScreen(it,viewModel,true) }
             1 -> brani?.let { BraniScreen(it,viewModel) }
-            2 -> mercatoA?.let { brani?.let { it1 -> CarteinVendita(it1, it,viewModel,false) } }
+            //2 -> mercatoA?.let { brani?.let { it1 -> CarteinVendita(it1, it,viewModel,false) } }
         }
     }
 }
@@ -229,9 +232,7 @@ fun BranoCard(brano: User_Cards_Track, height: Modifier,viewModel: CardsViewMode
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Button(onClick = {viewModel.vendi_track(brano) }) {
-                Text("Vendi")
-            }
+
         }
     }
 }
@@ -259,9 +260,7 @@ fun ArtistaCard(artista: User_Cards_Artisti, height: Modifier,viewModel: CardsVi
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Button(onClick = { viewModel.vendi_artista(artista)}, enabled = m) {
-                Text("Vendi")
-            }
+
         }
     }
 }

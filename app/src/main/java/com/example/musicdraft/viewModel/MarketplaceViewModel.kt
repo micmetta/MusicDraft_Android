@@ -14,6 +14,7 @@ import com.example.musicdraft.model.TracksRepository
 import com.example.musicdraft.model.UserCardsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,6 +51,10 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
 
     private val _showDialog = MutableLiveData(false)
     val showDialog: LiveData<Boolean> get() = _showDialog
+
+    // Stato del messaggio da visualizzare all'utente
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> get() = _message
 
     init {
         // Inizializzazione dei dati
@@ -96,45 +101,41 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
         }
     }
 
-    /**
-     * Applica i filtri agli artisti e aggiorna la lista visualizzata.
-     *
-     * @param popThreshold La popolarità massima degli artisti da visualizzare.
-     * @param nameQuery La query per filtrare gli artisti per nome.
-     * @param genreQuery La query per filtrare gli artisti per genere.
-     */
     fun applyArtistFilter(popThreshold: Int?, nameQuery: String?, genreQuery: String?) {
-        val filteredArtisti = allartist.value?.filter { artist ->
+        if (popThreshold == null && nameQuery.isNullOrEmpty() && genreQuery.isNullOrEmpty()) {
+            clearFilteredArtisti()
+            return
+        }
+
+        val filteredArtisti = allartist.value!!.filter { artist ->
             val popFilter = popThreshold?.let { artist.popolarita <= it } ?: true
             val nameFilter = nameQuery?.let { artist.nome.contains(it, ignoreCase = true) } ?: true
             val genreFilter = genreQuery?.let { artist.genere.contains(it, ignoreCase = true) } ?: true
             popFilter && nameFilter && genreFilter
         }
-        _filteredArtisti.value = if (popThreshold == null && nameQuery.isNullOrEmpty() && genreQuery.isNullOrEmpty()) {
-            // Se tutti i filtri sono vuoti, visualizza tutti gli artisti senza applicare alcun filtro
-            allartist.value ?: emptyList()
-        } else {
-            // Altrimenti, applica i filtri normalmente
-            filteredArtisti ?: emptyList()
-        }
+
+        _filteredArtisti.value = filteredArtisti
     }
 
-    /**
-     * Applica il filtro di popolarità alle tracce e aggiorna la lista visualizzata.
-     *
-     * @param popThreshold La popolarità massima delle tracce da visualizzare.
-     */
-    fun applyBraniFilter(popThreshold: Int?) {
-        val filteredBrani = alltrack.value?.filter { brano ->
-            val popFilter = popThreshold?.let { brano.popolarita <= it } ?: true
-            popFilter
+    fun applyBraniFilter(popThreshold: Int?, nameQuery: String?) {
+        if (popThreshold == null && nameQuery.isNullOrEmpty()) {
+            _filteredBrani.value = emptyList()
+            return
         }
-        _filteredBrani.value = if (popThreshold == null) {
-            alltrack.value ?: emptyList()
-        } else {
-            filteredBrani ?: emptyList()
+
+        val filteredTrack = alltrack.value!!.filter { track ->
+            val popFilter = popThreshold?.let { track.popolarita <= it } ?: true
+            val nameFilter = nameQuery?.let { track.nome.contains(it, ignoreCase = true) } ?: true
+            popFilter && nameFilter
         }
-        println("Filter applied with popThreshold: $popThreshold, result count: ${_filteredBrani.value?.size}")
+        _filteredBrani.value = filteredTrack
+    }
+
+    fun clearFilteredArtisti() {
+        _filteredArtisti.value = emptyList()
+    }
+    fun clearFilteredTrack() {
+        _filteredBrani.value = emptyList()
     }
 
     /**
@@ -145,7 +146,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     fun compra_track(track: Track) {
         viewModelScope.launch {
             val email = loginViewModel.userLoggedInfo.value!!.email
-
+            val points = loginViewModel.userLoggedInfo.value!!.points
 
 
             // Aggiorna le liste di tracce filtrate e le carte acquistate
@@ -167,26 +168,31 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                 }
             }
             if (c == 0) {
-                if (size == null) {
-                    val currentFilteredList = alltrack.value
-                    // Aggiorna le liste di tracce filtrate e le carte acquistate
-                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                        remove(track)
+                if (points > track.popolarita * 10) {
+                    if (size == null) {
+                        val currentFilteredList = alltrack.value
+                        // Aggiorna le liste di tracce filtrate e le carte acquistate
+                        val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                            remove(track)
+                        }
+                        alltrack.value = updatedFilteredList
+                        trackRepo.deleteTrack(track)
+                        cardsViewModel.insertTrackToUser(track, email)
+                        _message.value = "Traccia Comprata"
+
+                    } else {
+                        val currentFilteredList = _filteredBrani.value
+                        val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                            remove(track)
+                        }
+                        _filteredBrani.value = updatedFilteredList
+                        cardsViewModel.insertTrackToUser(track, email)
+                        trackRepo.deleteTrack(track)
+                        _message.value = "Traccia Comprata"
+
                     }
-                    alltrack.value = updatedFilteredList
-                    trackRepo.deleteTrack(track)
-                    cardsViewModel.insertTrackToUser(track, email)
                 } else {
-                    val currentFilteredList = _filteredBrani.value
-                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                        remove(track)
-                    }
-                    _filteredBrani.value = updatedFilteredList
-                    cardsViewModel.insertTrackToUser(track, email)
-                    trackRepo.deleteTrack(track)
-                }
-            } else {
-                _showDialog.value = true // Show dialog
+                    _message.value = "Not enough points"                }
             }
         }
     }
@@ -199,6 +205,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     fun compra_artisti(artista: Artisti) {
         viewModelScope.launch {
             val email = loginViewModel.userLoggedInfo.value!!.email
+            val points = loginViewModel.userLoggedInfo.value!!.points
 
 
             // Aggiorna le liste di artisti filtrati e le carte acquistate
@@ -220,26 +227,31 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                 }
             }
             if (c == 0) {
-                if (size == null) {
-                    val currentFilteredList = allartist.value
-                    // Aggiorna le liste di artisti filtrati e le carte acquistate
-                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                        remove(artista)
+                if (points > artista.popolarita * 10) {
+                    if (size == null) {
+                        val currentFilteredList = allartist.value
+                        // Aggiorna le liste di artisti filtrati e le carte acquistate
+                        val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                            remove(artista)
+                        }
+                        allartist.value = updatedFilteredList
+                        artistRepo.delete_artista(artista)
+                        cardsViewModel.insertArtistToUser(artista, email)
+                        _message.value = "Artista Comprato"
+                    } else {
+                        val currentFilteredList = _filteredArtisti.value
+                        val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                            remove(artista)
+                        }
+                        _filteredArtisti.value = updatedFilteredList
+                        cardsViewModel.insertArtistToUser(artista, email)
+                        artistRepo.delete_artista(artista)
+                        _message.value = "Artista Comprato"
+
                     }
-                    allartist.value = updatedFilteredList
-                    artistRepo.delete_artista(artista)
-                    cardsViewModel.insertArtistToUser(artista, email)
                 } else {
-                    val currentFilteredList = _filteredArtisti.value
-                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                        remove(artista)
-                    }
-                    _filteredArtisti.value = updatedFilteredList
-                    cardsViewModel.insertArtistToUser(artista, email)
-                    artistRepo.delete_artista(artista)
+                    _message.value = "Not enough points"
                 }
-            } else {
-                _showDialog.value = true // Show dialog
             }
         }
     }
@@ -247,7 +259,8 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     /**
      * Funzione per chiudere il dialogo di conferma acquisto.
      */
-    fun onDialogDismiss() {
-        _showDialog.value = false
+    fun clearMessage() {
+        _message.value = null
     }
+
 }

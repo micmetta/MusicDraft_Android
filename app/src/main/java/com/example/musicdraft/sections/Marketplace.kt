@@ -39,29 +39,47 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
     var popThreshold by remember { mutableStateOf("") }
     var nameQuery by remember { mutableStateOf("") }
     var genreQuery by remember { mutableStateOf("") }
+    val message by viewModel.message.collectAsState()
+
     viewModel.getOnmarketCards()
     // Ottieni la lista degli artisti e delle tracce in base alla scheda selezionata e ai filtri applicati
-    val artisti by if (!(popThreshold.isNullOrEmpty())) {
+    val artisti by if (!(popThreshold.isNullOrEmpty() && nameQuery.isNullOrEmpty() && genreQuery.isNullOrEmpty())) {
         viewModel._filteredArtisti.collectAsState(emptyList())
     } else {
+        viewModel.clearFilteredArtisti()
         viewModel.allartist.collectAsState(emptyList())
+
+
     }
 
-    val brani by if (!(popThreshold.isNullOrEmpty())) {
+    val brani by if (!(popThreshold.isNullOrEmpty() && nameQuery.isNullOrEmpty())) {
         viewModel._filteredBrani.collectAsState(emptyList())
     } else {
+        viewModel.clearFilteredTrack()
         viewModel.alltrack.collectAsState(emptyList())
     }
-    val showDialog by viewModel.showDialog.observeAsState(false)
+    if (message != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearMessage() },
+            title = { Text(text = "Alert") },
+            text = { Text(text = message!!) },
+            confirmButton = {
+                Button(onClick = { viewModel.clearMessage() }) {
+                    Text("OK")
+                }
+            },
+            //text = { Text(message ?: "") }
+        )
+    }
 
     // Composable principale per la schermata del Marketplace
     Column(modifier = Modifier.padding(top = 65.dp)) {
         // TabRow per la navigazione tra Artisti e Brani
         TabRow(selectedTabIndex = selectedTab, modifier = Modifier.fillMaxWidth()) {
-            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
+            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0; popThreshold = "";nameQuery="";genreQuery=""}) {
                 Text("Artisti")
             }
-            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
+            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1;popThreshold = "";nameQuery="";genreQuery="" }) {
                 Text("Brani")
             }
         }
@@ -85,18 +103,21 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
         } else {
             BraniFilter(
                 popThreshold = popThreshold,
+                nameQuery = nameQuery,
                 onPopThresholdChange = { popThreshold = it },
+                onNameQueryChange = { nameQuery = it },
                 onApplyFilter = {
                     viewModel.applyBraniFilter(
-                        popThreshold.toIntOrNull()
+                        popThreshold.toIntOrNull(),
+                        nameQuery.takeIf { it.isNotEmpty() },
                     )
                 }
             )
         }
         // Visualizza la lista degli artisti o delle tracce in base alla scheda selezionata
         when (selectedTab) {
-            0 -> artisti?.let { ArtistiScreen(it,viewModel,showDialog) }
-            1 -> brani?.let { BraniScreen(it,viewModel,showDialog) }
+            0 -> artisti?.let { ArtistiScreen(it,viewModel) }
+            1 -> brani?.let { BraniScreen(it,viewModel) }
         }
     }
 }
@@ -157,7 +178,9 @@ fun ArtistiFilter(
 fun BraniFilter(
     popThreshold: String,
     onPopThresholdChange: (String) -> Unit,
-    onApplyFilter: () -> Unit
+    onApplyFilter: () -> Unit,
+    nameQuery: String,
+    onNameQueryChange: (String) -> Unit
 ) {
     // Column per i filtri dei brani
     Column(modifier = Modifier.padding(16.dp)) {
@@ -166,6 +189,12 @@ fun BraniFilter(
             value = popThreshold,
             onValueChange = { onPopThresholdChange(it) },
             label = { Text("Popolarità massima") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        TextField(
+            value = nameQuery,
+            onValueChange = { onNameQueryChange(it) },
+            label = { Text("Nome") },
             modifier = Modifier.fillMaxWidth()
         )
         // Button per l'applicazione del filtro
@@ -181,12 +210,12 @@ fun BraniFilter(
  * @param artisti Elenco degli artisti da visualizzare.
  */
 @Composable
-fun ArtistiScreen(artisti: List<Artisti>, viewModel: MarketplaceViewModel, showDialog: Boolean) {
+fun ArtistiScreen(artisti: List<Artisti>, viewModel: MarketplaceViewModel) {
     // Visualizza una griglia di carte per gli artisti
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso gli artisti e visualizza una carta per ciascuno
         items(artisti.size) { index ->
-            ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel,showDialog)
+            ArtistaCard(artisti[index], Modifier.height(8.dp),viewModel)
         }
     }
 }
@@ -195,12 +224,12 @@ fun ArtistiScreen(artisti: List<Artisti>, viewModel: MarketplaceViewModel, showD
  * @param brani Elenco dei brani da visualizzare.
  */
 @Composable
-fun BraniScreen(brani: List<Track>, viewModel: MarketplaceViewModel, showDialog: Boolean) {
+fun BraniScreen(brani: List<Track>, viewModel: MarketplaceViewModel) {
     // Visualizza una griglia di carte per i brani
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
         // Itera attraverso i brani e visualizza una carta per ciascuno
         items(brani.size) { index ->
-            BranoCard(brani[index], Modifier.height(8.dp),viewModel,showDialog)
+            BranoCard(brani[index], Modifier.height(8.dp),viewModel)
         }
     }
 }
@@ -211,22 +240,7 @@ fun BraniScreen(brani: List<Track>, viewModel: MarketplaceViewModel, showDialog:
  * @param height Modificatore per la altezza della carta.
  */
 @Composable
-fun BranoCard(brano: Track, height: Modifier, viewModel: MarketplaceViewModel, showDialog: Boolean) {
-    // Carta contenente le informazioni del brano
-
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { viewModel.onDialogDismiss() },
-            title = { Text(text = "Attenzione") },
-            text = { Text(text = "Non è possibile acquistare questo brano.") },
-            confirmButton = {
-                Button(onClick = { viewModel.onDialogDismiss() }) {
-                    Text("OK")
-                }
-            }
-        )
-    }
+fun BranoCard(brano: Track, height: Modifier, viewModel: MarketplaceViewModel, ) {
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = brano.nome, style = MaterialTheme.typography.bodyLarge)
@@ -259,20 +273,8 @@ fun ArtistaCard(
     artista: Artisti,
     height: Modifier,
     viewModel: MarketplaceViewModel,
-    showDialog: Boolean
 ) {
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { viewModel.onDialogDismiss() },
-            title = { Text(text = "Attenzione") },
-            text = { Text(text = "Non è possibile acquistare questo brano.") },
-            confirmButton = {
-                Button(onClick = { viewModel.onDialogDismiss() }) {
-                    Text("OK")
-                }
-            }
-        )
-    }
+
     // Carta contenente le informazioni dell'artista
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
