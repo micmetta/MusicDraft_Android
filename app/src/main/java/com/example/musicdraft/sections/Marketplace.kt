@@ -241,10 +241,6 @@ fun BraniScreen(brani: List<Track>, viewModel: MarketplaceViewModel) {
  */
 @Composable
 fun BranoCard(brano: Track, height: Modifier, viewModel: MarketplaceViewModel, ) {
-    // Carta contenente le informazioni del brano
-
-
-
     Card(modifier = Modifier.padding(8.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = brano.nome, style = MaterialTheme.typography.bodyLarge)

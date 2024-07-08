@@ -235,7 +235,7 @@ class DeckViewModel(
         ////////////////////////////////////////////////////////////////////////////////
 
         if (false) {
-            _message.value = "Questa carta è già presente in un altro mazzo"
+            _message.value = "This card is owned by another deck"
         }
         ////////////////////////////////////////////////////////////////////////////////
         else if(isCardInAnReceivedOffer == true){
@@ -319,7 +319,7 @@ class DeckViewModel(
                  */
                 for(n in names!!){
                     if(compareDeckNames(n,deckName.value)){
-                        _message.value = "Il nome del mazzo esiste già!"
+                        _message.value = "Deck name already exist"
                         return
                     }
                 }
@@ -332,7 +332,7 @@ class DeckViewModel(
                 return
             }*/
             if(!(distinctCards(currentCards))){
-                _message.value = "È necessario selezionare esattamente 5 carte uniche!"
+                _message.value = "You had to choose 5 distinct cards"
                 return
             }
 
@@ -353,7 +353,7 @@ class DeckViewModel(
             // Reset degli stati
             annullaModifica()
             _selectedCards.value = emptyList()
-            _message.value = "Mazzo salvato con successo"
+            _message.value = "Deck Saved"
         }
     }
 

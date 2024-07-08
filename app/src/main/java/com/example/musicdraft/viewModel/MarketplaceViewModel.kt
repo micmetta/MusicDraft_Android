@@ -178,6 +178,8 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                         alltrack.value = updatedFilteredList
                         trackRepo.deleteTrack(track)
                         cardsViewModel.insertTrackToUser(track, email)
+                        _message.value = "Traccia Comprata"
+
                     } else {
                         val currentFilteredList = _filteredBrani.value
                         val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
@@ -186,9 +188,11 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                         _filteredBrani.value = updatedFilteredList
                         cardsViewModel.insertTrackToUser(track, email)
                         trackRepo.deleteTrack(track)
+                        _message.value = "Traccia Comprata"
+
                     }
                 } else {
-                    _message.value = "non hai abbastanza points per comprare questa carta"                }
+                    _message.value = "Not enough points"                }
             }
         }
     }
@@ -233,6 +237,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                         allartist.value = updatedFilteredList
                         artistRepo.delete_artista(artista)
                         cardsViewModel.insertArtistToUser(artista, email)
+                        _message.value = "Artista Comprato"
                     } else {
                         val currentFilteredList = _filteredArtisti.value
                         val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
@@ -241,10 +246,11 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                         _filteredArtisti.value = updatedFilteredList
                         cardsViewModel.insertArtistToUser(artista, email)
                         artistRepo.delete_artista(artista)
+                        _message.value = "Artista Comprato"
 
                     }
                 } else {
-                    _message.value = "non hai abbastanza points per comprare questa carta"
+                    _message.value = "Not enough points"
                 }
             }
         }
