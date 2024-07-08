@@ -14,6 +14,7 @@ import com.example.musicdraft.model.TracksRepository
 import com.example.musicdraft.model.UserCardsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,6 +51,10 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
 
     private val _showDialog = MutableLiveData(false)
     val showDialog: LiveData<Boolean> get() = _showDialog
+
+    // Stato del messaggio da visualizzare all'utente
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> get() = _message
 
     init {
         // Inizializzazione dei dati
@@ -141,7 +146,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     fun compra_track(track: Track) {
         viewModelScope.launch {
             val email = loginViewModel.userLoggedInfo.value!!.email
-
+            val points = loginViewModel.userLoggedInfo.value!!.points
 
 
             // Aggiorna le liste di tracce filtrate e le carte acquistate
@@ -163,26 +168,27 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                 }
             }
             if (c == 0) {
-                if (size == null) {
-                    val currentFilteredList = alltrack.value
-                    // Aggiorna le liste di tracce filtrate e le carte acquistate
-                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                        remove(track)
+                if (points > track.popolarita * 10) {
+                    if (size == null) {
+                        val currentFilteredList = alltrack.value
+                        // Aggiorna le liste di tracce filtrate e le carte acquistate
+                        val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                            remove(track)
+                        }
+                        alltrack.value = updatedFilteredList
+                        trackRepo.deleteTrack(track)
+                        cardsViewModel.insertTrackToUser(track, email)
+                    } else {
+                        val currentFilteredList = _filteredBrani.value
+                        val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                            remove(track)
+                        }
+                        _filteredBrani.value = updatedFilteredList
+                        cardsViewModel.insertTrackToUser(track, email)
+                        trackRepo.deleteTrack(track)
                     }
-                    alltrack.value = updatedFilteredList
-                    trackRepo.deleteTrack(track)
-                    cardsViewModel.insertTrackToUser(track, email)
                 } else {
-                    val currentFilteredList = _filteredBrani.value
-                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                        remove(track)
-                    }
-                    _filteredBrani.value = updatedFilteredList
-                    cardsViewModel.insertTrackToUser(track, email)
-                    trackRepo.deleteTrack(track)
-                }
-            } else {
-                _showDialog.value = true // Show dialog
+                    _message.value = "non hai abbastanza points per comprare questa carta"                }
             }
         }
     }
@@ -195,6 +201,7 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     fun compra_artisti(artista: Artisti) {
         viewModelScope.launch {
             val email = loginViewModel.userLoggedInfo.value!!.email
+            val points = loginViewModel.userLoggedInfo.value!!.points
 
 
             // Aggiorna le liste di artisti filtrati e le carte acquistate
@@ -216,26 +223,29 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
                 }
             }
             if (c == 0) {
-                if (size == null) {
-                    val currentFilteredList = allartist.value
-                    // Aggiorna le liste di artisti filtrati e le carte acquistate
-                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                        remove(artista)
+                if (points > artista.popolarita * 10) {
+                    if (size == null) {
+                        val currentFilteredList = allartist.value
+                        // Aggiorna le liste di artisti filtrati e le carte acquistate
+                        val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                            remove(artista)
+                        }
+                        allartist.value = updatedFilteredList
+                        artistRepo.delete_artista(artista)
+                        cardsViewModel.insertArtistToUser(artista, email)
+                    } else {
+                        val currentFilteredList = _filteredArtisti.value
+                        val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
+                            remove(artista)
+                        }
+                        _filteredArtisti.value = updatedFilteredList
+                        cardsViewModel.insertArtistToUser(artista, email)
+                        artistRepo.delete_artista(artista)
+
                     }
-                    allartist.value = updatedFilteredList
-                    artistRepo.delete_artista(artista)
-                    cardsViewModel.insertArtistToUser(artista, email)
                 } else {
-                    val currentFilteredList = _filteredArtisti.value
-                    val updatedFilteredList = currentFilteredList!!.toMutableList().apply {
-                        remove(artista)
-                    }
-                    _filteredArtisti.value = updatedFilteredList
-                    cardsViewModel.insertArtistToUser(artista, email)
-                    artistRepo.delete_artista(artista)
+                    _message.value = "non hai abbastanza points per comprare questa carta"
                 }
-            } else {
-                _showDialog.value = true // Show dialog
             }
         }
     }
@@ -243,7 +253,8 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
     /**
      * Funzione per chiudere il dialogo di conferma acquisto.
      */
-    fun onDialogDismiss() {
-        _showDialog.value = false
+    fun clearMessage() {
+        _message.value = null
     }
+
 }
