@@ -126,9 +126,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val opponentMatch = authRepository.opponentMatch
     /////////////////////////////////////////////////////////////////////////////
 
-    // - La funzione qui sotto verrà invocata ogni volta che l'utente
-    //   farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
-    //   per questo motivo prende in input un evento di tipo "UIEvent".
+    /**
+     * Gestisce gli eventi UI relativi alla schermata di registrazione dell'utente.
+     *
+     * La funzione qui sotto verrà invocata ogni volta che l'utente
+     * farà scattare un qualche evento sulla schermata di Creazione account ("SignUpScreen.kt")
+     * per questo motivo prende in input un evento di tipo "UIEvent".
+     *
+     * @param event Evento UI da gestire, derivato da [UIEventSignUp].
+     * @param navController Controller di navigazione per la navigazione tra schermate.
+     */
     fun onEvent(event:UIEventSignUp, navController: NavController){
 
         // gestione dei diversi eventi possibili:
@@ -193,9 +200,17 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         validateData() // da inserire in un thread
     }
 
-    // - La funzione qui sotto verrà invocata ogni volta che l'utente
-    //   farà scattare un qualche evento sulla schermata di Login ("SignInScreen.kt")
-    //   per questo motivo prende in input un evento di tipo "UIEvent".
+
+    /**
+     * Gestisce gli eventi UI relativi alla schermata di accesso dell'utente.
+     *
+     * La funzione qui sotto verrà invocata ogni volta che l'utente
+     * farà scattare un qualche evento sulla schermata di Login ("SignInScreen.kt")
+     * per questo motivo prende in input un evento di tipo "UIEvent".
+     *
+     * @param event Evento UI da gestire, derivato da [UIEventSignIn].
+     * @param navController Controller di navigazione per la navigazione tra schermate.
+     */
     fun onEvent(event: UIEventSignIn, navController: NavController){
 
         // gestione dei diversi eventi possibili:
@@ -243,8 +258,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         validateDataLogin() // da inserire in un thread
     }
 
-    // Questa funzione serve per invalidare i dati della schermata di registrazione subito dopo che l'utente
-    // ha cliccato su questa schermata sul button 'Login'.
+    /**
+     * Invalida i dati della schermata di registrazione resettando tutti i campi dello stato 'registrationUIState'.
+     * Viene chiamata quando l'utente passa dalla schermata di registrazione alla schermata di accesso.
+     */
     private fun invalidateDataSigUp() {
         // resetto tutti i campi di "registrationUIState":
         registrationUIState.value = registrationUIState.value.copy(
@@ -256,8 +273,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         allValidationCompleted.value = false
     }
 
-    // Questa funzione serve per invalidare i dati della schermata di login subito dopo che l'utente
-    // ha cliccato su questa schermata sul button 'Register'.
+    /**
+     * Invalida i dati della schermata di accesso resettando tutti i campi dello stato 'loginUIState'.
+     * Viene chiamata quando l'utente passa dalla schermata di accesso alla schermata di registrazione.
+     */
     private fun invalidateDataSigIn() {
         // resetto tutti i campi di "loginUIState":
         loginUIState.value = loginUIState.value.copy(
@@ -268,8 +287,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    // - Questa è la funzione che verrà eseguita una volta che l'utente avrà premuto sul button "Register".
-    private fun signUp(navController: NavController) {
+    /**
+     * Esegue la procedura di registrazione dell'utente.
+     * Questa funzione viene chiamata quando l'utente preme il pulsante "Register" nella schermata di registrazione.
+     *
+     * @param navController Controller di navigazione per la navigazione tra schermate.
+     */    private fun signUp(navController: NavController) {
 
         Log.d(TAG, "Hai cliccato sul button 'Register'!")
         printStateSignUp()
@@ -303,7 +326,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 //        SaveNewUserInDB(registrationUIState.value.email, registrationUIState.value.nickName, registrationUIState.value.password)
     }
 
-    // - Questa è la funzione che verrà eseguita una volta che l'utente avrà premuto sul button "Login".
+    /**
+     * Gestisce il processo di accesso dell'utente quando l'utente preme il pulsante "Login" nella schermata di accesso.
+     *
+     * @param navController Controller di navigazione per la navigazione tra schermate.
+     */
     private fun signIn(navController: NavController) {
         Log.d(TAG, "Hai cliccato sul button 'Login'!")
         printStateSignIn()
@@ -328,8 +355,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    // - Funzioni di validazione dei dati inseriti dall'utente e aggiornamento dello stato dell'interfaccia
-    //   per la schermata di registrazione.
+    /**
+     * Esegue la validazione dei dati inseriti dall'utente nella schermata di registrazione.
+     * Aggiorna lo stato dell'interfaccia 'registrationUIState' con i risultati di validazione.
+     */
     private fun validateData() {
 
         val nicknameResult = ValidatorFields.validateNickname(nickname = registrationUIState.value.nickName)
@@ -361,8 +390,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     }
 
-    // - Funzioni di validazione dei dati inseriti dall'utente e aggiornamento dello stato dell'interfaccia
-    //   per la schermata di login.
+    /**
+     * Esegue la validazione dei dati inseriti dall'utente nella schermata di login.
+     * Aggiorna lo stato dell'interfaccia 'loginUIState' con i risultati di validazione.
+     */
     private fun validateDataLogin() {
         val emailResult = ValidatorFields.validateEmail(email = loginUIState.value.email)
         val passwordResult = ValidatorFields.validatePassword(password = loginUIState.value.password)
@@ -386,24 +417,32 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // mi serve solo per verificare che il registrationUIState venga aggiornato
-    // correttamente ogni volta che si verifica un 'UIEvent' usando il Logcat:
+    /**
+     * Stampa lo stato corrente dello stato 'registrationUIState' nel Logcat per scopi di debug durante la registrazione.
+     */
     private fun printStateSignUp(){
         Log.d(TAG, "Sono dentro printState() della registrazione")
         Log.d(TAG, "registrationUIState corrente: " + registrationUIState.value.toString())
     }
 
-    // mi serve solo per verificare che il loginUIState venga aggiornato
-    // correttamente ogni volta che si verifica un 'UIEvent' usando il Logcat:
+    /**
+     * Stampa lo stato corrente dello stato 'loginUIState' nel Logcat per scopi di debug durante l'accesso.
+     */
     private fun printStateSignIn(){
         Log.d(TAG, "Sono dentro printState() del login")
         Log.d(TAG, loginUIState.value.toString())
     }
 
-    /*
-     - Questa funzione verrà invocata dalla funzione di SignUp per creare e memorizzare nel DB di firebase
-       il nuovo utente con tutte le sue info.
-    */
+    /**
+     * Crea un nuovo utente nel database Firebase Authentication con le credenziali fornite.
+     * Controlla prima se esiste già un utente con lo stesso nickname nel proprio database locale
+     * per garantire l'unicità del nickname.
+     *
+     * @param nickname Nickname dell'utente da registrare.
+     * @param email Email dell'utente da registrare.
+     * @param password Password dell'utente da registrare.
+     * @param navController Controller di navigazione per la navigazione tra schermate.
+     */
     private fun createUserInFirebase(nickname: String, email:String, password:String, navController: NavController){
 
         // attivo l'indicatore di caricamento:
@@ -474,9 +513,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /*
-     - Questa funzione permette all'utente di eseguire il login (supponendo che si sia già registrato).
-    */
+    /**
+     * Esegue il login dell'utente utilizzando le credenziali fornite.
+     * Controlla prima nel database locale se l'utente esiste.
+     *
+     * @param navController Controller di navigazione per la navigazione tra schermate.
+     */
     private fun login(navController: NavController){
 
         //checkForActiveSessionUser()
@@ -559,15 +601,20 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////
     }
 
-
+    /**
+     * Ottiene le informazioni dell'utente dal repository utilizzando l'email memorizzata in 'emailUserLog'.
+     */
     fun getUserByEmail(){
         authRepository.getUserByEmail(emailUserLog.value)
     }
 
 
-    /*
-    - Funzione che si preoccuperà di controllare se c'è ancora una sessione attiva dell'utente.
-    */
+    /**
+     * Controlla se c'è una sessione utente attiva verificando l'esistenza di un utente corrente in Firebase Authentication.
+     * Se c'è una sessione attiva, aggiorna lo stato dell'utente loggato nel LiveData `isUSerLoggedIn` e ottiene le informazioni
+     * dell'utente dal repository utilizzando l'email dell'utente attivo.
+     * Se non c'è una sessione attiva, imposta il LiveData `isUSerLoggedIn` su false.
+     */
     fun checkForActiveSessionUser(){
         if(FirebaseAuth.getInstance().currentUser != null){
             // mi prendo l'email dell'utente ancora attivo
@@ -591,9 +638,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    /*
-     - Questa funzione permette all'utente di eseguire il logout.
-    */
+    /**
+     * Esegue il logout dell'utente da Firebase Authentication.
+     * Effettua il logout dell'utente corrente, aggiorna lo stato dei LiveData `loginUIState`, `registrationUIState`
+     * e `isUSerLoggedIn`, e naviga l'utente alla schermata di login.
+     *
+     * @param navController Controller di navigazione per la navigazione tra schermate.
+     */
     fun logoutFromFirebase(navController: NavController) {
 
         val firebaseAuth = FirebaseAuth.getInstance()
@@ -647,7 +698,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         //firebaseAuth.removeAuthStateListener(authStateListener)
     }
 
-
+    /**
+     * Esegue il logout dell'utente attualmente loggato da Firebase Authentication.
+     * Questa funzione viene utilizzata per garantire un logout sicuro, ascoltando lo stato
+     * di autenticazione per assicurarsi che il logout sia completato correttamente.
+     * Una volta eseguito il logout, aggiorna lo stato dell'utente, resetta i dati di login e
+     * registrazione, e imposta `isUSerLoggedIn` su false.
+     */
     fun securityLogoutFromFirebase(){
 
         if(FirebaseAuth.getInstance().currentUser != null) {
@@ -698,7 +755,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
 
 
-
+    /**
+     * Invia una email per il reset della password all'indirizzo specificato.
+     * Verifica prima se l'email esiste nel database Firebase. Se l'utente esiste,
+     * invia l'email di reset della password. Altrimenti, mostra un messaggio di errore.
+     *
+     * @param email Indirizzo email dell'utente per il quale si vuole reimpostare la password.
+     */
     fun forgotPassword(email: String) {
         forgotPasswordInProgress = true
         forgotPasswordSuccess = null
@@ -732,7 +795,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
+    /**
+     * Rieffettua l'autenticazione dell'utente utilizzando le credenziali email/password fornite.
+     * Questa funzione è utilizzata per riautenticare l'utente prima di operazioni sensibili come il cambio
+     * della password.
+     *
+     * @param email Email dell'utente per la riautenticazione.
+     * @param password Password dell'utente per la riautenticazione.
+     * @param onComplete Callback che ritorna il successo o il fallimento dell'operazione di riautenticazione.
+     *                  Il primo parametro indica se l'operazione è riuscita, il secondo contiene un messaggio di errore in caso di fallimento.
+     */
     fun reauthenticateUser(email: String, password: String, onComplete: (Boolean, String?) -> Unit) {
         val user = FirebaseAuth.getInstance().currentUser
         if (user != null) {
@@ -808,7 +880,17 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 //            }
 //        }
 //    }
-
+    /**
+     * Aggiorna il nickname dell'utente nel database Firebase.
+     * Verifica prima se il nuovo nickname non esiste già nel database.
+     * Se il nickname non esiste, riautentica l'utente e procede con l'aggiornamento del nickname.
+     * Altrimenti, mostra un messaggio di errore indicando che il nickname esiste già.
+     *
+     * @param currentEmail Email corrente dell'utente.
+     * @param password Password dell'utente per la riautenticazione.
+     * @param currentNickname Nickname attuale dell'utente.
+     * @param newNickname Nuovo nickname desiderato.
+     */
     fun updateNickname(currentEmail: String, password: String, currentNickname: String, newNickname: String){
         checkUserExistenceWithNickname(newNickname) { exists ->
             if (!exists) {
@@ -842,20 +924,34 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-
+    /**
+     * Naviga alla schermata delle impostazioni.
+     *
+     * @param navController NavController utilizzato per la navigazione.
+     */
     fun backToScreenSettings(navController: NavController){
         navController.navigate(Screens.Settings.screen)
     }
 
-
+    /**
+     * Resetta il flag `errorDialogActivated` a false per nascondere eventuali dialoghi di errore.
+     */
     fun reset_errorDialogActivated(){
         errorDialogActivated.value = false
     }
-
+    /**
+     * Resetta la stringa `stringToShowErrorDialog` a una stringa vuota.
+     */
     fun reset_stringToShowErrorDialog(){
         stringToShowErrorDialog.value = ""
     }
-
+    /**
+     * Salva un nuovo utente nel database.
+     *
+     * @param email Email del nuovo utente.
+     * @param nickname Nickname del nuovo utente.
+     * @param password Password del nuovo utente.
+     */
     fun SaveNewUserInDB(email: String, nickname: String, password: String){
         ////////////////////////////////////////////////////
         // inserisco il nuovo utente nel DB:
@@ -869,7 +965,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         authRepository.insertNewUser(user)
         ////////////////////////////////////////////////////
     }
-
+    /**
+     * Verifica se esiste un utente nel database Firebase con l'email specificata.
+     * Il risultato viene ritornato tramite il callback `onResult`.
+     *
+     * @param email Email dell'utente da verificare.
+     * @param onResult Callback che ritorna true se l'utente esiste, altrimenti false.
+     */
     fun checkUserExistenceWithEmail(email: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val exists = withContext(Dispatchers.IO) {
@@ -878,7 +980,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             onResult(exists)
         }
     }
-
+    /**
+     * Verifica se esiste un utente nel database Firebase con il nickname specificato.
+     * Il risultato viene ritornato tramite il callback `onResult`.
+     *
+     * @param nickname Nickname dell'utente da verificare.
+     * @param onResult Callback che ritorna true se l'utente esiste, altrimenti false.
+     */
     fun checkUserExistenceWithNickname(nickname: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val exists = withContext(Dispatchers.IO) {
@@ -887,11 +995,18 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             onResult(exists)
         }
     }
-
-    fun getAllNicknameFriendsOfCurrentUser(emails: List<String>){
+    /**
+     * Ottiene tutti i nickname degli amici dell'utente corrente.
+     *
+     * @param emails Lista di email degli amici dell'utente.
+     */    fun getAllNicknameFriendsOfCurrentUser(emails: List<String>){
         authRepository.getAllUsersFriendsOfCurrentUser(emails)
     }
-
+    /**
+     * Ottiene tutti gli utenti che hanno ricevuto una richiesta di amicizia dall'utente corrente.
+     *
+     * @param emails Lista di oggetti `HandleFriends` contenente le email degli utenti che hanno ricevuto la richiesta.
+     */
     fun getallUsersrReceivedRequestByCurrentUser(emails: List<HandleFriends>?){
         // Da ogni 'handleFriends' presente in emails prendo solo il valore del campo 'email2' in modo tale da crearmi
         // una lista di email di utenti che hanno ricevuto la richiesta dall'utente corrente e dopodchè
@@ -903,23 +1018,49 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-
+    /**
+     * Ottiene un utente dal repository utilizzando il nickname specificato.
+     *
+     * @param nickname Nickname dell'utente da ottenere.
+     */
     fun getUserByNickname(nickname: String){
         authRepository.getUserByNickname(nickname)
     }
 
+    /**
+     * Ottiene un amico dal repository utilizzando il nickname specificato.
+     *
+     * @param nickname Nickname dell'amico da ottenere.
+     */
     fun getFriendByNickname(nickname: String){
         authRepository.getFriendByNickname(nickname)
     }
 
+    /**
+     * Ottiene un avversario dal repository utilizzando il nickname specificato.
+     *
+     * @param nickname Nickname dell'avversario da ottenere.
+     */
     fun getOpponentByNickname(nickname: String){
         authRepository.getOpponentByNickname(nickname)
     }
 
+    /**
+     * Aggiunge punti all'utente nel repository.
+     *
+     * @param addPoints Punti da aggiungere.
+     * @param email Email dell'utente a cui aggiungere i punti.
+     */
     fun addPoints(addPoints: Int, email: String) {
         authRepository.addPoints(addPoints, email)
     }
 
+    /**
+     * Sottrae punti all'utente nel repository.
+     *
+     * @param subtractPoints Punti da sottrarre.
+     * @param email Email dell'utente a cui sottrarre i punti.
+     */
     fun subtractPoints(subtractPoints: Int, email: String) {
         authRepository.subtractPoints(subtractPoints, email)
     }

@@ -10,7 +10,11 @@ import com.example.musicdraft.database.MusicDraftDatabase
 import com.example.musicdraft.model.ExchangeManagementCardsRepository
 import com.example.musicdraft.sections.Screens
 
-
+/**
+ * ViewModel per la gestione degli scambi di carte tra utenti.
+ *
+ * @param application Applicazione Android utilizzata per ottenere il riferimento al database.
+ */
 class ExchangeManagementCardsViewModel(application: Application) : AndroidViewModel(application) {
 
     // mi prendo il riferimento al DB:
@@ -53,7 +57,12 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
         //0
     ))
 
-
+    /**
+     * Gestisce gli eventi UI relativi agli scambi di carte.
+     *
+     * @param event Evento UI da gestire.
+     * @param navController Controller di navigazione per la navigazione tra schermate.
+     */
     fun onEvent(event: UIEventExchangeCards, navController: NavController) {
         // gestione dei diversi eventi possibili:
         when (event) {
@@ -64,6 +73,17 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
         }
     }
 
+    /**
+     * Inserisce una nuova offerta di scambio di carte nel repository.
+     *
+     * @param nicknameU1 Nickname dell'utente che offre le carte.
+     * @param nicknameU2 Nickname dell'utente a cui sono offerte le carte.
+     * @param idRequiredCard ID della carta richiesta.
+     * @param typeRequiredCard Tipo della carta richiesta.
+     * @param listOfferedCards Lista delle carte offerte.
+     * @param listTypesOfferedCards Lista dei tipi delle carte offerte.
+     * @param pointsOffered Punti offerti per lo scambio.
+     */
     fun insertNewOffer(nicknameU1: String,
                        nicknameU2: String,
                        idRequiredCard: String,
@@ -86,7 +106,11 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
         )
         exchangeManagementCardsRepository.insertNewOffer(exchangeManagementCards)
     }
-
+    /**
+     * Recupera le offerte ricevute dall'utente corrente.
+     *
+     * @param nicknameUserCurrent Nickname dell'utente corrente.
+     */
     fun getOffersReceveidByCurrentUser(nicknameUserCurrent: String) {
         exchangeManagementCardsRepository.getOffersReceveidByCurrentUser(nicknameUserCurrent)
 //        return allOffersReceivedByCurrentUser
@@ -96,19 +120,38 @@ class ExchangeManagementCardsViewModel(application: Application) : AndroidViewMo
 //        return exchangeManagementCardsRepository.getOffersReceveidByCurrentUser(nicknameUserCurrent).value
     }
 
+    /**
+     * Recupera le offerte inviate dall'utente corrente.
+     *
+     * @param nicknameUserCurrent Nickname dell'utente corrente.
+     */
     fun getOffersSentByCurrentUser(nicknameUserCurrent: String){
         exchangeManagementCardsRepository.getOffersSentByCurrentUser(nicknameUserCurrent)
     }
 
-
+    /**
+     * Aggiorna l'offerta ricevuta selezionata per la visualizzazione.
+     *
+     * @param obj Oggetto dell'offerta ricevuta da visualizzare.
+     */
     fun updateSelectedShowReceivedOffer(obj: ExchangeManagementCards){
         selectedShowReceivedOffer.value = obj
     }
 
+    /**
+     * Aggiorna l'offerta inviata selezionata per la visualizzazione.
+     *
+     * @param obj Oggetto dell'offerta inviata da visualizzare.
+     */
     fun updateSelectedShowSentOffer(obj: ExchangeManagementCards){
         selectedShowSentOffer.value = obj
     }
 
+    /**
+     * Elimina un'offerta di scambio dal repository.
+     *
+     * @param id ID dell'offerta da eliminare.
+     */
     fun deleteOffer(id: Int){
         exchangeManagementCardsRepository.deleteOffer(id)
     }

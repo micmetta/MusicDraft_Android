@@ -198,9 +198,11 @@ class DeckViewModel(
 
 
     /**
-     * Metodo per gestire il toggle della selezione di una carta.
+     * Alterna la selezione di una carta. Verifica se la carta può essere aggiunta alla selezione corrente in base a varie condizioni.
      *
-     * @param card Carta da selezionare/deselezionare.
+     * @param card La carta da selezionare o deselezionare.
+     * @param reqSentCurrentUser Lista delle offerte inviate dall'utente corrente.
+     * @param reqReceivedCurrentUser Lista delle offerte ricevute dall'utente corrente.
      */
     fun toggleCardSelection(
         card: Cards,
