@@ -26,6 +26,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
     private val daoTrack = database.ownTrackCardsDao()
     private val artistDao = database.artistDao()
     private val trackDao = database.trackDao()
+    private val deckDao = database.deckDao()
 
     /** Flusso che contiene tutte le carte artista acquisite per un utente. */
     private val _acquiredCardsArtist: List<User_Cards_Artisti>? = null
@@ -292,7 +293,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
         MarketTrack.value = (updatedonMarket)
     }
 
-
+/*
     /**
      * Vende una carta artista, aggiornando i flussi e inserendo l'artista nel database.
      *
@@ -300,6 +301,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
      */
     fun vendi_artista(artista:User_Cards_Artisti){
         this.viewModelScope.launch {
+
             val email = loginViewModel.userLoggedInfo.value!!.email
             val cards_on_market = ownArtistRepo.getArtistCardById(artista.id_carta, email)
             MarketArtist.value = cards_on_market
@@ -331,7 +333,7 @@ class CardsViewModel(application: Application, private val loginViewModel: Login
 
         }
     }
-
+*/
 }
 
 

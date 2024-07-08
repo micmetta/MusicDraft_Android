@@ -229,9 +229,7 @@ fun BranoCard(brano: User_Cards_Track, height: Modifier,viewModel: CardsViewMode
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Button(onClick = {viewModel.vendi_track(brano) }) {
-                Text("Vendi")
-            }
+
         }
     }
 }
@@ -259,9 +257,7 @@ fun ArtistaCard(artista: User_Cards_Artisti, height: Modifier,viewModel: CardsVi
                     .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
-            Button(onClick = { viewModel.vendi_artista(artista)}, enabled = m) {
-                Text("Vendi")
-            }
+
         }
     }
 }
