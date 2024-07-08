@@ -77,10 +77,10 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
         // TabRow per la navigazione tra Artisti e Brani
         TabRow(selectedTabIndex = selectedTab, modifier = Modifier.fillMaxWidth()) {
             Tab(selected = selectedTab == 0, onClick = { selectedTab = 0; popThreshold = "";nameQuery="";genreQuery=""}) {
-                Text("Artisti")
+                Text("Artist")
             }
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1;popThreshold = "";nameQuery="";genreQuery="" }) {
-                Text("Brani")
+                Text("Track")
             }
         }
         // Visualizza i filtri corrispondenti alla scheda selezionata
@@ -148,23 +148,23 @@ fun ArtistiFilter(
         TextField(
             value = popThreshold,
             onValueChange = { onPopThresholdChange(it) },
-            label = { Text("Popolarità massima") },
+            label = { Text("Pop Max") },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
             value = nameQuery,
             onValueChange = { onNameQueryChange(it) },
-            label = { Text("Nome") },
+            label = { Text("Name") },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
             value = genreQuery,
             onValueChange = { onGenreQueryChange(it) },
-            label = { Text("Genere") },
+            label = { Text("Genre") },
             modifier = Modifier.fillMaxWidth()
         )
         Button(onClick = { onApplyFilter() }) {
-            Text("Applica filtro")
+            Text("Apply filter")
         }
     }
 }
@@ -188,18 +188,18 @@ fun BraniFilter(
         TextField(
             value = popThreshold,
             onValueChange = { onPopThresholdChange(it) },
-            label = { Text("Popolarità massima") },
+            label = { Text("Pop Max") },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
             value = nameQuery,
             onValueChange = { onNameQueryChange(it) },
-            label = { Text("Nome") },
+            label = { Text("Name") },
             modifier = Modifier.fillMaxWidth()
         )
         // Button per l'applicazione del filtro
         Button(onClick = { onApplyFilter() }) {
-            Text("Applica filtro")
+            Text("Apply filter")
         }
     }
 }
@@ -247,6 +247,8 @@ fun BranoCard(brano: Track, height: Modifier, viewModel: MarketplaceViewModel, )
             Text(text = brano.anno_pubblicazione)
             Text(text = brano.durata)
             Text(text = "Pop: ${brano.popolarita}")
+            Text(text = "Costo: ${brano.popolarita*10}")
+
             // Immagine del brano con dimensioni specificate
             Image(
                 painter = rememberAsyncImagePainter(brano.immagine),
@@ -257,7 +259,7 @@ fun BranoCard(brano: Track, height: Modifier, viewModel: MarketplaceViewModel, )
                 contentScale = ContentScale.Crop
             )
             Button(onClick = { viewModel.compra_track(brano)}) {
-                Text("Compra")
+                Text("Buy")
             }
         }
     }
@@ -281,6 +283,8 @@ fun ArtistaCard(
             Text(text = artista.nome, style = MaterialTheme.typography.bodyLarge)
             Text(text = artista.genere)
             Text(text = "Pop: ${artista.popolarita}")
+            Text(text = "Costo: ${artista.popolarita*10}")
+
             // Immagine dell'artista con dimensioni specificate
             Image(
                 painter = rememberAsyncImagePainter(artista.immagine),
@@ -291,7 +295,7 @@ fun ArtistaCard(
                 contentScale = ContentScale.Crop
             )
             Button(onClick = { viewModel.compra_artisti(artista) }) {
-                Text("Compra")
+                Text("Buy")
             }
         }
     }

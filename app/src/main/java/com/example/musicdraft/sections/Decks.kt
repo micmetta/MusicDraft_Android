@@ -102,18 +102,18 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
             .fillMaxSize()
     ) {
         Spacer(modifier = Modifier.height(60.dp))
-        Text("I miei mazzi di Carte", style = MaterialTheme.typography.titleLarge)
+        Text("My Decks", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(16.dp))
 
         if (!isEditing) {
             Button(onClick = { viewModel.creaNuovoMazzo() }) {
-                Text("Crea Nuovo Mazzo")
+                Text("Create New Deck")
             }
             Spacer(modifier = Modifier.height(16.dp))
 
             if (decks == null || decks.value!!.isEmpty()) {
                 Text(
-                    "Non hai ancora creato nessun mazzo",
+                    "No Deck created yet",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(16.dp)
                 )
@@ -153,11 +153,11 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Button(onClick = { viewModel.startEditingDeck(deck) }) {
-                                        Text("Modifica")
+                                        Text("Modify")
                                     }
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Button(onClick = { viewModel.eliminaMazzo(deck)}) {
-                                        Text("Elimina")
+                                        Text("Delete")
                                     }
                                 }
                             }
@@ -167,7 +167,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
             }
         } else if (selectedDeck != null) {
             Text(
-                text = if (selectedDeck!!.carte.isNotEmpty()) "Modifica Mazzo" else "Crea un Nuovo Mazzo",
+                text = if (selectedDeck!!.carte.isNotEmpty()) "Modify deck" else "Create New Deck",
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -177,8 +177,8 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
                 OutlinedTextField(
                     value = selectedDeck!!.id_mazzo,
                     onValueChange = { viewModel.updateDeckName(it) },
-                    label = { Text("Nome del Mazzo") },
-                    placeholder = { Text("Inserisci il nome del mazzo") },
+                    label = { Text("Name") },
+                    placeholder = { Text("Insert deck's name") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -194,13 +194,13 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
                             .padding(end = 8.dp)
                     ) {
                         item {
-                            Text("Aggiungi Carta:", style = MaterialTheme.typography.titleMedium)
+                            Text("Add Card:", style = MaterialTheme.typography.titleMedium)
                         }
 
                         if (availableCards?.isEmpty() == true) {
                             item {
                                 Text(
-                                    "Nessuna carta disponibile",
+                                    "No Cards Available",
                                     style = MaterialTheme.typography.bodyLarge,
                                     modifier = Modifier.padding(16.dp)
                                 )
@@ -242,7 +242,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
                             .padding(start = 8.dp)
                     ) {
                         item {
-                            Text("Carte Selezionate:", style = MaterialTheme.typography.titleMedium)
+                            Text("Selected Cards:", style = MaterialTheme.typography.titleMedium)
                         }
 
                         items(selectedCards) { card ->
@@ -266,7 +266,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
                                         modifier = Modifier.size(50.dp)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("${card.nome_carta} (Popolarità: ${card.popolarita})")
+                                    Text("${card.nome_carta} (Pop: ${card.popolarita})")
                                 }
                             }
                         }
@@ -285,10 +285,10 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
                             viewModel.modificaMazzo()
                         }
                     }) {
-                        Text("Salva")
+                        Text("Save")
                     }
                     Button(onClick = { viewModel.cancelEditing() }) {
-                        Text("Annulla")
+                        Text("Cancel")
                     }
                 }
             }
