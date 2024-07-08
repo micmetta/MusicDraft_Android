@@ -41,15 +41,19 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
     var genreQuery by remember { mutableStateOf("") }
     viewModel.getOnmarketCards()
     // Ottieni la lista degli artisti e delle tracce in base alla scheda selezionata e ai filtri applicati
-    val artisti by if (!(popThreshold.isNullOrEmpty())) {
+    val artisti by if (!(popThreshold.isNullOrEmpty() && nameQuery.isNullOrEmpty() && genreQuery.isNullOrEmpty())) {
         viewModel._filteredArtisti.collectAsState(emptyList())
     } else {
+        viewModel.clearFilteredArtisti()
         viewModel.allartist.collectAsState(emptyList())
+
+
     }
 
-    val brani by if (!(popThreshold.isNullOrEmpty())) {
+    val brani by if (!(popThreshold.isNullOrEmpty() && nameQuery.isNullOrEmpty())) {
         viewModel._filteredBrani.collectAsState(emptyList())
     } else {
+        viewModel.clearFilteredTrack()
         viewModel.alltrack.collectAsState(emptyList())
     }
     val showDialog by viewModel.showDialog.observeAsState(false)
@@ -58,10 +62,10 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
     Column(modifier = Modifier.padding(top = 65.dp)) {
         // TabRow per la navigazione tra Artisti e Brani
         TabRow(selectedTabIndex = selectedTab, modifier = Modifier.fillMaxWidth()) {
-            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
+            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0; popThreshold = "";nameQuery="";genreQuery=""}) {
                 Text("Artisti")
             }
-            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
+            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1;popThreshold = "";nameQuery="";genreQuery="" }) {
                 Text("Brani")
             }
         }
@@ -85,10 +89,13 @@ fun Marketplace(viewModel: MarketplaceViewModel) {
         } else {
             BraniFilter(
                 popThreshold = popThreshold,
+                nameQuery = nameQuery,
                 onPopThresholdChange = { popThreshold = it },
+                onNameQueryChange = { nameQuery = it },
                 onApplyFilter = {
                     viewModel.applyBraniFilter(
-                        popThreshold.toIntOrNull()
+                        popThreshold.toIntOrNull(),
+                        nameQuery.takeIf { it.isNotEmpty() },
                     )
                 }
             )
@@ -157,7 +164,9 @@ fun ArtistiFilter(
 fun BraniFilter(
     popThreshold: String,
     onPopThresholdChange: (String) -> Unit,
-    onApplyFilter: () -> Unit
+    onApplyFilter: () -> Unit,
+    nameQuery: String,
+    onNameQueryChange: (String) -> Unit
 ) {
     // Column per i filtri dei brani
     Column(modifier = Modifier.padding(16.dp)) {
@@ -166,6 +175,12 @@ fun BraniFilter(
             value = popThreshold,
             onValueChange = { onPopThresholdChange(it) },
             label = { Text("Popolarità massima") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        TextField(
+            value = nameQuery,
+            onValueChange = { onNameQueryChange(it) },
+            label = { Text("Nome") },
             modifier = Modifier.fillMaxWidth()
         )
         // Button per l'applicazione del filtro

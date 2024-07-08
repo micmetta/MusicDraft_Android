@@ -96,45 +96,41 @@ class MarketplaceViewModel(application: Application, private val cardsViewModel:
         }
     }
 
-    /**
-     * Applica i filtri agli artisti e aggiorna la lista visualizzata.
-     *
-     * @param popThreshold La popolarità massima degli artisti da visualizzare.
-     * @param nameQuery La query per filtrare gli artisti per nome.
-     * @param genreQuery La query per filtrare gli artisti per genere.
-     */
     fun applyArtistFilter(popThreshold: Int?, nameQuery: String?, genreQuery: String?) {
-        val filteredArtisti = allartist.value?.filter { artist ->
+        if (popThreshold == null && nameQuery.isNullOrEmpty() && genreQuery.isNullOrEmpty()) {
+            clearFilteredArtisti()
+            return
+        }
+
+        val filteredArtisti = allartist.value!!.filter { artist ->
             val popFilter = popThreshold?.let { artist.popolarita <= it } ?: true
             val nameFilter = nameQuery?.let { artist.nome.contains(it, ignoreCase = true) } ?: true
             val genreFilter = genreQuery?.let { artist.genere.contains(it, ignoreCase = true) } ?: true
             popFilter && nameFilter && genreFilter
         }
-        _filteredArtisti.value = if (popThreshold == null && nameQuery.isNullOrEmpty() && genreQuery.isNullOrEmpty()) {
-            // Se tutti i filtri sono vuoti, visualizza tutti gli artisti senza applicare alcun filtro
-            allartist.value ?: emptyList()
-        } else {
-            // Altrimenti, applica i filtri normalmente
-            filteredArtisti ?: emptyList()
-        }
+
+        _filteredArtisti.value = filteredArtisti
     }
 
-    /**
-     * Applica il filtro di popolarità alle tracce e aggiorna la lista visualizzata.
-     *
-     * @param popThreshold La popolarità massima delle tracce da visualizzare.
-     */
-    fun applyBraniFilter(popThreshold: Int?) {
-        val filteredBrani = alltrack.value?.filter { brano ->
-            val popFilter = popThreshold?.let { brano.popolarita <= it } ?: true
-            popFilter
+    fun applyBraniFilter(popThreshold: Int?, nameQuery: String?) {
+        if (popThreshold == null && nameQuery.isNullOrEmpty()) {
+            _filteredBrani.value = emptyList()
+            return
         }
-        _filteredBrani.value = if (popThreshold == null) {
-            alltrack.value ?: emptyList()
-        } else {
-            filteredBrani ?: emptyList()
+
+        val filteredTrack = alltrack.value!!.filter { track ->
+            val popFilter = popThreshold?.let { track.popolarita <= it } ?: true
+            val nameFilter = nameQuery?.let { track.nome.contains(it, ignoreCase = true) } ?: true
+            popFilter && nameFilter
         }
-        println("Filter applied with popThreshold: $popThreshold, result count: ${_filteredBrani.value?.size}")
+        _filteredBrani.value = filteredTrack
+    }
+
+    fun clearFilteredArtisti() {
+        _filteredArtisti.value = emptyList()
+    }
+    fun clearFilteredTrack() {
+        _filteredBrani.value = emptyList()
     }
 
     /**

@@ -57,9 +57,12 @@ fun Cards(viewModel: CardsViewModel) {
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
                 Text("Brani")
             }
+            /*
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
                 Text("In Vendita")
             }
+            */
+
         }
         // Visualizza i filtri corrispondenti alla scheda selezionata
 
@@ -67,7 +70,7 @@ fun Cards(viewModel: CardsViewModel) {
         when (selectedTab) {
             0 -> artisti?.let { ArtistiScreen(it,viewModel,true) }
             1 -> brani?.let { BraniScreen(it,viewModel) }
-            2 -> mercatoA?.let { brani?.let { it1 -> CarteinVendita(it1, it,viewModel,false) } }
+            //2 -> mercatoA?.let { brani?.let { it1 -> CarteinVendita(it1, it,viewModel,false) } }
         }
     }
 }
