@@ -52,10 +52,10 @@ fun Cards(viewModel: CardsViewModel) {
         // TabRow per la navigazione tra Artisti e Brani
         TabRow(selectedTabIndex = selectedTab, modifier = Modifier.fillMaxWidth()) {
             Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
-                Text("Artisti")
+                Text("Artist")
             }
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
-                Text("Brani")
+                Text("Track")
             }
             /*
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
@@ -130,19 +130,19 @@ fun ArtistiFilter(
         TextField(
             value = popThreshold,
             onValueChange = { onPopThresholdChange(it) },
-            label = { Text("Popolarità massima") },
+            label = { Text("Max Pop") },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
             value = nameQuery,
             onValueChange = { onNameQueryChange(it) },
-            label = { Text("Nome") },
+            label = { Text("Name") },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
             value = genreQuery,
             onValueChange = { onGenreQueryChange(it) },
-            label = { Text("Genere") },
+            label = { Text("Genre") },
             modifier = Modifier.fillMaxWidth()
         )
         Button(onClick = { onApplyFilter() }) {
@@ -168,7 +168,7 @@ fun BraniFilter(
         TextField(
             value = popThreshold,
             onValueChange = { onPopThresholdChange(it) },
-            label = { Text("Popolarità massima") },
+            label = { Text("Max Pop") },
             modifier = Modifier.fillMaxWidth()
         )
         // Button per l'applicazione del filtro

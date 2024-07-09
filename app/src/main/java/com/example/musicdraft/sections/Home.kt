@@ -219,7 +219,7 @@ fun Home(
 //        val dates = listOf("01/01/2023", "02/01/2023", "03/01/2023", "04/01/2023", "05/01/2023")
 //        val values = listOf(5f, 8f, 6f, 10f, 7f)
 //        val lineData = dates.indices.map { index -> Point(index.toFloat(), values[index]) }
-        if (matchesConcludedByCurrentUser != null) {
+        if (!(matchesConcludedByCurrentUser.isNullOrEmpty())) {
             if (matchesConcludedByCurrentUser!!.size > 0) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -241,6 +241,23 @@ fun Home(
                         NUM_POINTS_MIN
                     )
                 }
+            }
+        }else{
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Text(
+                    text = "Have you not played any matches yet?\n Buy some cards, create your own deck, and challenge other players",
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
             }
         }
         ////////////////////////////////////////////////////////////////////////////////////////////////////
