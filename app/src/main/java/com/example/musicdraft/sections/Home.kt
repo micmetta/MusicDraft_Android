@@ -512,7 +512,7 @@ fun LineChartComposable(
                             SelectionHighlightPopUp()
                         )
                     ),
-                ),
+                ),//
                 backgroundColor = MaterialTheme.colorScheme.surface,
                 xAxisData = xAxisData,
                 yAxisData = yAxisData,
