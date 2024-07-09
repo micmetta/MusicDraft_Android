@@ -56,7 +56,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
     val availableCards by viewModel.cards.collectAsState(emptyList())
     val selectedCards by viewModel.selectedCards.collectAsState()
     val message by viewModel.message.collectAsState()
-    val deckName by viewModel.deckName.collectAsState()
+    val deckName by viewModel.deckName.collectAsState("")
     val isCreatingNewDeck by viewModel.isCreatingNewDeck.observeAsState(false)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
     if (message != null) {
         AlertDialog(
             onDismissRequest = { viewModel.clearMessage() },
-            title = { Text(text = "Error") },
+            title = { Text(text = "Alert") },
             text = { Text(text = message!!) },
             confirmButton = {
                 Button(onClick = { viewModel.clearMessage() }) {
@@ -175,7 +175,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
 
             Column {
                 OutlinedTextField(
-                    value = selectedDeck!!.id_mazzo,
+                    value = deckName,
                     onValueChange = { viewModel.updateDeckName(it) },
                     label = { Text("Name") },
                     placeholder = { Text("Insert deck's name") },
