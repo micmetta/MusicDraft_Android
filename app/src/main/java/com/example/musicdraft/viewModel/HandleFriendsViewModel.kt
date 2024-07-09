@@ -131,5 +131,7 @@ class HandleFriendsViewModel(application: Application) : AndroidViewModel(applic
      */
     fun deleteFriendship(email1: String, email2: String) {
         handleFriendsRepository.deleteFriendship(email1, email2)
+        handleFriendsRepository.deleteFriendship(email2, email1)
+
     }
 }
