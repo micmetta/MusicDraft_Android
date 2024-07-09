@@ -349,7 +349,7 @@ fun LineChartComposable(
 
             Log.d("LineChartComposable", "matchesConcludedByCurrentUser: ${matchesConcludedByCurrentUser}")
 
-            val steps = matchesConcludedByCurrentUser.size
+            var steps = matchesConcludedByCurrentUser.size
             val pointsData = mutableMapOf<String, Int>() // mappa vuota
             val MAX_HISTORY = 50
 
@@ -395,6 +395,8 @@ fun LineChartComposable(
 
             }else {
 
+                steps = 10
+
                 //Log.d("LineChartComposable", "matchesConcludedByCurrentUser.take (2): ${matchesConcludedByCurrentUser.take (2)}")
 
                 // aggiungo in cima come primo elemento un elemento fittizio in modo tale da migliorare la visualizzazione del grafico:
@@ -435,9 +437,18 @@ fun LineChartComposable(
                 }
             }
 
+            Log.d(
+                "LineChartComposable",
+                "pointsData: ${pointsData}"
+            )
 
             // Estraggo le chiavi (le date) dalla mappa e ordino le date
             val sortedDates = pointsData.keys.toList().sorted()
+
+            Log.d(
+                "LineChartComposable",
+                "sortedDates: ${sortedDates}"
+            )
 
             // Crea i punti utilizzando i valori float corrispondenti alle date
             val points = sortedDates.mapIndexed { index, date ->
@@ -446,26 +457,34 @@ fun LineChartComposable(
                 Point(index.toFloat(), pointsData[date]!!.toFloat())
             }
 
+            Log.d(
+                "LineChartComposable",
+                "points: ${points}"
+            )
+
+            val maxYValue = points.maxOfOrNull { it.y } ?: 0f
+            val minYValue = points.minOfOrNull { it.y } ?: 0f
+
             val xAxisData = AxisData.Builder()
                 .axisStepSize(100.dp)
                 .backgroundColor(Color.Transparent)
                 .steps(points.size - 1)
-                .labelData { i -> sortedDates[i] } // Utilizza le date come etichette sull'asse x
+                .labelData { i -> sortedDates[i] }
                 .labelAndAxisLinePadding(10.dp)
                 .axisLineColor(MaterialTheme.colorScheme.tertiary)
                 .axisLabelColor(MaterialTheme.colorScheme.tertiary)
                 .build()
 
             val yAxisData = AxisData.Builder()
-                .steps(steps / 2) // numero di steps dimezzato per aumentare la spaziatura
+                .steps(steps / 2)
                 .backgroundColor(Color.Transparent)
                 .labelAndAxisLinePadding(20.dp)
                 .labelData { i ->
-                    val yScale = 100 / steps // 100 = numero max asse y
-                    (i * yScale).toString()
+                    val yScale = (maxYValue - minYValue) / (steps / 2)
+                    (minYValue + i * yScale).toString()
                 }
                 .axisLineColor(MaterialTheme.colorScheme.tertiary)
-                .axisLineColor(MaterialTheme.colorScheme.tertiary)
+                .axisLabelColor(MaterialTheme.colorScheme.tertiary)
                 .build()
 
             val lineChartData = LineChartData(
