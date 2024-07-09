@@ -1056,6 +1056,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Aggiunge punti all'utente nel repository.
+     *
+     * @param addPoints Punti da aggiungere.
+     * @param nickname Nickname dell'utente a cui aggiungere i punti.
+     */
+    fun addPointsNick(addPoints: Int, nickname: String) {
+        authRepository.addPointsNick(addPoints, nickname)
+    }
+
+    /**
      * Sottrae punti all'utente nel repository.
      *
      * @param subtractPoints Punti da sottrarre.
@@ -1063,6 +1073,16 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun subtractPoints(subtractPoints: Int, email: String) {
         authRepository.subtractPoints(subtractPoints, email)
+    }
+
+    /**
+     * Sottrae punti all'utente nel repository.
+     *
+     * @param subtractPoints Punti da sottrarre.
+     * @param nickname Nickname dell'utente a cui sottrarre i punti.
+     */
+    fun subtractPointsNick(subtractPoints: Int, nickname: String) {
+        authRepository.subtractPointsNick(subtractPoints, nickname)
     }
 
 }

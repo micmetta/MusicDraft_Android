@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        //this.deleteDatabase("musicDraftDB")
+        //this.deleteDatabase("musicDraftDB"
 
         super.onCreate(savedInstanceState)
         setContent {

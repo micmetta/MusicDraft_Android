@@ -378,6 +378,9 @@ fun SelectDeck(
                                                         )
                                                     }
                                                 if (matchSummaryConcluded != null) {
+                                                    Log.d("matchmaking", "entrato vittoria utente corrente")
+                                                    Log.d("matchmaking", "opponentMatch: ${opponentMatch}")
+
                                                     // inserisco l'oggetto appena creato nella tabella "MatchSummaryConcluded":
                                                     matchmakingViewModel.insertNewSummaryMatch(matchSummaryConcluded)
 
@@ -408,12 +411,18 @@ fun SelectDeck(
                                                         )
                                                     }
                                                 if (matchSummaryConcluded != null) {
+
+                                                    Log.d("matchmaking", "entrato persa utente corrente")
+                                                    Log.d("matchmaking", "opponentMatch: ${opponentMatch}")
+
                                                     // inserisco l'oggetto appena creato nella tabella "MatchSummaryConcluded":
                                                     matchmakingViewModel.insertNewSummaryMatch(matchSummaryConcluded)
 
                                                     // aggiornamento points:
                                                     loginViewModel.subtractPoints(NUM_POINTS_MIN, infoUserCurrent!!.email) // sottraggo points all'utente corrente
-                                                    loginViewModel.addPoints((2*NUM_POINTS_MIN), opponentMatch!!.email) // 2x perchè gli erano stati sotratti
+//                                                    loginViewModel.addPoints((2*NUM_POINTS_MIN), opponentMatch!!.email) // 2x perchè gli erano stati sotratti
+//                                                    // NUM_POINTS_MIN per mettersi in coda
+                                                    loginViewModel.addPointsNick((2*NUM_POINTS_MIN), matchSummaryConcluded.nickWinner) // 2x perchè gli erano stati sotratti
                                                     // NUM_POINTS_MIN per mettersi in coda
 
                                                     // elimino la partita appena conclusa:
@@ -438,12 +447,18 @@ fun SelectDeck(
                                                         )
                                                     }
                                                 if (matchSummaryConcluded != null) {
+
+                                                    Log.d("matchmaking", "pareggio")
+                                                    Log.d("matchmaking", "opponentMatch: ${opponentMatch}")
+
                                                     // inserisco l'oggetto appena creato nella tabella "MatchSummaryConcluded":
                                                     matchmakingViewModel.insertNewSummaryMatch(matchSummaryConcluded)
 
                                                     // aggiornamento points:
                                                     loginViewModel.addPoints(NUM_POINTS_MIN, infoUserCurrent!!.email)
-                                                    loginViewModel.addPoints((2*NUM_POINTS_MIN), opponentMatch!!.email) // 2x perchè gli erano stati sotratti
+//                                                    loginViewModel.addPoints((2*NUM_POINTS_MIN), opponentMatch!!.email) // 2x perchè gli erano stati sotratti
+//                                                    // NUM_POINTS_MIN per mettersi in coda
+                                                    loginViewModel.addPointsNick((2*NUM_POINTS_MIN), matchSummaryConcluded.nickname1) // 2x perchè gli erano stati sotratti
                                                     // NUM_POINTS_MIN per mettersi in coda
 
                                                     // elimino la partita appena conclusa:

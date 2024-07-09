@@ -175,7 +175,7 @@ fun Decks(viewModel: DeckViewModel, loginViewModel: LoginViewModel, exchangeMana
 
             Column {
                 OutlinedTextField(
-                    value = selectedDeck!!.id_mazzo,
+                    value = deckName,
                     onValueChange = { viewModel.updateDeckName(it) },
                     label = { Text("Nome del Mazzo") },
                     placeholder = { Text("Inserisci il nome del mazzo") },

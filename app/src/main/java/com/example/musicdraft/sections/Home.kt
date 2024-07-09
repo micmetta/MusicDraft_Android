@@ -334,10 +334,11 @@ fun LineChartComposable(
 
             val steps = matchesConcludedByCurrentUser.size
             val pointsData = mutableMapOf<String, Int>() // mappa vuota
+            val MAX_HISTORY = 50
 
-            if(matchesConcludedByCurrentUser.size > 10){
+            if(matchesConcludedByCurrentUser.size > MAX_HISTORY){
                 // inserisco nel grafico i punteggi solamente delle ultime 10 partite:
-                val last10Matches = matchesConcludedByCurrentUser.take (10)
+                val last10Matches = matchesConcludedByCurrentUser.take (MAX_HISTORY)
 
                 // inserisco nel grafico tutte le partite
                 last10Matches.forEach { matchConcluded ->
@@ -439,7 +440,7 @@ fun LineChartComposable(
                 .build()
 
             val yAxisData = AxisData.Builder()
-                .steps(steps)
+                .steps(steps / 2) // numero di steps dimezzato per aumentare la spaziatura
                 .backgroundColor(Color.Transparent)
                 .labelAndAxisLinePadding(20.dp)
                 .labelData { i ->

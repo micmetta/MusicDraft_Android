@@ -84,6 +84,15 @@ interface UserDao {
     suspend fun addPoints(addPoints: Int, email: String)
 
     /**
+     * Aggiunge un certo numero di points ad un utente.
+     *
+     * @param nickname Nickname dell'utente da cercare.
+     * @param addPoints Points da aggiungere.
+     */
+    @Query("UPDATE User SET points = points + :addPoints WHERE nickname = :nickname")
+    suspend fun addPointsNick(addPoints: Int, nickname: String)
+
+    /**
      * Sottrae un certo numero di points ad un utente.
      *
      * @param email Indirizzo email dell'utente da cercare.
@@ -91,6 +100,15 @@ interface UserDao {
      */
     @Query("UPDATE User SET points = points - :subtractPoints WHERE email = :email")
     suspend fun subtractPoints(subtractPoints: Int, email: String)
+
+    /**
+     * Sottrae un certo numero di points ad un utente.
+     *
+     * @param nickname Nickname dell'utente da cercare.
+     * @param addPoints Points da sottrarre.
+     */
+    @Query("UPDATE User SET points = points - :subtractPoints WHERE nickname = :nickname")
+    suspend fun subtractPointsNick(subtractPoints: Int, nickname: String)
 
     /**
      * Ottiene un utente specifico per indirizzo email.

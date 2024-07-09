@@ -263,6 +263,24 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 dao.addPoints(addPoints, email)
+                Log.d("AuthRepository","addPoints email: ${email}")
+                Log.d("AuthRepository","addPoints addPoints: ${addPoints}")
+            }
+        }
+    }
+
+    /**
+     * Invoca il metodo addPoints di UserDao per aggiungere dei points ad un utente.
+     *
+     * @param addPoints Points da aggiungere.
+     * @param nickname Nickname utente.
+     */
+    fun addPointsNick(addPoints: Int, nickname: String) {
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                dao.addPointsNick(addPoints, nickname)
+                Log.d("AuthRepository","addPoints nickname: ${nickname}")
+                Log.d("AuthRepository","addPoints addPoints: ${addPoints}")
             }
         }
     }
@@ -277,6 +295,24 @@ class AuthRepository(val viewModel: LoginViewModel, val dao: UserDao){
         viewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 dao.subtractPoints(subtractPoints, email)
+                Log.d("AuthRepository","subtractPoints email: ${email}")
+                Log.d("AuthRepository","subtractPoints addPoints: ${subtractPoints}")
+            }
+        }
+    }
+
+    /**
+     * Invoca il metodo subtractPoints di UserDao per sottrarre dei points ad un utente.
+     *
+     * @param subtractPoints Points da sottrarre.
+     * @param nickname Nickname utente.
+     */
+    fun subtractPointsNick(subtractPoints: Int, nickname: String) {
+        viewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                dao.subtractPointsNick(subtractPoints, nickname)
+                Log.d("AuthRepository","subtractPoints nickname: ${nickname}")
+                Log.d("AuthRepository","subtractPoints addPoints: ${subtractPoints}")
             }
         }
     }
